@@ -734,8 +734,9 @@
 }
 
 .rv-acts .btn.danger {
+  background: transparent;
   color: var(--bad);
-  border-color: var(--bad);
+  border: 2px solid var(--bad);
 }
 
 .rv-acts .btn.danger:hover {
@@ -746,10 +747,12 @@
 .rv-acts .btn.rv-del {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
-  padding-inline: 12px;
+  padding: 0 14px;
   overflow: hidden;
 }
+.rv-acts .btn.rv-del .ms { font-size: 22px; width: 22px; height: 22px; line-height: 22px; }
 
 .rv-del .rv-del-t {
   max-width: 0;

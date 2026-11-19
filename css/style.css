@@ -625,14 +625,14 @@ textarea:focus-visible {
   color: #b9d3cc;
 }
 
-.line {
+.line:not(.btn) {
   position: relative;
   display: grid;
   gap: 40px;
   padding-left: 34px;
 }
 
-.line:before {
+.line:not(.btn):before {
   content: "";
   position: absolute;
   left: 8px;
@@ -2372,3 +2372,11 @@ body { animation: pageIn .6s ease both; }
   z-index: 200; pointer-events: none; transition: transform .15s linear;
 }
 @media (prefers-reduced-motion: reduce) { body { animation: none; } #scrollbar { transition: none; } }
+
+/* ===== Thẻ thông tin cá nhân: chevron xoay mượt, nền nhấn khi mở ===== */
+.acc-sec { transition: border-color .4s ease, box-shadow .4s ease, background-color .4s ease; }
+.acc-sec[open]:not(.acc-closing) { border-color: color-mix(in srgb, var(--brand, #145a50) 45%, transparent); box-shadow: 0 14px 30px -20px rgba(12, 59, 54, .45); }
+.acc-sec summary { transition: background-color .3s ease, padding-left .3s ease; border-radius: 18px; }
+.acc-sec summary:hover { background-color: rgba(12, 59, 54, .05); padding-left: 22px; }
+.acc-sec summary .ms { transition: transform .5s cubic-bezier(.3, 1.4, .5, 1); }
+.acc-sec.acc-closing summary .ms { transform: rotate(0deg); }

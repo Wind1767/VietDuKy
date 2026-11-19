@@ -604,6 +604,70 @@
     faqAnimate(item, willOpen);
   });
 
+  /* ---------- Thông tin cá nhân (trang tài khoản): thẻ mở/đóng có animation ---------- */
+  function accAnimate(item, open) {
+    var summary = item.querySelector(':scope > summary');
+    var body = [].slice.call(item.children).filter(function (c) {
+      return c !== summary;
+    });
+    if (item._accAnim) {
+      item._accAnim.cancel();
+      item._accAnim = null;
+    }
+    if (reduceMotion || !item.animate) {
+      item.open = open;
+      return;
+    }
+    var startH = item.offsetHeight;
+    var endH;
+    if (open) {
+      item.open = true;
+      item.style.height = 'auto';
+      endH = item.offsetHeight;
+      item.style.height = '';
+    } else {
+      endH = summary.offsetHeight + 2;
+    }
+    item.style.overflow = 'hidden';
+    item.classList.toggle('acc-closing', !open);
+    var anim = item.animate({ height: [startH + 'px', endH + 'px'] }, { duration: 520, easing: 'cubic-bezier(.22,.8,.3,1)' });
+    item._accAnim = anim;
+    body.forEach(function (el, i) {
+      el.animate(open ? { opacity: [0, 1], transform: ['translateY(-12px)', 'none'] } : { opacity: [1, 0], transform: ['none', 'translateY(-8px)'] }, {
+        duration: open ? 480 : 260,
+        delay: open ? 90 + i * 70 : 0,
+        easing: 'cubic-bezier(.2,.8,.2,1)',
+        fill: 'both'
+      });
+    });
+    anim.onfinish = function () {
+      item.open = open;
+      item.style.overflow = '';
+      item.classList.remove('acc-closing');
+      item._accAnim = null;
+      body.forEach(function (el) {
+        el.getAnimations().forEach(function (a) {
+          a.cancel();
+        });
+      });
+    };
+    anim.oncancel = function () {
+      item.style.overflow = '';
+    };
+  }
+
+  document.addEventListener('click', function (e) {
+    var summary = e.target.closest && e.target.closest('.acc-sec > summary');
+    if (!summary) {
+      return;
+    }
+    e.preventDefault();
+    var item = summary.parentElement;
+    var willOpen = !item.open || item.dataset.accClosing === '1';
+    item.dataset.accClosing = willOpen ? '0' : '1';
+    accAnimate(item, willOpen);
+  });
+
   /* ---------- Ô chọn ngày: không cho chọn ngày đã qua ---------- */
   var today = new Date();
   var iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
