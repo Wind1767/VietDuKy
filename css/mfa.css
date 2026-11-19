@@ -1,0 +1,300 @@
+/* Việt Du Ký – giao diện đăng nhập Google, passkey, Google Authenticator (khách và quản trị dùng chung) */
+.mfa-alt {
+  margin-top: 14px;
+}
+
+.mfa-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  color: var(--mut, #5b6e68);
+  font-size: 13px;
+}
+
+.mfa-or::before,
+.mfa-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line, rgba(20, 35, 31, .16));
+}
+
+.mfa-google {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+  margin-bottom: 10px;
+  color-scheme: light; /* nút Google luôn nền sáng, tránh viền đen khi giao diện tối */
+}
+
+.mfa-step h2,
+.mfa-sec h3 {
+  margin: 0 0 6px;
+  color: var(--ink, #14231f);
+}
+
+.mfa-sub {
+  margin: 0 0 12px;
+  color: var(--mut, #5b6e68);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mfa-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.mfa-lbl {
+  flex: 1 0 100%;
+  color: var(--ink, #14231f);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mfa-input {
+  flex: 1 1 200px;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid var(--line, rgba(20, 35, 31, .22));
+  border-radius: 12px;
+  background: var(--surface, var(--paper, #fff));
+  color: var(--ink, #14231f);
+  font: inherit;
+  letter-spacing: .04em;
+}
+
+.mfa-input {
+  background-clip: padding-box;
+  transition: border-color .35s ease, box-shadow .35s ease;
+}
+
+/* Viền focus vẽ BÊN TRONG ô (border + inset shadow) nên không bị nền/khung cha che hay cắt */
+.mfa-input:focus,
+.mfa-input:focus-visible {
+  outline: 0;
+  border-color: var(--gold, #ffcd00);
+  box-shadow: inset 0 0 0 1.5px var(--gold, #ffcd00), 0 0 0 3px rgba(255, 205, 0, .28);
+}
+
+.mfa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1.5px solid var(--line, rgba(20, 35, 31, .22));
+  border-radius: 999px;
+  background: var(--surface, var(--paper, #fff));
+  color: var(--ink, #14231f);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .35s ease, box-shadow .35s ease, background-color .35s ease, border-color .35s ease;
+}
+
+.mfa-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(12, 59, 54, .14);
+}
+
+.mfa-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.mfa-btn:focus-visible {
+  outline: 3px solid var(--focus, #b38b00);
+  outline-offset: 2px;
+}
+
+.mfa-btn:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.mfa-btn.primary {
+  border-color: transparent;
+  background: var(--accent, var(--jade2, #145a50));
+  color: var(--accent-ink, #fff);
+}
+
+.mfa-btn.danger {
+  border-color: var(--st-new, #b42318);
+  color: var(--st-new, #b42318);
+}
+
+.mfa-btn.sm {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.mfa-btn.block {
+  display: flex;
+  width: 100%;
+}
+
+.mfa-link {
+  margin-top: 10px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--accent, var(--jade2, #145a50));
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mfa-msg,
+.mfa-note {
+  margin: 10px 0 0;
+  color: var(--st-new, #b42318);
+  font-size: 14px;
+}
+
+.mfa-note:not(.bad) {
+  color: var(--st-won, #0b6b45);
+}
+
+.mfa-sec {
+  padding: 16px 0;
+  border-top: 1px solid var(--line, rgba(20, 35, 31, .14));
+}
+
+.mfa-sec:first-child {
+  padding-top: 4px;
+  border-top: 0;
+}
+
+.mfa-area {
+  display: grid;
+  gap: 12px;
+}
+
+.mfa-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mfa-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink, #14231f);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.mfa-qr {
+  justify-self: start;
+  padding: 8px;
+  border: 1px solid var(--line, rgba(20, 35, 31, .14));
+  border-radius: 12px;
+  background: #fff; /* mã QR luôn nền trắng để quét được */
+  line-height: 0;
+}
+
+.mfa-qr svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mfa-key {
+  margin: 0;
+  color: var(--mut, #5b6e68);
+  font-size: 13px;
+}
+
+.mfa-key code,
+.mfa-codes {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .06em;
+  overflow-wrap: anywhere;
+}
+
+.mfa-codebox {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1.5px dashed var(--accent, var(--jade2, #145a50));
+  border-radius: 14px;
+  background: var(--surface2, var(--mist, #f6faf8));
+}
+
+.mfa-codes {
+  columns: 2;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface, var(--paper, #fff));
+  color: var(--ink, #14231f);
+  font-size: 15px;
+  line-height: 1.9;
+  user-select: all;
+}
+
+.mfa-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mfa-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--line, rgba(20, 35, 31, .14));
+  border-radius: 12px;
+  background: var(--surface, var(--paper, #fff));
+}
+
+.mfa-list b,
+.mfa-list small {
+  display: block;
+}
+
+.mfa-list small {
+  color: var(--mut, #5b6e68);
+}
+
+.mfa-reauth {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .mfa-codes {
+    columns: 1;
+  }
+
+  .mfa-btn {
+    width: 100%;
+  }
+
+  .mfa-row .mfa-btn.sm,
+  .mfa-list .mfa-btn {
+    width: auto;
+  }
+}
+
+.mfa-step {
+  display: grid;
+  gap: 10px;
+}
+
+.mfa-step .mfa-form {
+  margin: 0;
+}
+
+.mfa-link {
+  justify-self: start;
+}

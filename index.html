@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Việt Du Ký – Du lịch Việt Nam từ Bắc vào Nam
+  </title>
+  <meta content="Tour du lịch Việt Nam: Hạ Long, Sa Pa, Hội An, Huế, Đà Lạt, Phú Quốc." name="description"/>
+  <meta content="#0c3b36" name="theme-color"/>
+  <meta content="Việt Du Ký – Du lịch Việt Nam từ Bắc vào Nam" property="og:title"/>
+  <link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="/favicon.png" rel="icon" type="image/png" sizes="256x256"/>
+  <link href="/favicon.ico" rel="icon" sizes="48x48"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
+  <link href="/manifest.webmanifest" rel="manifest"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&amp;family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,600&amp;display=swap&amp;subset=vietnamese" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&amp;icon_names=account_circle,add,add_a_photo,admin_panel_settings,arrow_back,arrow_downward,arrow_forward,arrow_upward,badge,bar_chart,block,calendar_month,call,check,check_circle,chevron_left,chevron_right,close,compare_arrows,content_copy,dark_mode,dashboard,delete,download,eco,error,event,expand_more,explore,favorite,filter_list,format_quote,forum,forward_to_inbox,group,groups,handshake,history,inbox,light_mode,location_on,lock,lock_open,logout,luggage,mail,manage_accounts,map,mark_email_read,menu,menu_open,mood,north_east,person,person_add,print,quickreply,refresh,restaurant,route,schedule,search,sell,send,share,star,support_agent,upload,verified,visibility,visibility_off,wifi_off,add_location,confirmation_number,description,devices,edit,keyboard,remove,save,shield_lock,smart_toy,swap_vert,table_view,warning,trending_up,trending_down,thumb_up,arrow_right_alt&amp;display=block" rel="stylesheet"/>
+  <link as="image" fetchpriority="high" href="images/hero.jpg" rel="preload"/>
+  <script src="/js/site.js"></script>
+  <link href="css/style.css" rel="stylesheet"/>
+  <link href="css/components.css" rel="stylesheet"/>
+  <link href="css/form-controls.css" rel="stylesheet"/>
+  <link href="css/extras.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <header class="hero">
+   <div class="bg">
+   </div>
+   <div class="sun">
+   </div>
+   <div class="wrap">
+    <h1>
+     <span class="w" style="--i:0">
+      Chạm
+     </span>
+     <span class="w" style="--i:1">
+      vào
+     </span>
+     <span class="w" style="--i:2">
+      Việt
+     </span>
+     <span class="w" style="--i:3">
+      Nam
+     </span>
+     <span class="w" style="--i:4">
+      tại
+     </span>
+     <b id="typed"></b>
+    </h1>
+    <p class="lead">
+     Từ vịnh xanh ngọc bích đến phố cổ lung linh đèn lồng, mỗi chuyến đi là một câu chuyện riêng.
+    </p>
+    <form class="search" action="/contact" data-go="/contact" method="get">
+     <label class="fld">
+      <span class="ms">location_on</span>
+      <span class="fb">
+       <span class="lb">
+        Điểm đến
+       </span>
+       <select name="destination">
+        <option value="">
+         Chọn điểm đến
+        </option>
+        <option>
+         Vịnh Hạ Long
+        </option>
+        <option>
+         Sa Pa
+        </option>
+        <option>
+         Hội An
+        </option>
+        <option>
+         Huế
+        </option>
+        <option>
+         Đà Lạt
+        </option>
+        <option>
+         Phú Quốc
+        </option>
+       </select>
+      </span>
+     </label>
+     <label class="fld">
+      <span class="ms">calendar_month</span>
+      <span class="fb">
+       <span class="lb">
+        Ngày khởi hành
+       </span>
+       <input name="date" type="date"/>
+      </span>
+     </label>
+     <label class="fld">
+      <span class="ms">group</span>
+      <span class="fb">
+       <span class="lb">
+        Số người
+       </span>
+       <input max="200" min="1" name="people" placeholder="Ví dụ: 2" type="number"/>
+      </span>
+     </label>
+     <button class="btn">
+      Tìm tour
+     </button>
+    </form>
+    <div class="trust">
+     <span class="st">
+      <span class="ms fill">star</span>
+      <span class="ms fill">star</span>
+      <span class="ms fill">star</span>
+      <span class="ms fill">star</span>
+      <span class="ms fill">star</span>
+     </span>
+     <span id="heroTrust">
+      Đánh giá thật từ khách hàng
+     </span>
+    </div>
+   </div>
+   <svg class="wave b" preserveaspectratio="none" viewbox="0 0 2400 90">
+    <path d="M0 50Q150 5 300 50T600 50T900 50T1200 50T1500 50T1800 50T2100 50T2400 50V90H0Z" fill="#eef4f1">
+    </path>
+   </svg>
+   <svg class="wave" preserveaspectratio="none" viewbox="0 0 2400 90">
+    <path d="M0 60Q150 20 300 60T600 60T900 60T1200 60T1500 60T1800 60T2100 60T2400 60V90H0Z" fill="#eef4f1">
+    </path>
+   </svg>
+  </header>
+  <section data-block="dest" id="diem-den">
+   <div class="wrap">
+    <div class="sec-h rv">
+     <h2>
+      Sáu miền đất, sáu cảm xúc
+     </h2>
+     <p>
+      Chọn điểm đến bạn mơ ước, chúng tôi lo phần còn lại.
+     </p>
+    </div>
+    <div class="dest">
+     <a class="card rv z" href="/contact">
+      <img alt="Vịnh Hạ Long" loading="lazy" decoding="async" src="images/d-halong.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Quảng Ninh
+       </span>
+       <h3>
+        Vịnh Hạ Long
+       </h3>
+       <small>
+        Du thuyền qua hàng nghìn đảo đá vôi, chèo kayak trong hang động.
+       </small>
+      </div>
+     </a>
+     <a class="card rv z" data-d=".1" href="/contact">
+      <img alt="Sa Pa" loading="lazy" decoding="async" src="images/d-sapa.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Lào Cai
+       </span>
+       <h3>
+        Sa Pa
+       </h3>
+       <small>
+        Ruộng bậc thang vàng mùa lúa chín và chợ phiên vùng cao.
+       </small>
+      </div>
+     </a>
+     <a class="card rv z" data-d=".2" href="/contact">
+      <img alt="Hội An" loading="lazy" decoding="async" src="images/d-hoian.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Quảng Nam
+       </span>
+       <h3>
+        Hội An
+       </h3>
+       <small>
+        Phố cổ đèn lồng, thả hoa đăng trên sông Hoài.
+       </small>
+      </div>
+     </a>
+     <a class="card rv z" href="/contact">
+      <img alt="Huế" loading="lazy" decoding="async" src="images/d-hue.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Thừa Thiên Huế
+       </span>
+       <h3>
+        Cố đô Huế
+       </h3>
+       <small>
+        Đại Nội, lăng tẩm và ẩm thực cung đình.
+       </small>
+      </div>
+     </a>
+     <a class="card rv z" data-d=".1" href="/contact">
+      <img alt="Đà Lạt" loading="lazy" decoding="async" src="images/d-dalat.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Lâm Đồng
+       </span>
+       <h3>
+        Đà Lạt
+       </h3>
+       <small>
+        Săn mây, đồi thông và những quán cà phê sương sớm.
+       </small>
+      </div>
+     </a>
+     <a class="card rv z" data-d=".2" href="/contact">
+      <img alt="Phú Quốc" loading="lazy" decoding="async" src="images/d-phuquoc.jpg"/>
+      <span class="go">
+       <span class="ms">north_east</span>
+      </span>
+      <div>
+       <span class="tag">
+        Kiên Giang
+       </span>
+       <h3>
+        Phú Quốc
+       </h3>
+       <small>
+        Biển trong, cát trắng và hoàng hôn rực rỡ.
+       </small>
+      </div>
+     </a>
+    </div>
+   </div>
+  </section>
+  <section class="why" data-block="why">
+   <div class="wrap">
+    <div class="sec-h rv">
+     <h2>
+      Vì sao chọn chúng tôi
+     </h2>
+    </div>
+    <div class="g">
+     <div class="it rv">
+      <div class="ic">
+       <span class="ms">explore</span>
+      </div>
+      <h3>
+       Hướng dẫn viên bản địa
+      </h3>
+      <p>
+       Người dân địa phương kể bạn nghe những câu chuyện không có trong sách.
+      </p>
+     </div>
+     <div class="it rv" data-d=".1">
+      <div class="ic">
+       <span class="ms">restaurant</span>
+      </div>
+      <h3>
+       Ẩm thực đúng vị
+      </h3>
+      <p>
+       Phở Hà Nội, mì Quảng, bún bò Huế ăn đúng quán, đúng giờ.
+      </p>
+     </div>
+     <div class="it rv" data-d=".2">
+      <div class="ic">
+       <span class="ms">route</span>
+      </div>
+      <h3>
+       Lịch trình linh hoạt
+      </h3>
+      <p>
+       Đổi ngày, đổi điểm đến miễn phí trước 7 ngày khởi hành.
+      </p>
+     </div>
+     <div class="it rv" data-d=".3">
+      <div class="ic">
+       <span class="ms">support_agent</span>
+      </div>
+      <h3>
+       Hỗ trợ 24/7
+      </h3>
+      <p>
+       Luôn có người nghe máy, dù bạn đang ở bất kỳ đâu.
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <div class="cnt" data-block="stats">
+   <div class="wrap g">
+    <div class="rv">
+     <span class="ms">luggage</span>
+     <b data-n="12500">
+      0
+     </b>
+     Chuyến đi hoàn tất
+    </div>
+    <div class="rv" data-d=".1">
+     <span class="ms">mood</span>
+     <b data-n="9800">
+      0
+     </b>
+     Khách hàng hài lòng
+    </div>
+    <div class="rv" data-d=".2">
+     <span class="ms">map</span>
+     <b data-n="63">
+      0
+     </b>
+     Tỉnh thành phủ sóng
+    </div>
+    <div class="rv" data-d=".3">
+     <span class="ms">badge</span>
+     <b data-n="120">
+      0
+     </b>
+     Hướng dẫn viên
+    </div>
+   </div>
+  </div>
+  <section data-block="tours" id="tour">
+   <div class="wrap">
+    <div class="sec-h rv">
+     <h2>
+      Tour được yêu thích
+     </h2>
+     <p>
+      Giá trọn gói, đã gồm khách sạn, xe đưa đón và bữa ăn theo chương trình.
+     </p>
+    </div>
+    <div class="tours">
+     <article class="tour rv" data-fav="du-thuyen-ha-long">
+      <div class="im">
+       <span class="bdg">
+        Bán chạy
+       </span>
+       <img alt="Du thuyền Hạ Long" loading="lazy" decoding="async" src="images/d-halong.jpg"/>
+      </div>
+      <div class="bd">
+       <div class="meta">
+        <span>
+         <span class="ms">schedule</span>
+         2 ngày 1 đêm
+        </span>
+        <span>
+         <span class="ms">group</span>
+         Từ 2 khách
+        </span>
+       </div>
+       <h3>
+        Du thuyền Hạ Long
+       </h3>
+       <div class="pr">
+        <b>
+         2.890.000đ
+        </b>
+        <a href="/contact">
+         Đặt tour
+         <span class="ms">arrow_forward</span>
+        </a>
+       </div>
+      </div>
+     </article>
+     <article class="tour rv" data-fav="da-nang-hoi-an-hue" data-d=".1">
+      <div class="im">
+       <span class="bdg">
+        Giảm 10%
+       </span>
+       <img alt="Đà Nẵng Hội An Huế" loading="lazy" decoding="async" src="images/d-hoian.jpg"/>
+      </div>
+      <div class="bd">
+       <div class="meta">
+        <span>
+         <span class="ms">schedule</span>
+         4 ngày 3 đêm
+        </span>
+        <span>
+         <span class="ms">group</span>
+         Nhóm tối đa 15
+        </span>
+       </div>
+       <h3>
+        Đà Nẵng – Hội An – Huế
+       </h3>
+       <div class="pr">
+        <b>
+         5.490.000đ
+        </b>
+        <a href="/contact">
+         Đặt tour
+         <span class="ms">arrow_forward</span>
+        </a>
+       </div>
+      </div>
+     </article>
+     <article class="tour rv" data-fav="phu-quoc-nghi-duong" data-d=".2">
+      <div class="im">
+       <span class="bdg">
+        Mới
+       </span>
+       <img alt="Phú Quốc" loading="lazy" decoding="async" src="images/d-phuquoc.jpg"/>
+      </div>
+      <div class="bd">
+       <div class="meta">
+        <span>
+         <span class="ms">schedule</span>
+         3 ngày 2 đêm
+        </span>
+        <span>
+         <span class="ms">group</span>
+         Từ 2 khách
+        </span>
+       </div>
+       <h3>
+        Phú Quốc nghỉ dưỡng
+       </h3>
+       <div class="pr">
+        <b>
+         4.250.000đ
+        </b>
+        <a href="/contact">
+         Đặt tour
+         <span class="ms">arrow_forward</span>
+        </a>
+       </div>
+      </div>
+     </article>
+    </div>
+   <p class="tours-all" id="toursAll" hidden><a class="btn line" id="toursAllBtn" href="/tours">Tất cả tour</a></p></div>
+  </section>
+  <section class="jr" data-block="journey">
+   <div class="wrap">
+    <div class="sec-h rv">
+     <h2>
+      Hành trình xuyên Việt
+     </h2>
+     <p>
+      Một cung đường di sản đi qua ba miền.
+     </p>
+    </div>
+    <div class="line">
+     <div class="st rv l">
+      <h3>
+       Miền Bắc: Hà Nội – Hạ Long – Sa Pa
+      </h3>
+      <p>
+       Phố cổ ngàn năm, vịnh di sản thế giới và những thửa ruộng bậc thang.
+      </p>
+     </div>
+     <div class="st rv l" data-d=".15">
+      <h3>
+       Miền Trung: Huế – Đà Nẵng – Hội An
+      </h3>
+      <p>
+       Cố đô trầm mặc, bãi biển Mỹ Khê và phố đèn lồng.
+      </p>
+     </div>
+     <div class="st rv l" data-d=".3">
+      <h3>
+       Miền Nam: Đà Lạt – TP.HCM – Phú Quốc
+      </h3>
+      <p>
+       Thành phố sôi động, miền Tây sông nước và đảo ngọc.
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <section class="ts" data-block="reviews" id="danh-gia">
+   <div class="wrap">
+    <div class="sec-h rv" style="margin-inline:auto">
+     <h2>
+      Khách nói về chúng tôi
+     </h2>
+    </div>
+    <p class="rv-sum" id="rvSum" hidden></p>
+    <div class="box rv" id="rvBox">
+     <div class="t on empty"><p>Đang tải đánh giá…</p></div>
+    </div>
+    <div class="dots" id="rvDots">
+    </div>
+    <p class="rv-cta"><a class="btn line" href="/reviews">Xem tất cả và viết đánh giá</a></p>
+   </div>
+  </section>
+  <section class="faq-s" data-block="faq">
+   <div class="wrap">
+    <div class="sec-h rv" style="margin-inline:auto;text-align:center">
+     <h2>
+      Câu hỏi thường gặp
+     </h2>
+    </div>
+    <div class="faq rv">
+     <details>
+      <summary>
+       Đặt tour cần chuẩn bị giấy tờ gì?
+       <span class="ms">expand_more</span>
+      </summary>
+      <p>
+       Bạn cần CCCD hoặc hộ chiếu còn hạn. Trẻ em dưới 14 tuổi mang theo giấy khai sinh hoặc hộ chiếu.
+      </p>
+     </details>
+     <details>
+      <summary>
+       Giá tour đã gồm những gì?
+       <span class="ms">expand_more</span>
+      </summary>
+      <p>
+       Giá trọn gói gồm khách sạn, xe đưa đón, vé tham quan, bữa ăn theo chương trình và hướng dẫn viên. Chi tiêu cá nhân không nằm trong giá.
+      </p>
+     </details>
+     <details>
+      <summary>
+       Tôi có thể đổi ngày đi không?
+       <span class="ms">expand_more</span>
+      </summary>
+      <p>
+       Có. Bạn được đổi ngày miễn phí nếu báo trước 7 ngày khởi hành.
+      </p>
+     </details>
+     <details>
+      <summary>
+       Tour có phù hợp với gia đình có trẻ nhỏ không?
+       <span class="ms">expand_more</span>
+      </summary>
+      <p>
+       Có. Chúng tôi có lịch trình nhịp chậm cho gia đình, người lớn tuổi và trẻ nhỏ.
+      </p>
+     </details>
+    </div>
+   </div>
+  </section>
+  <div class="wrap" data-block="cta" style="margin-top:80px">
+   <div class="cta rv z">
+    <h2>
+     Sẵn sàng cho chuyến đi tiếp theo?
+    </h2>
+    <p>
+     Để lại thông tin, tư vấn viên sẽ gọi lại trong 30 phút.
+    </p>
+    <a class="btn gold" href="/contact">
+     Nhận tư vấn miễn phí
+    </a>
+   </div>
+  </div>
+  <span hidden id="blkEnd"></span>
+  <script defer src="/js/content.js"></script>
+  <script defer="" src="js/reviews.js"></script>
+  <script defer src="/js/focus-fix.js"></script>
+  <script defer="" src="js/main.js">
+  </script>
+  <script defer src="/js/form-controls.js"></script>
+  <script defer src="/js/extras.js"></script>
+ </body>
+</html>
+
