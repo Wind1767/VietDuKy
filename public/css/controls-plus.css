@@ -54,7 +54,7 @@ input[type="range"].vr-in::-webkit-slider-thumb {
   border: 3px solid var(--vui-accent);
   background: var(--vui-bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .28);
-  transition: transform .2s cubic-bezier(.3, 1.6, .5, 1);
+  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 input[type="range"].vr-in::-moz-range-thumb {
@@ -64,7 +64,7 @@ input[type="range"].vr-in::-moz-range-thumb {
   border: 3px solid var(--vui-accent);
   background: var(--vui-bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .28);
-  transition: transform .2s cubic-bezier(.3, 1.6, .5, 1);
+  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 .vr.act input[type="range"].vr-in::-webkit-slider-thumb,
@@ -106,7 +106,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   background: var(--vui-accent);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .15s, transform .2s cubic-bezier(.3, 1.6, .5, 1);
+  transition: opacity .35s, transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 .vr:hover .vr-bubble,
@@ -139,7 +139,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   cursor: pointer;
   display: inline-grid;
   place-items: stretch;
-  transition: border-color .2s, transform .2s cubic-bezier(.3, 1.6, .5, 1);
+  transition: border-color .35s, transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 .vc-btn:hover {
@@ -177,7 +177,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   background: var(--vui-bg);
   color: var(--vui-ink);
   box-shadow: var(--vui-sh);
-  animation: vcp-in .22s cubic-bezier(.3, 1.4, .5, 1) both;
+  animation: vcp-in .55s cubic-bezier(.3, 1.4, .5, 1) both;
 }
 
 .vcp.sheet {
@@ -222,7 +222,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   border: 3px solid #fff;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .4);
   pointer-events: none;
-  transition: transform .15s;
+  transition: transform .35s;
 }
 
 .vcp-sv.act .vcp-thumb {
@@ -347,7 +347,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   border: 0;
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .22);
-  transition: transform .2s cubic-bezier(.3, 1.6, .5, 1);
+  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 .vcp-sw:hover {
@@ -398,7 +398,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   color: var(--vui-ink);
   cursor: pointer;
   outline: none;
-  transition: border-color .2s, background .2s, transform .25s cubic-bezier(.3, 1.6, .5, 1);
+  transition: border-color .35s, background .35s, transform .35s cubic-bezier(.3, 1.6, .5, 1);
 }
 
 .vf-zone:hover,
@@ -420,7 +420,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
 
 .vf-zone.bad {
   border-color: #d92d20;
-  animation: vf-shake .35s;
+  animation: vf-shake .55s;
 }
 
 .vf-zone.dis {
@@ -485,7 +485,7 @@ input[type="range"].vr-in:focus-visible::-moz-range-thumb {
   border: 1px solid var(--vui-line);
   background: var(--vui-field);
   color: var(--vui-ink);
-  animation: vcp-in .25s cubic-bezier(.3, 1.4, .5, 1) both;
+  animation: vcp-in .55s cubic-bezier(.3, 1.4, .5, 1) both;
 }
 
 .vf-th {

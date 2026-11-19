@@ -167,7 +167,7 @@
   function helpfulHTML(r) {
     return '<div class="rv-help" data-id="' + r.id + '"><span>Đánh giá này có hữu ích không?</span>' +
       (r.own ? '' : '<button type="button" class="rv-helpbtn' + (r.voted ? ' on' : '') + '" aria-pressed="' + (r.voted ? 'true' : 'false') + '">' +
-        '<span aria-hidden="true">👍</span> Hữu ích</button>') +
+        '<span class="ms" aria-hidden="true">thumb_up</span> Hữu ích</button>') +
       '<em class="rv-helpn" data-n="' + (r.helpful || 0) + '">' + helpfulText(r.helpful || 0) + '</em></div>';
   }
 

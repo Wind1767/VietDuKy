@@ -35,7 +35,7 @@
   display: grid;
   place-items: center;
   box-shadow: 0 10px 26px -6px rgba(12, 59, 54, .6);
-  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s;
+  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1), box-shadow .35s;
 }
 
 .vc-fab:hover {
@@ -91,7 +91,7 @@
   overflow: hidden;
   box-shadow: 0 24px 60px -12px rgba(12, 59, 54, .5), 0 0 0 1px rgba(12, 59, 54, .08);
   transform-origin: bottom left;
-  animation: vcOpen .35s cubic-bezier(.3, 1.4, .5, 1);
+  animation: vcOpen .55s cubic-bezier(.3, 1.4, .5, 1);
 }
 
 .vc-panel > header {
@@ -220,7 +220,7 @@
   line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  animation: vcIn .28s cubic-bezier(.3, 1.4, .5, 1) both;
+  animation: vcIn .55s cubic-bezier(.3, 1.4, .5, 1) both;
 }
 
 .vc-row.ad .vc-b {
@@ -299,7 +299,7 @@
   font: 500 .85rem 'Be Vietnam Pro', sans-serif;
   cursor: pointer;
   text-align: left;
-  transition: background .15s, transform .15s;
+  transition: background .35s, transform .35s;
 }
 
 .vc-chip:hover {
@@ -386,7 +386,7 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: transform .2s, opacity .2s;
+  transition: transform .35s, opacity .35s;
 }
 
 .vc-form button:disabled {
@@ -773,7 +773,7 @@
   padding: 7px 13px;
   font: 600 .83rem 'Be Vietnam Pro', sans-serif;
   cursor: pointer;
-  transition: transform .15s, filter .15s;
+  transition: transform .35s, filter .35s;
 }
 
 .vc-tp:hover {
@@ -813,7 +813,7 @@
   font: inherit;
   cursor: pointer;
   color: #14231f;
-  transition: background .15s, transform .15s;
+  transition: background .35s, transform .35s;
 }
 
 .vc-sess:hover {

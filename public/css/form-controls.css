@@ -71,7 +71,7 @@
   box-shadow: none;
   transform: none;
   -webkit-tap-highlight-color: transparent;
-  transition: border-color .2s, background .2s;
+  transition: border-color .35s, background .35s;
 }
 
 .vui-btn:hover {
@@ -115,7 +115,7 @@
   font-size: 20px;
   flex: none;
   color: var(--vui-mut);
-  transition: transform .25s;
+  transition: transform .35s;
 }
 
 .vui-btn.open .ms:last-child {
@@ -197,7 +197,7 @@ form.ct .vui-btn:focus-visible {
   box-shadow: var(--vui-sh);
   padding: 6px;
   transform-origin: top left;
-  animation: vuiIn .16s ease-out both;
+  animation: vuiIn .55s ease-out both;
   font: 400 .92rem 'Be Vietnam Pro', system-ui, sans-serif;
 }
 
@@ -487,7 +487,7 @@ input[type="checkbox"] {
   cursor: pointer;
   box-shadow: none;
   accent-color: var(--vui-accent);
-  transition: background-color .18s, border-color .18s, background-size .22s cubic-bezier(.3, 1.7, .5, 1), transform .15s;
+  transition: background-color .35s, border-color .35s, background-size .35s cubic-bezier(.3, 1.7, .5, 1), transform .35s;
 }
 
 input[type="checkbox"]:hover:not(:disabled) {
@@ -538,7 +538,7 @@ label.chk {
   border-radius: 12px;
   cursor: pointer;
   line-height: 1.35;
-  transition: background-color .15s, border-color .15s;
+  transition: background-color .35s, border-color .35s;
 }
 
 label.chk:hover {
@@ -582,7 +582,7 @@ label.chk.tgl input[type="checkbox"] {
   background-image: radial-gradient(circle closest-side, #fff 96%, transparent 100%);
   background-size: 20px 20px;
   background-position: 3px center;
-  transition: background-color .2s, background-position .22s cubic-bezier(.3, 1.4, .5, 1), transform .15s;
+  transition: background-color .35s, background-position .35s cubic-bezier(.3, 1.4, .5, 1), transform .35s;
 }
 
 label.chk.tgl input[type="checkbox"]:checked {

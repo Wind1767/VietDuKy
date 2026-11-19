@@ -307,15 +307,406 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
     }).catch(function () {});
   });
 
-  /* ---------- Nhớ trang đang xem: đăng nhập lại là vào đúng trang cũ ---------- */
-  window.addEventListener('hashchange', function () {
-    if (/^#\/[a-z]+/.test(location.hash)) {
-      save('vdk-last-view', location.hash);
+  /* Vào trang quản trị luôn bắt đầu ở "Tổng quan" (không tự nhảy về trang xem lần trước) */
+  try {
+    localStorage.removeItem('vdk-last-view');
+  } catch (e) {}
+
+  /* ---------- Công cụ cho mọi bảng: lọc nhanh trên trang đang xem, đếm dòng, xuất CSV ---------- */
+  function csvCell(v) {
+    v = String(v).replace(/\s+/g, ' ').trim();
+    return /[",;\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function exportCsv(table, name) {
+    var rows = [];
+    table.querySelectorAll('tr').forEach(function (tr) {
+      if (tr.hidden || tr.style.display === 'none') {
+        return;
+      }
+      var cells = [].slice.call(tr.children).filter(function (c) {
+        return c.style.display !== 'none';
+      }).map(function (c) {
+        return csvCell(c.innerText || '');
+      });
+      if (cells.some(function (c) {
+        return c;
+      })) {
+        rows.push(cells.join(','));
+      }
+    });
+    var blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 500);
+    toast('Đã xuất ' + (rows.length - 1) + ' dòng ra CSV');
+  }
+  function decorateTables() {
+    document.querySelectorAll('main table.tbl:not(.static)').forEach(function (table) {
+      var host = table.closest('.tbl-wrap') || table;
+      if (host.previousElementSibling && host.previousElementSibling.classList.contains('tt-bar')) {
+        return;
+      }
+      if (table.tBodies.length === 0 || table.tBodies[0].rows.length < 2) {
+        return;
+      }
+      var bar = document.createElement('div');
+      bar.className = 'tt-bar';
+      bar.innerHTML = '<label class="tt-find"><span class="ms">filter_alt</span><input type="search" placeholder="Lọc nhanh trong trang này…" aria-label="Lọc nhanh các dòng đang hiển thị"></label>' +
+        '<span class="tt-count" aria-live="polite"></span>' +
+        '<button type="button" class="btn sm tt-cols" title="Ẩn / hiện cột" aria-haspopup="true"><span class="ms">view_column</span>Cột</button>' +
+        '<button type="button" class="btn sm tt-copy" title="Sao chép các dòng đang hiển thị (dán được vào Excel / Google Sheets)"><span class="ms">content_copy</span>Sao chép</button>' +
+        '<button type="button" class="btn sm tt-csv" title="Tải các dòng đang hiển thị về file CSV"><span class="ms">download</span>CSV</button>' +
+        '<div class="tt-cols-menu" hidden></div><div class="tt-sum" aria-live="polite"></div>';
+      host.parentNode.insertBefore(bar, host);
+      var input = bar.querySelector('input'), count = bar.querySelector('.tt-count');
+      function apply() {
+        var q = input.value.trim().toLowerCase(), shown = 0, rows = table.tBodies[0].rows;
+        for (var i = 0; i < rows.length; i++) {
+          var ok = !q || (rows[i].innerText || '').toLowerCase().indexOf(q) > -1;
+          rows[i].hidden = !ok;
+          shown += ok ? 1 : 0;
+        }
+        count.textContent = q ? shown + '/' + rows.length + ' dòng' : rows.length + ' dòng';
+      }
+      input.addEventListener('input', function () {
+        apply();
+      });
+      var sumBox = bar.querySelector('.tt-sum');
+      function numOf(t) {
+        t = String(t).replace(/\s+/g, '').replace(/[₫đdvndVNĐ]|\u00a0/g, '');
+        if (!/^-?[\d.,]+$/.test(t) || !/\d/.test(t)) {
+          return null;
+        }
+        return parseFloat(t.replace(/\./g, '').replace(',', '.'));
+      }
+      function sums() {
+        var ths = table.tHead ? [].slice.call(table.tHead.rows[0].cells) : [], out = [];
+        ths.forEach(function (th, ci) {
+          if (!th.classList.contains('num')) {
+            return;
+          }
+          var tot = 0, n = 0, bad = false;
+          [].forEach.call(table.tBodies[0].rows, function (r) {
+            if (r.hidden || !r.cells[ci]) {
+              return;
+            }
+            var t = (r.cells[ci].innerText || '').trim();
+            if (!t || t === '–' || t === '-') {
+              return;
+            }
+            var v = numOf(t);
+            if (v === null || isNaN(v)) {
+              bad = true;
+            } else {
+              tot += v;
+              n++;
+            }
+          });
+          if (!bad && n > 1) {
+            out.push('<span>' + (th.innerText || '').trim() + ': <b>' + tot.toLocaleString('vi-VN') +
+              '</b></span>');
+          }
+        });
+        sumBox.innerHTML = out.join('');
+        sumBox.hidden = !out.length;
+      }
+      var baseApply = apply;
+      apply = function () {
+        baseApply();
+        sums();
+      };
+      apply();
+
+      /* sắp xếp khi bấm tiêu đề cột (trong trang đang xem) */
+      if (table.tHead) {
+        [].forEach.call(table.tHead.rows[0].cells, function (th, ci) {
+          if (th.querySelector('button, a, input') || !(th.innerText || '').trim() || th.getAttribute('data-nosort') !== null) {
+            return;
+          }
+          th.classList.add('tt-sortable');
+          th.tabIndex = 0;
+          th.setAttribute('role', 'columnheader');
+          var dir = 0;
+          function go() {
+            dir = dir === 1 ? -1 : 1;
+            [].forEach.call(table.tHead.rows[0].cells, function (o) {
+              o.removeAttribute('aria-sort');
+            });
+            th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+            var rows = [].slice.call(table.tBodies[0].rows);
+            rows.sort(function (a, b) {
+              var x = (a.cells[ci] ? a.cells[ci].innerText : '').trim(), y = (b.cells[ci] ? b.cells[ci].innerText : '').trim();
+              var nx = numOf(x), ny = numOf(y);
+              if (nx !== null && ny !== null) {
+                return (nx - ny) * dir;
+              }
+              return x.localeCompare(y, 'vi', { numeric: true }) * dir;
+            });
+            rows.forEach(function (r) {
+              table.tBodies[0].appendChild(r);
+            });
+          }
+          th.addEventListener('click', go);
+          th.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              go();
+            }
+          });
+        });
+      }
+
+      /* ẩn / hiện cột */
+      var menu = bar.querySelector('.tt-cols-menu'), colsBtn = bar.querySelector('.tt-cols');
+      if (table.tHead) {
+        [].forEach.call(table.tHead.rows[0].cells, function (th, ci) {
+          var name = (th.innerText || '').trim();
+          if (!name) {
+            return;
+          }
+          var l = document.createElement('label');
+          l.innerHTML = '<input type="checkbox" checked> ';
+          l.appendChild(document.createTextNode(name));
+          l.firstChild.onchange = function () {
+            var hide = !l.firstChild.checked;
+            [].forEach.call(table.rows, function (r) {
+              if (r.cells[ci]) {
+                r.cells[ci].style.display = hide ? 'none' : '';
+              }
+            });
+          };
+          menu.appendChild(l);
+        });
+      }
+      colsBtn.onclick = function (e) {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+      };
+      document.addEventListener('click', function (e) {
+        if (!menu.hidden && !menu.contains(e.target) && e.target !== colsBtn) {
+          menu.hidden = true;
+        }
+      });
+      bar.querySelector('.tt-copy').onclick = function () {
+        var rows = [];
+        [].forEach.call(table.rows, function (tr) {
+          if (tr.hidden) {
+            return;
+          }
+          var c = [].filter.call(tr.cells, function (x) {
+            return x.style.display !== 'none';
+          }).map(function (x) {
+            return (x.innerText || '').replace(/\s+/g, ' ').trim();
+          });
+          if (c.some(Boolean)) {
+            rows.push(c.join('\t'));
+          }
+        });
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(rows.join('\n')).then(function () {
+            toast('Đã sao chép ' + (rows.length - 1) + ' dòng');
+          }).catch(function () {});
+        }
+      };
+      bar.querySelector('.tt-csv').onclick = function () {
+        exportCsv(table, (location.hash.replace(/^#\/?/, '').split(/[?/]/)[0] || 'bang'));
+      };
+      apply();
+    });
+  }
+  var ttT;
+  new MutationObserver(function () {
+    clearTimeout(ttT);
+    ttT = setTimeout(decorateTables, 120);
+  }).observe(document.body, { childList: true, subtree: true });
+
+  /* ---------- Bộ công cụ nổi: tự làm mới, chế độ tập trung, in trang, trang gần đây, ghi chú nhanh ---------- */
+  var dock = document.createElement('div');
+  dock.className = 'adm-dock';
+  dock.innerHTML = '<button type="button" class="dock-fab" aria-label="Công cụ quản trị" aria-expanded="false" title="Công cụ"><span class="ms">construction</span></button>' +
+    '<div class="dock-panel" role="dialog" aria-label="Công cụ quản trị" hidden>' +
+    '<h3>Công cụ</h3>' +
+    '<label class="dock-row"><span class="ms">autorenew</span><span>Tự làm mới</span><select id="dkAuto" aria-label="Chu kỳ tự làm mới"><option value="0">Tắt</option><option value="30">30 giây</option><option value="60">1 phút</option><option value="300">5 phút</option></select></label>' +
+    '<button type="button" class="dock-row" id="dkFocus"><span class="ms">fullscreen</span><span>Chế độ tập trung</span><kbd>F</kbd></button>' +
+    '<button type="button" class="dock-row" id="dkPrint"><span class="ms">print</span><span>In trang này</span></button>' +
+    '<button type="button" class="dock-row" id="dkTop"><span class="ms">vertical_align_top</span><span>Về đầu trang</span></button>' +
+    '<h4>Trang xem gần đây</h4><div class="dock-recent" id="dkRecent"></div>' +
+    '<h4>Ghi chú nhanh <small>(lưu trên máy này)</small></h4><textarea id="dkNote" rows="4" placeholder="Việc cần nhớ, SĐT khách, ghi chú ca trực…" aria-label="Ghi chú nhanh"></textarea>' +
+    '</div>';
+  document.body.appendChild(dock);
+  var fab = dock.querySelector('.dock-fab'), panel = dock.querySelector('.dock-panel');
+  function dockOpen(on) {
+    panel.hidden = !on;
+    fab.setAttribute('aria-expanded', on ? 'true' : 'false');
+    dock.classList.toggle('open', on);
+    if (on) {
+      renderRecent();
+    }
+  }
+  fab.onclick = function () {
+    dockOpen(panel.hidden);
+  };
+  document.addEventListener('click', function (e) {
+    if (!panel.hidden && !dock.contains(e.target)) {
+      dockOpen(false);
     }
   });
-  if ((!location.hash || location.hash === '#/') && /^#\/[a-z]+$/.test(load('vdk-last-view', ''))) {
-    location.hash = load('vdk-last-view', '');
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !panel.hidden) {
+      dockOpen(false);
+    }
+    var tag = (e.target.tagName || '').toLowerCase();
+    if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey && tag !== 'input' && tag !== 'textarea' && tag !== 'select' && !e.target.isContentEditable) {
+      toggleFocus();
+    }
+  });
+  function toggleFocus() {
+    var app = $('app');
+    if (!app || app.hidden) {
+      return;
+    }
+    var on = app.classList.toggle('focus-mode');
+    $('dkFocus').querySelector('.ms').textContent = on ? 'fullscreen_exit' : 'fullscreen';
+    toast(on ? 'Chế độ tập trung: bấm F để thoát' : 'Đã thoát chế độ tập trung');
   }
+  $('dkFocus').onclick = toggleFocus;
+  $('dkPrint').onclick = function () {
+    dockOpen(false);
+    setTimeout(function () {
+      window.print();
+    }, 150);
+  };
+  $('dkTop').onclick = function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    dockOpen(false);
+  };
+
+  /* tự làm mới: bấm nút "Làm mới" của trang hiện tại (nếu có), không làm khi đang gõ hoặc mở ngăn chi tiết */
+  var autoT;
+  function setAuto(sec) {
+    clearInterval(autoT);
+    save('vdk-auto', String(sec));
+    if (sec > 0) {
+      autoT = setInterval(function () {
+        var d = $('drawer'), a = document.activeElement, typing = a && /^(input|textarea|select)$/i.test(a.tagName);
+        if (document.hidden || typing || (d && !d.hidden)) {
+          return;
+        }
+        var b = document.querySelector('main #refresh, main #drefresh, main [data-refresh]');
+        if (b) {
+          b.click();
+        }
+      }, sec * 1000);
+    }
+  }
+  var auto = $('dkAuto');
+  auto.value = load('vdk-auto', '0');
+  if (auto.value !== '0') {
+    setAuto(parseInt(auto.value, 10));
+  }
+  auto.onchange = function () {
+    setAuto(parseInt(auto.value, 10));
+    toast(auto.value === '0' ? 'Đã tắt tự làm mới' : 'Tự làm mới mỗi ' + auto.options[auto.selectedIndex].text);
+  };
+
+  /* trang gần đây */
+  var recent = [];
+  try {
+    recent = JSON.parse(load('vdk-recent', '[]')) || [];
+  } catch (e) {
+    recent = [];
+  }
+  function trackView() {
+    setTimeout(function () {
+      var h = document.querySelector('main h1'), hash = location.hash;
+      if (!h || !hash || hash === '#/' || hash === '#') {
+        return;
+      }
+      var title = (h.textContent || '').trim();
+      recent = recent.filter(function (r) {
+        return r.h !== hash;
+      });
+      recent.unshift({ h: hash, t: title });
+      recent = recent.slice(0, 6);
+      save('vdk-recent', JSON.stringify(recent));
+    }, 700);
+  }
+  function renderRecent() {
+    var box = $('dkRecent');
+    box.innerHTML = '';
+    var list = recent.filter(function (r) {
+      return r.h !== location.hash;
+    }).slice(0, 5);
+    if (!list.length) {
+      box.innerHTML = '<p class="dock-empty">Chưa có trang nào.</p>';
+      return;
+    }
+    list.forEach(function (r) {
+      var a = document.createElement('a');
+      a.href = r.h;
+      a.innerHTML = '<span class="ms">history</span>';
+      a.appendChild(document.createTextNode(r.t || r.h));
+      a.onclick = function () {
+        dockOpen(false);
+      };
+      box.appendChild(a);
+    });
+  }
+  window.addEventListener('hashchange', trackView);
+  trackView();
+
+  /* ghi chú nhanh */
+  var note = $('dkNote'), noteT;
+  note.value = load('vdk-note', '');
+  note.addEventListener('input', function () {
+    clearTimeout(noteT);
+    noteT = setTimeout(function () {
+      save('vdk-note', note.value);
+    }, 400);
+  });
+
+  /* ---------- Duyệt bảng bằng bàn phím: J / K chọn dòng, Enter mở dòng ---------- */
+  var rowIdx = -1;
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (e.ctrlKey || e.metaKey || e.altKey || /^(input|textarea|select)$/.test(tag) || e.target.isContentEditable) {
+      return;
+    }
+    var t = document.querySelector('main table.tbl tbody');
+    if (!t || (e.key !== 'j' && e.key !== 'k' && e.key !== 'Enter')) {
+      return;
+    }
+    var rows = [].filter.call(t.rows, function (r) {
+      return !r.hidden;
+    });
+    if (!rows.length) {
+      return;
+    }
+    if (e.key === 'Enter') {
+      var cur = t.querySelector('tr.kbd-row');
+      if (cur && !/^(a|button)$/.test(tag)) {
+        e.preventDefault();
+        (cur.querySelector('a, button') || cur).click();
+      }
+      return;
+    }
+    var at = rows.indexOf(t.querySelector('tr.kbd-row'));
+    rowIdx = Math.max(0, Math.min(rows.length - 1, at + (e.key === 'j' ? 1 : -1)));
+    if (at < 0) {
+      rowIdx = 0;
+    }
+    rows.forEach(function (r) {
+      r.classList.remove('kbd-row');
+    });
+    rows[rowIdx].classList.add('kbd-row');
+    rows[rowIdx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
 
   /* ---------- Nút lên đầu trang quản trị ---------- */
   var up = document.createElement('button');

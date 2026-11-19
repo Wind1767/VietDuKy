@@ -95,7 +95,7 @@
       'aria-label': 'Tìm tour',
       autocomplete: 'off'
     });
-    var sorts = [['def', 'Mặc định'], ['asc', 'Giá thấp → cao'], ['desc', 'Giá cao → thấp'], ['rate', 'Đánh giá cao']];
+    var sorts = [['def', 'Mặc định'], ['asc', 'Giá tăng dần'], ['desc', 'Giá giảm dần'], ['rate', 'Đánh giá cao']];
     var sortBtns = sorts.map(function (s) {
       var b = h('button', {
         type: 'button',

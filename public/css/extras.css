@@ -72,7 +72,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: background .2s, color .2s, border-color .2s;
+  transition: background .35s, color .35s, border-color .35s;
 }
 
 .x-sorts button:hover,
@@ -152,7 +152,7 @@
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
-  transition: transform .3s cubic-bezier(.3, 1.8, .5, 1), background .2s, color .2s;
+  transition: transform .3s cubic-bezier(.3, 1.8, .5, 1), background .35s, color .35s;
 }
 
 .x-cmp {
@@ -230,7 +230,7 @@
   background: rgba(8, 20, 18, .66);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  animation: x-fade .25s both;
+  animation: x-fade .55s both;
 }
 
 .x-modal-box {
@@ -243,7 +243,7 @@
   border-radius: 24px;
   color: var(--x-text);
   background: var(--x-card);
-  animation: x-pop .4s cubic-bezier(.3, 1.4, .5, 1) both;
+  animation: x-pop .55s cubic-bezier(.3, 1.4, .5, 1) both;
 }
 
 .x-modal-box h3 {
@@ -329,7 +329,7 @@
   opacity: 0;
   transform: translate(-50%, 12px);
   pointer-events: none;
-  transition: opacity .25s, transform .3s;
+  transition: opacity .35s, transform .3s;
 }
 
 .x-toast.on {
@@ -439,5 +439,26 @@
     text-align: center;
     border-radius: 18px;
   }
+}
+
+
+
+/* ===== FAQ: viền vàng bật/tắt tức thì theo mục vừa bấm (không còn nán lại ~1 giây) ===== */
+.faq details {
+  outline: 2px solid transparent;
+  transition: background-color .3s ease, box-shadow .3s ease, transform .3s ease, outline-color .35s ease, color .35s ease;
+  transition-delay: 0s;
+}
+.faq details[open]:not(.fc) {
+  outline-color: var(--gold);
+}
+.faq details[open].fc {
+  background: var(--mist);
+  box-shadow: none;
+  transform: none;
+  outline-color: transparent;
+}
+:root[data-theme="dark"] .faq details[open].fc {
+  background-color: #12251f;
 }
 

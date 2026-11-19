@@ -9,6 +9,7 @@ Website đặt tour du lịch tiếng Việt chạy trên Cloudflare Workers + D
 - `npm run dev` – `wrangler dev`; `npm run deploy` – triển khai.
 
 ## Cấu trúc
+- **Chỉ sửa giao diện trong `public/`.** `wrangler.toml` chỉ triển khai `./public`; không tạo bản sao `index.html`, `css/`, `js/`, `admin/` ở thư mục gốc (file ở đó sẽ không lên web).
 - `src/worker.js` – điểm vào, định tuyến `/api/*` và `/p/*`, phiên admin (cookie `vdk_session`).
 - `src/customer-auth.js` – tài khoản khách: đăng ký, xác minh email, đăng nhập, phiên (cookie `vdk_user`, dạng `s1.<43 ký tự>`; chỉ lưu bản băm SHA-256 trong bảng `user_sessions`).
 - `src/session-device.js` – ràng phiên với thiết bị/quốc gia. Cookie chép sang máy khác bị thu hồi.

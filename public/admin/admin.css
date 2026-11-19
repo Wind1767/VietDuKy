@@ -340,7 +340,7 @@ select {
 }
 
 .side .t {
-  transition: opacity .25s ease, max-width .55s cubic-bezier(.34, 1.56, .64, 1);
+  transition: opacity .35s ease, max-width .55s cubic-bezier(.34, 1.56, .64, 1);
   max-width: 180px;
   overflow: hidden;
 }
@@ -440,7 +440,7 @@ select {
   inset: 0;
   background: rgba(5, 20, 18, .55);
   z-index: 65;
-  animation: fade .2s ease-out;
+  animation: fade .55s ease-out;
 }
 
 @keyframes fade {
@@ -974,7 +974,7 @@ a.kpi:hover {
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 32px rgba(0,0,0,.25);
-  animation: slide .22s ease-out;
+  animation: slide .55s ease-out;
 }
 
 @keyframes slide {
@@ -1411,7 +1411,7 @@ a.kpi:hover {
   border-radius: var(--r);
   background: var(--surface);
   border: 1px solid var(--accent);
-  animation: bulkin .4s cubic-bezier(.34, 1.56, .64, 1);
+  animation: bulkin .55s cubic-bezier(.34, 1.56, .64, 1);
 }
 
 @keyframes bulkin {
@@ -1645,7 +1645,7 @@ a.kpi:hover {
   padding: 12px 14px;
   text-decoration: none;
   border-bottom: 1px solid var(--line);
-  transition: background .15s;
+  transition: background .35s;
 }
 
 .conv:hover {
@@ -1801,7 +1801,7 @@ a.kpi:hover {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.45;
-  animation: bubIn .25s cubic-bezier(.3, 1.4, .5, 1) both;
+  animation: bubIn .55s cubic-bezier(.3, 1.4, .5, 1) both;
 }
 
 .cm.them .bub {
@@ -2128,7 +2128,7 @@ h3 {
   border-radius: 12px;
   min-height: 42px;
   box-shadow: 0 1px 0 rgba(10, 55, 50, .04);
-  transition: background .2s, transform .2s cubic-bezier(.3, 1.4, .5, 1), box-shadow .2s, filter .2s;
+  transition: background .35s, transform .35s cubic-bezier(.3, 1.4, .5, 1), box-shadow .35s, filter .35s;
 }
 
 .btn:hover {
@@ -2161,7 +2161,7 @@ select,
 textarea {
   border-radius: 12px;
   border-color: var(--line);
-  transition: border-color .2s, box-shadow .2s, background .2s;
+  transition: border-color .35s, box-shadow .35s, background .35s;
 }
 
 input:focus,
@@ -2232,7 +2232,7 @@ textarea:focus {
 .ghost {
   border-radius: 12px;
   min-height: 44px;
-  transition: background .2s, transform .2s, color .2s;
+  transition: background .35s, transform .35s, color .35s;
   color: #cfe3dd;
 }
 
@@ -2402,7 +2402,7 @@ a.kpi:hover {
 .chart .bar {
   fill: var(--bar);
   rx: 3px;
-  transition: fill .2s;
+  transition: fill .35s;
 }
 
 .hbar .track {
@@ -2430,7 +2430,7 @@ a.kpi:hover {
 }
 
 .tbl tbody tr {
-  transition: background .15s;
+  transition: background .35s;
 }
 
 .tbl th,
@@ -2468,7 +2468,7 @@ a.kpi:hover {
 /* Chip lọc & ngăn chi tiết */
 .chip {
   min-height: 36px;
-  transition: background .2s, transform .2s cubic-bezier(.3, 1.4, .5, 1);
+  transition: background .35s, transform .35s cubic-bezier(.3, 1.4, .5, 1);
 }
 
 .chip:hover {
@@ -2482,7 +2482,7 @@ a.kpi:hover {
 .drawer {
   border-radius: 24px 0 0 24px;
   box-shadow: -24px 0 70px -20px rgba(0, 0, 0, .45);
-  animation: slide .35s cubic-bezier(.2, .8, .2, 1);
+  animation: slide .55s cubic-bezier(.2, .8, .2, 1);
 }
 
 .drawer header {
@@ -2501,7 +2501,7 @@ a.kpi:hover {
 
 .seg button:not(.seg-b) {
   border-radius: 12px;
-  transition: background .2s, transform .2s cubic-bezier(.3, 1.4, .5, 1);
+  transition: background .35s, transform .35s cubic-bezier(.3, 1.4, .5, 1);
 }
 
 .seg button:not(.seg-b):active {
@@ -2524,7 +2524,7 @@ a.kpi:hover {
 }
 
 .conv {
-  transition: background .15s, padding .2s;
+  transition: background .35s, padding .35s;
 }
 
 .conv.on {
@@ -2639,7 +2639,7 @@ a.kpi:hover {
   background: var(--line);
   position: relative;
   cursor: pointer;
-  transition: background .2s;
+  transition: background .35s;
   padding: 0;
 }
 
@@ -2652,7 +2652,7 @@ a.kpi:hover {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,.3);
-  transition: transform .2s;
+  transition: transform .35s;
 }
 
 .sw[aria-checked="true"] {
@@ -2671,7 +2671,7 @@ a.kpi:hover {
 
 .tpl {
   cursor: pointer;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform .35s, box-shadow .35s;
 }
 
 .tpl:hover,
@@ -2838,7 +2838,7 @@ a.kpi:hover {
 }
 
 .side .t {
-  transition: opacity .2s ease, max-width .35s cubic-bezier(.4, 0, .2, 1);
+  transition: opacity .35s ease, max-width .35s cubic-bezier(.4, 0, .2, 1);
 }
 
 .side .nav {
@@ -3092,7 +3092,7 @@ body {
 
 .card {
   box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 12px 26px -20px rgba(12,59,54,.4);
-  transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, border-color .25s;
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-color .35s;
 }
 
 :root[data-theme="dark"] .card {
@@ -3141,7 +3141,7 @@ a.kpi:hover,
 
 /* Thanh bên: chỉ báo mục đang chọn */
 .nav a {
-  transition: background .2s, transform .2s, padding .2s;
+  transition: background .35s, transform .35s, padding .35s;
 }
 
 .nav a:hover {
@@ -3173,7 +3173,7 @@ a.kpi:hover,
 
 /* Bảng, nút */
 table tbody tr {
-  transition: background .15s;
+  transition: background .35s;
 }
 
 table tbody tr:hover {
@@ -3181,7 +3181,7 @@ table tbody tr:hover {
 }
 
 .btn {
-  transition: transform .15s, background .2s, filter .2s, border-color .2s;
+  transition: transform .35s, background .35s, filter .35s, border-color .35s;
 }
 
 .btn:active:not(:disabled) {
@@ -3381,7 +3381,7 @@ body[data-del="0"] .drawer footer .btn.danger {
 }
 
 .tbl tbody tr {
-  animation: aUp .35s ease both;
+  animation: aUp .55s ease both;
 }
 
 .tbl tbody tr:nth-child(2) {
@@ -3401,7 +3401,7 @@ body[data-del="0"] .drawer footer .btn.danger {
 }
 
 .pill {
-  animation: aPop .4s cubic-bezier(.3,1.6,.5,1) both;
+  animation: aPop .55s cubic-bezier(.3,1.6,.5,1) both;
 }
 
 @keyframes aPop {
@@ -3414,7 +3414,7 @@ body[data-del="0"] .drawer footer .btn.danger {
 .card,
 .btn,
 .av {
-  transition: transform .25s, box-shadow .25s, background-color .3s, color .3s;
+  transition: transform .35s, box-shadow .35s, background-color .3s, color .3s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3617,7 +3617,7 @@ kbd {
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   opacity: 0;
-  transition: opacity .16s;
+  transition: opacity .35s;
 }
 
 .dlg-scrim.on {
@@ -3633,7 +3633,7 @@ kbd {
   text-align: center;
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .6);
   transform: translateY(12px) scale(.96);
-  transition: transform .24s cubic-bezier(.3, 1.4, .5, 1);
+  transition: transform .35s cubic-bezier(.3, 1.4, .5, 1);
 }
 
 .dlg-scrim.on .dlg {
@@ -3725,7 +3725,7 @@ kbd {
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   opacity: 0;
-  transition: opacity .14s;
+  transition: opacity .35s;
 }
 
 .pal-scrim.on {
@@ -3740,7 +3740,7 @@ kbd {
   overflow: hidden;
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .6);
   transform: translateY(-10px) scale(.98);
-  transition: transform .22s cubic-bezier(.3, 1.4, .5, 1);
+  transition: transform .35s cubic-bezier(.3, 1.4, .5, 1);
 }
 
 .pal-scrim.on .pal {
@@ -4521,7 +4521,7 @@ code {
   display: grid;
   place-items: center;
   opacity: 0;
-  transition: opacity .15s, background .15s, color .15s;
+  transition: opacity .35s, background .35s, color .35s;
 }
 
 .cm-del .ms {
@@ -4818,7 +4818,7 @@ code {
   font-weight: 600;
   font-size: 14px;
   border: 1px solid transparent;
-  transition: transform .15s;
+  transition: transform .35s;
 }
 
 .ts-item:hover {
@@ -5579,7 +5579,7 @@ main p + p,
   opacity: 0;
   transform: translateY(12px);
   pointer-events: none;
-  transition: opacity .2s, transform .25s;
+  transition: opacity .35s, transform .35s;
 }
 
 .adm-top.on {
@@ -5639,7 +5639,7 @@ main p + p,
 
 .whoami.can-edit {
   cursor: pointer;
-  transition: background .15s;
+  transition: background .35s;
 }
 
 .whoami.can-edit:hover {
@@ -5707,4 +5707,665 @@ select {
   select {
     font-size: max(16px, 1em);
   }
+}
+
+/* ===== Icon thay cho ký tự unicode ===== */
+.ms.fill {
+  font-variation-settings: 'FILL' 1;
+}
+
+.kpi .cmp .ms,
+.rb span .ms,
+.kpi .val .ms {
+  font-size: 1em;
+  vertical-align: -.15em;
+}
+
+.kpi .val .ms {
+  color: #f5b400;
+}
+
+.rb span .ms {
+  color: #f5b400;
+  font-size: 14px;
+}
+
+/* ===== Chuyển động bổ sung ===== */
+@keyframes vRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vRow {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#main > .page-h,
+main > .page-h {
+  animation: vRise .45s cubic-bezier(.2,.8,.2,1) both;
+}
+
+main > :is(.card, .kpis, .grid2, .grid3, .table-card, .toolbar, .filters, .tabs) {
+  animation: vRise .5s cubic-bezier(.2,.8,.2,1) .08s both;
+}
+
+.kpis > * {
+  animation: vRise .5s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.kpis > *:nth-child(2) {
+  animation-delay: .06s;
+}
+
+.kpis > *:nth-child(3) {
+  animation-delay: .12s;
+}
+
+.kpis > *:nth-child(4) {
+  animation-delay: .18s;
+}
+
+.kpis > *:nth-child(5) {
+  animation-delay: .24s;
+}
+
+.kpis > *:nth-child(6) {
+  animation-delay: .3s;
+}
+
+tbody tr {
+  animation: vRow .55s ease both;
+}
+
+tbody tr:nth-child(2) {
+  animation-delay: .03s;
+}
+
+tbody tr:nth-child(3) {
+  animation-delay: .06s;
+}
+
+tbody tr:nth-child(4) {
+  animation-delay: .09s;
+}
+
+tbody tr:nth-child(5) {
+  animation-delay: .12s;
+}
+
+tbody tr:nth-child(n+6) {
+  animation-delay: .15s;
+}
+
+.btn,
+.chip,
+.tab {
+  transition: transform .35s ease, box-shadow .35s ease, background-color .35s ease, color .35s ease, border-color .35s ease;
+}
+
+.btn:active {
+  transform: scale(.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > *,
+  .kpis > *,
+  tbody tr,
+  .page-h {
+    animation: none !important;
+  }
+}
+
+/* ===== Nền chuyển động mặc định (admin) ===== */
+:where(a, button, summary, input, select, textarea, label, .chip, .btn, .icon-btn, tbody tr, li) {
+  transition: color .35s ease, background-color .35s ease, border-color .35s ease, box-shadow .35s ease, transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s ease;
+}
+
+/* ===== Chat với khách: đồng bộ kích thước nút ===== */
+.chat-head .btn,
+.chat-head .icon-btn,
+.chat-head .chat-back {
+  box-sizing: border-box;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 12px;
+  flex: none;
+  white-space: nowrap;
+}
+
+.chat-head .icon-btn,
+.chat-head .chat-back {
+  width: 42px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+}
+
+.chat-head .btn {
+  padding: 0 16px;
+}
+
+.chat-head .btn .ms,
+.chat-head .icon-btn .ms,
+.chat-form .btn .ms {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+.chat-form {
+  align-items: flex-end;
+}
+
+.chat-form .btn {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.chat-form textarea {
+  box-sizing: border-box;
+  min-height: 44px;
+}
+
+.chat-head .btn:hover,
+.chat-head .icon-btn:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 860px) {
+  .chat-head {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .chat-head .btn {
+    width: 42px;
+    padding: 0;
+  }
+  .chat-head .btn .lbl {
+    display: none;
+  }
+}
+
+/* ===== Thang kích thước nút/ô nhập đồng đều (ghi đè các giá trị rải rác phía trên) ===== */
+:root {
+  --ctl: 42px;
+  --ctl-sm: 34px;
+  --ctl-chip: 36px;
+}
+
+.btn,
+.icon-btn,
+.toolbar input,
+.toolbar select,
+.toolbar .btn,
+.page-h .btn,
+.h-acts .btn,
+.drawer .btn,
+.modal .btn {
+  box-sizing: border-box;
+  min-height: var(--ctl);
+  height: var(--ctl);
+  line-height: 1.2;
+}
+
+.btn {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.icon-btn {
+  width: var(--ctl);
+  padding: 0;
+}
+
+.chip,
+.tpl-chip,
+.sess-chip {
+  box-sizing: border-box;
+  min-height: var(--ctl-chip);
+  height: var(--ctl-chip);
+}
+
+.btn.sm,
+.row-btn,
+td .btn,
+td .icon-btn,
+.tt-bar .btn,
+.bulk .btn,
+.tpl-bar .btn {
+  min-height: var(--ctl-sm);
+  height: var(--ctl-sm);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+td .icon-btn,
+.row-btn.icon {
+  width: var(--ctl-sm);
+  padding: 0;
+}
+
+.btn .ms,
+.icon-btn .ms,
+.chip .ms {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+.btn.sm .ms,
+td .btn .ms,
+.tt-bar .btn .ms {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+@media (max-width: 860px) {
+  :root {
+    --ctl: 44px;
+  }
+}
+
+/* ===== Bảng: tiêu đề dính khi cuộn + thanh công cụ bảng ===== */
+.tbl thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface2, var(--surface));
+}
+
+.tt-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  animation: vRise .45s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.tt-find {
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--ctl-sm);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+  transition: border-color .3s, box-shadow .3s;
+}
+
+.tt-find:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.tt-find .ms {
+  color: var(--mut);
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.tt-find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  height: 100%;
+  padding: 0;
+  box-shadow: none;
+}
+
+.tt-count {
+  color: var(--mut);
+  font-size: 13px;
+}
+
+tr[hidden] {
+  display: none;
+}
+
+/* ===== Bộ công cụ nổi ===== */
+@keyframes dockIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.adm-dock {
+  position: fixed;
+  left: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 61;
+}
+
+body:has(#app[hidden]) .adm-dock {
+  display: none;
+}
+
+.dock-fab {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 8px 22px -10px rgba(0,0,0,.5);
+  transition: transform .4s cubic-bezier(.3,1.5,.5,1), background .3s;
+}
+
+.dock-fab:hover {
+  background: var(--surface2);
+  transform: rotate(-12deg) scale(1.06);
+}
+
+.adm-dock.open .dock-fab {
+  transform: rotate(90deg);
+  background: var(--accent);
+  color: #fff;
+}
+
+.dock-panel {
+  position: absolute;
+  left: 0;
+  bottom: 58px;
+  width: min(320px, calc(100vw - 36px));
+  max-height: 70vh;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,.55);
+  animation: dockIn .4s cubic-bezier(.2,.8,.2,1) both;
+  transform-origin: 0 100%;
+}
+
+.dock-panel[hidden] {
+  display: none;
+}
+
+.dock-panel h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.dock-panel h4 {
+  font-size: 13px;
+  margin: 14px 0 6px;
+  color: var(--mut);
+  font-weight: 600;
+}
+
+.dock-panel h4 small {
+  font-weight: 400;
+}
+
+.dock-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--ctl-sm);
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .3s;
+}
+
+.dock-row:hover {
+  background: var(--surface2);
+}
+
+.dock-row > span:nth-child(2) {
+  flex: 1;
+}
+
+.dock-row select {
+  height: 32px;
+  min-height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 8px;
+}
+
+.dock-row kbd {
+  font: 12px ui-monospace, monospace;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--mut);
+}
+
+.dock-recent {
+  display: grid;
+  gap: 2px;
+}
+
+.dock-recent a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background .3s, transform .3s;
+}
+
+.dock-recent a:hover {
+  background: var(--surface2);
+  transform: translateX(3px);
+}
+
+.dock-recent .ms {
+  font-size: 18px;
+  color: var(--mut);
+}
+
+.dock-empty {
+  color: var(--mut);
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+#dkNote {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface2);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color .3s;
+}
+
+#dkNote:focus {
+  outline: 0;
+  border-color: var(--accent);
+}
+
+/* ===== Chế độ tập trung ===== */
+.app.focus-mode {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app.focus-mode .side,
+.app.focus-mode .topbar {
+  display: none;
+}
+
+.app.focus-mode .main {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media print {
+  .side,
+  .topbar,
+  .adm-dock,
+  .adm-top,
+  .tt-bar,
+  .toast,
+  .drawer {
+    display: none !important;
+  }
+  .app {
+    display: block;
+  }
+  .card,
+  .tbl tr {
+    break-inside: avoid;
+  }
+  tbody tr {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-panel {
+    animation: none;
+  }
+}
+
+.dock-row > span:nth-child(2) {
+  white-space: nowrap;
+}
+
+.dock-row select {
+  flex: none;
+}
+
+/* ===== Thanh công cụ bảng mở rộng ===== */
+.tt-bar {
+  position: relative;
+}
+
+.tt-cols-menu {
+  position: absolute;
+  right: 14px;
+  top: calc(100% - 4px);
+  z-index: 20;
+  min-width: 190px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 18px 40px -16px rgba(0,0,0,.5);
+  animation: dockIn .3s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.tt-cols-menu[hidden] {
+  display: none;
+}
+
+.tt-cols-menu label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .3s;
+}
+
+.tt-cols-menu label:hover {
+  background: var(--surface2);
+}
+
+.tt-sum {
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 13px;
+  color: var(--mut);
+}
+
+.tt-sum[hidden] {
+  display: none;
+}
+
+.tt-sum b {
+  color: var(--ink);
+}
+
+.tt-sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background .3s;
+}
+
+.tt-sortable:hover {
+  background: var(--surface2);
+}
+
+.tt-sortable[aria-sort]::after {
+  content: 'arrow_upward';
+  font-family: 'Material Symbols Rounded';
+  font-feature-settings: 'liga';
+  font-size: 16px;
+  vertical-align: -3px;
+  margin-left: 4px;
+  color: var(--accent);
+  display: inline-block;
+  transition: transform .3s;
+}
+
+.tt-sortable[aria-sort="descending"]::after {
+  transform: rotate(180deg);
+}
+
+.tbl tbody tr.kbd-row {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.tt-bar {
+  z-index: 5;
 }

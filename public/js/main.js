@@ -159,19 +159,32 @@
   document.body.insertAdjacentHTML('beforeend', footHTML);
 
   /* Dựng lại menu khi cài đặt mới từ máy chủ về (site.js gọi sau khi tải /api/site) */
+  var menuSig = menuItems();
   window.vdkRenderNav = function () {
     var m = document.getElementById('menu'), fn = document.getElementById('footNav');
-    if (m) {
+    var sig = menuItems();
+    /* Menu không đổi (hay gặp nhất) thì giữ nguyên: dựng lại sẽ làm một số mục chạy lại animation còn mục "tên người dùng" thì không */
+    if (m && sig !== menuSig) {
+      menuSig = sig;
       var anchor = document.getElementById('acctLink');
       anchor = anchor && anchor.parentNode;
       m.querySelectorAll('li[data-nl]').forEach(function (n) {
         n.remove();
       });
       var tmp = document.createElement('ul');
-      tmp.innerHTML = menuItems();
+      tmp.innerHTML = sig;
       while (tmp.firstChild) {
         m.insertBefore(tmp.firstChild, anchor || null);
       }
+      /* chạy lại animation cho TOÀN BỘ mục để mọi nút (kể cả tên người dùng) rơi xuống cùng nhịp */
+      var lis = m.querySelectorAll('li');
+      lis.forEach(function (li) {
+        li.style.animation = 'none';
+      });
+      void m.offsetWidth;
+      lis.forEach(function (li) {
+        li.style.animation = '';
+      });
     }
     if (fn) {
       fn.innerHTML = footerItems();
@@ -193,7 +206,8 @@
         acctLink.href = '/account';
         acctLink.textContent = d.user.name.trim().split(/\s+/).pop();
         acctLink.title = 'Tài khoản của bạn';
-        acctLink.parentNode.insertAdjacentHTML('afterend', '<li class="nl" style="--i:6"><button class="navlogout" id="navLogout" type="button"><span class="ms">logout</span><span>Đăng xuất</span></button></li>');
+        acctLink.classList.add('swap');
+        acctLink.parentNode.insertAdjacentHTML('afterend', '<li class="nl late" style="--i:6"><button class="navlogout" id="navLogout" type="button"><span class="ms">logout</span><span>Đăng xuất</span></button></li>');
         document.getElementById('navLogout').onclick = function () {
           fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(function () {}).then(function () {
             location.href = '/';
@@ -527,6 +541,8 @@
       item._faqAnim.cancel();
       item._faqAnim = null;
     }
+    /* viền vàng / bóng đổ đi theo trạng thái đích ngay khi bấm, không đợi animation chiều cao chạy xong */
+    item.classList.toggle('fc', !open);
 
     if (reduceMotion || !item.animate) {
       item.open = open;
@@ -586,6 +602,70 @@
     }
     item.dataset.closing = willOpen ? '0' : '1';
     faqAnimate(item, willOpen);
+  });
+
+  /* ---------- Thông tin cá nhân (trang tài khoản): thẻ mở/đóng có animation ---------- */
+  function accAnimate(item, open) {
+    var summary = item.querySelector(':scope > summary');
+    var body = [].slice.call(item.children).filter(function (c) {
+      return c !== summary;
+    });
+    if (item._accAnim) {
+      item._accAnim.cancel();
+      item._accAnim = null;
+    }
+    if (reduceMotion || !item.animate) {
+      item.open = open;
+      return;
+    }
+    var startH = item.offsetHeight;
+    var endH;
+    if (open) {
+      item.open = true;
+      item.style.height = 'auto';
+      endH = item.offsetHeight;
+      item.style.height = '';
+    } else {
+      endH = summary.offsetHeight + 2;
+    }
+    item.style.overflow = 'hidden';
+    item.classList.toggle('acc-closing', !open);
+    var anim = item.animate({ height: [startH + 'px', endH + 'px'] }, { duration: 520, easing: 'cubic-bezier(.22,.8,.3,1)' });
+    item._accAnim = anim;
+    body.forEach(function (el, i) {
+      el.animate(open ? { opacity: [0, 1], transform: ['translateY(-12px)', 'none'] } : { opacity: [1, 0], transform: ['none', 'translateY(-8px)'] }, {
+        duration: open ? 480 : 260,
+        delay: open ? 90 + i * 70 : 0,
+        easing: 'cubic-bezier(.2,.8,.2,1)',
+        fill: 'both'
+      });
+    });
+    anim.onfinish = function () {
+      item.open = open;
+      item.style.overflow = '';
+      item.classList.remove('acc-closing');
+      item._accAnim = null;
+      body.forEach(function (el) {
+        el.getAnimations().forEach(function (a) {
+          a.cancel();
+        });
+      });
+    };
+    anim.oncancel = function () {
+      item.style.overflow = '';
+    };
+  }
+
+  document.addEventListener('click', function (e) {
+    var summary = e.target.closest && e.target.closest('.acc-sec > summary');
+    if (!summary) {
+      return;
+    }
+    e.preventDefault();
+    var item = summary.parentElement;
+    var willOpen = !item.open || item.dataset.accClosing === '1';
+    item.dataset.accClosing = willOpen ? '0' : '1';
+    accAnimate(item, willOpen);
   });
 
   /* ---------- Ô chọn ngày: không cho chọn ngày đã qua ---------- */
@@ -1139,4 +1219,25 @@
         ' đánh giá của khách hàng';
     }).catch(function () {});
   }
+})();
+
+/* Thanh tiến độ cuộn trang */
+(function () {
+  var bar = document.createElement('div');
+  bar.id = 'scrollbar';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  var tick = false;
+  function upd() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ')';
+    tick = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!tick) {
+      tick = true;
+      requestAnimationFrame(upd);
+    }
+  }, { passive: true });
+  upd();
 })();

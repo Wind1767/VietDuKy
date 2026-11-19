@@ -791,7 +791,8 @@
     if (p === 0) {
       return { t: 'Bằng ' + label, c: '' };
     }
-    return { t: (p > 0 ? '▲ ' : '▼ ') + Math.abs(p) + '% so với ' + label, c: p > 0 ? 'up' : 'down' };
+    return { t: '<span class="ms">' + (p > 0 ? 'trending_up' : 'trending_down') + '</span>' + Math.abs(p) +
+        '% so với ' + label, c: p > 0 ? 'up' : 'down' };
   }
   function spark(vals) {
     if (!vals || vals.length < 2) {
@@ -942,7 +943,7 @@
       }) +
       kpi({
         lbl: 'Điểm đánh giá',
-        val: s.reviews.approved ? ratingTxt(s.reviews.avg) + ' ★' : '–',
+        val: s.reviews.approved ? ratingTxt(s.reviews.avg) + ' <span class="ms fill">star</span>' : '–',
         cmp: fmt(s.reviews.approved) + ' đã duyệt' +
           (s.reviews.pending ? ' · ' + s.reviews.pending +
             ' chờ duyệt' : ''),
@@ -1023,7 +1024,7 @@
     var tot = s.reviews.approved, dist = s.reviews.dist;
     $('rate').innerHTML = tot ? '<div class="rate-box"><div class="rate-big"><strong>' + ratingTxt(s.reviews.avg) + '</strong>' + starsHTML(s.reviews.avg) + '<small>' + tot + ' đánh giá</small></div><div class="rate-bars">' +
       [5, 4, 3, 2, 1].map(function (k) {
-        return '<div class="rb"><span>' + k + ' ★</span><i><b style="width:' + Math.round(dist[k] / tot * 100) +
+        return '<div class="rb"><span>' + k + ' <span class="ms fill">star</span></span><i><b style="width:' + Math.round(dist[k] / tot * 100) +
           '%"></b></i><em>' + dist[k] + '</em></div>';
       }).join('') + '</div></div>' : '<p class="muted">Chưa có đánh giá nào được duyệt.</p>';
     drawBars($('wd'), [1, 2, 3, 4, 5, 6, 0].map(function (i) {
@@ -3229,7 +3230,7 @@
         return Object.assign({}, s, { name: SOURCE[s.name] || s.name });
       }), 'Nguồn') +
         '<div class="card-pad sub">Trạng thái: ' + t.fresh + ' mới · ' + t.called + ' đã gọi · ' + t.won + ' đã chốt · ' + t.cancelled + ' huỷ' + (r.reviews.count ? ' · ' +
-        r.reviews.count + ' đánh giá mới (TB ' + String(r.reviews.avg).replace('.', ',') + '★)' : '') + '</div></section></div>';
+        r.reviews.count + ' đánh giá mới (TB ' + String(r.reviews.avg).replace('.', ',') + ' sao)' : '') + '</div></section></div>';
     barChart($('rChart1'), r.series, r.unit, 'bookings', 'won', function (v) {
       return fmt(v) + ' đơn';
     });

@@ -658,7 +658,7 @@
   width: var(--rs);
   height: var(--rs);
   fill: var(--line);
-  transition: fill .15s;
+  transition: fill .35s;
 }
 
 .rv-pick label.h svg {
@@ -734,8 +734,9 @@
 }
 
 .rv-acts .btn.danger {
+  background: transparent;
   color: var(--bad);
-  border-color: var(--bad);
+  border: 2px solid var(--bad);
 }
 
 .rv-acts .btn.danger:hover {
@@ -746,9 +747,17 @@
 .rv-acts .btn.rv-del {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
-  padding-inline: 12px;
+  padding: 0 14px;
   overflow: hidden;
+}
+
+.rv-acts .btn.rv-del .ms {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
 }
 
 .rv-del .rv-del-t {
@@ -756,7 +765,7 @@
   opacity: 0;
   white-space: nowrap;
   overflow: hidden;
-  transition: max-width .3s ease, opacity .25s ease, margin .3s ease;
+  transition: max-width .3s ease, opacity .35s ease, margin .3s ease;
 }
 
 .rv-acts .btn.rv-del:hover .rv-del-t,
@@ -836,7 +845,7 @@
   background: rgba(255, 255, 255, .2);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  transition: transform .35s cubic-bezier(.3, 1.8, .5, 1), background .25s, color .25s;
+  transition: transform .35s cubic-bezier(.3, 1.8, .5, 1), background .35s, color .35s;
 }
 
 .fav-btn.fav-card {
@@ -1730,7 +1739,7 @@ body,
   background-color: rgba(10, 30, 26, .45);
   color: #fff;
   animation: none;
-  transition: transform .35s cubic-bezier(.3,1.8,.5,1), background .25s, color .25s;
+  transition: transform .35s cubic-bezier(.3,1.8,.5,1), background .35s, color .35s;
 }
 
 :root .fav-btn.fav-btn:hover {
@@ -2650,7 +2659,7 @@ footer .soc a:hover {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
+  transition: background-color .35s, transform .35s;
 }
 
 .rv-helpbtn:hover {
