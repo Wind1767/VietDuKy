@@ -28,3 +28,17 @@ TURNSTILE_HOSTNAMES = "vietduky.indevs.in"
 GOOGLE_CLIENT_ID = "717807708737-ss0s4ru9g1k88f838fbcdkb8i7mpkmri.apps.googleusercontent.com"   # Client ID đăng nhập Google (công khai, an toàn khi để ở đây)
 # MFA_KEY: (tuỳ chọn) khoá mã hoá bí mật Google Authenticator, đặt bằng `wrangler secret put MFA_KEY`. Không đặt thì dùng SESSION_SECRET / ADMIN_PASSWORD.
 # ADMIN_SESSION_HOURS = "168"                 # thời hạn phiên quản trị (giờ, 1–720). Mặc định 168 = 7 ngày, tự gia hạn khi đang dùng
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+
+[observability.traces]
+enabled = false
+head_sampling_rate = 1
+persist = true
+
+[observability.issue_detection]
+enabled = false
