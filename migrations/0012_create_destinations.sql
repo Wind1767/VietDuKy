@@ -1,0 +1,2 @@
+-- Worker tự tạo bảng và nạp 6 điểm đến mẫu ở lần chạy đầu; file này chỉ để tham khảo.
+CREATE TABLE IF NOT EXISTS destinations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, title TEXT NOT NULL DEFAULT '', province TEXT NOT NULL DEFAULT '', blurb TEXT NOT NULL DEFAULT '', image TEXT NOT NULL DEFAULT '', active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, updated_at INTEGER NOT NULL);

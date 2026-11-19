@@ -1,0 +1,937 @@
+/* Khung chat kiểu Messenger cho khách */
+.vc {
+  --vc-main: var(--jade2, #145a50);
+  --vc-deep: var(--jade, #0c3b36);
+  --vc-gold: var(--gold, #ffcd00);
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.vc *,
+.vc *::before,
+.vc *::after {
+  box-sizing: border-box;
+}
+
+.vc [hidden] {
+  display: none !important;
+}
+
+.vc {
+  --vc-kb: 0px;
+}
+
+.vc-fab {
+  position: fixed;
+  left: 18px;
+  bottom: calc(18px + var(--vc-kb) + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  background: linear-gradient(145deg, var(--vc-main), var(--vc-deep));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 26px -6px rgba(12, 59, 54, .6);
+  transition: transform .35s cubic-bezier(.3, 1.6, .5, 1), box-shadow .2s;
+}
+
+.vc-fab:hover {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.vc-fab:active {
+  transform: scale(.94);
+}
+
+.vc-fab.on {
+  transform: scale(.92);
+}
+
+.vc-fab svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+.vc-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--red, #da251d);
+  color: #fff;
+  font: 700 12px/22px 'Be Vietnam Pro', sans-serif;
+  text-align: center;
+  font-style: normal;
+  border: 2px solid #fff;
+  animation: vcPop .5s cubic-bezier(.3, 1.8, .5, 1);
+}
+
+.vc-panel {
+  position: fixed;
+  left: 18px;
+  bottom: calc(88px + var(--vc-kb) + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  width: min(370px, calc(100vw - 24px));
+  height: min(560px, calc(100vh - 120px - var(--vc-kb)));
+  height: min(560px, calc(100dvh - 120px - var(--vc-kb)));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  /* section{padding} toàn trang không được lọt vào khung chat */
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -12px rgba(12, 59, 54, .5), 0 0 0 1px rgba(12, 59, 54, .08);
+  transform-origin: bottom left;
+  animation: vcOpen .35s cubic-bezier(.3, 1.4, .5, 1);
+}
+
+.vc-panel > header {
+  flex: none;
+  position: static;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--vc-main), var(--vc-deep));
+}
+
+.vc-panel > header img {
+  border-radius: 50%;
+  background: #fff;
+  padding: 2px;
+  object-fit: cover;
+  flex: none;
+}
+
+.vc-panel > header div {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.vc-panel > header b {
+  display: block;
+  font-size: 1rem;
+}
+
+.vc-panel > header small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .78rem;
+  opacity: .85;
+}
+
+.vc-panel > header small i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5be3a0;
+  flex: none;
+}
+
+.vc-x {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+}
+
+.vc-x:hover {
+  background: rgba(255, 255, 255, .26);
+}
+
+.vc-x svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.vc-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px 8px;
+  background: #f4f7f5;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overscroll-behavior: contain;
+}
+
+.vc-time {
+  align-self: center;
+  margin: 10px 0 6px;
+  font-size: .72rem;
+  color: #7a8c86;
+}
+
+.vc-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 100%;
+  margin-top: 8px;
+}
+
+.vc-row.cont {
+  margin-top: 0;
+}
+
+.vc-row.me {
+  justify-content: flex-end;
+}
+
+.vc-row img,
+.vc-sp {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+}
+
+.vc-sp {
+  background: none;
+}
+
+.vc-b {
+  max-width: 78%;
+  padding: 9px 14px;
+  border-radius: 18px;
+  font-size: .93rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: vcIn .28s cubic-bezier(.3, 1.4, .5, 1) both;
+}
+
+.vc-row.ad .vc-b {
+  background: #fff;
+  color: #14231f;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 1px 2px rgba(12, 59, 54, .08);
+}
+
+.vc-row.me .vc-b {
+  background: linear-gradient(135deg, var(--vc-main), var(--vc-deep));
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+
+.vc-row.ad.cont .vc-b {
+  border-top-left-radius: 6px;
+}
+
+.vc-row.me.cont .vc-b {
+  border-top-right-radius: 6px;
+}
+
+.vc-row.ad:not(.last) .vc-b {
+  border-bottom-left-radius: 6px;
+}
+
+.vc-row.me:not(.last) .vc-b {
+  border-bottom-right-radius: 6px;
+}
+
+.vc-b.wait {
+  opacity: .6;
+}
+
+.vc-b.fail {
+  background: #fde8e6 !important;
+  color: #b42318 !important;
+}
+
+.vc-st {
+  align-self: flex-end;
+  font-size: .7rem;
+  color: #7a8c86;
+  margin: 2px 4px 0;
+}
+
+.vc-st.bad {
+  color: #b42318;
+}
+
+.vc-retry {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.vc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0 34px;
+}
+
+.vc-chip {
+  border: 1px solid rgba(20, 90, 80, .35);
+  background: #fff;
+  color: var(--vc-main);
+  border-radius: 16px;
+  padding: 7px 13px;
+  font: 500 .85rem 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s, transform .15s;
+}
+
+.vc-chip:hover {
+  background: #e3f0ec;
+  transform: translateY(-1px);
+}
+
+.vc-gate {
+  margin: auto;
+  text-align: center;
+  display: grid;
+  gap: 10px;
+  padding: 24px 16px;
+  justify-items: center;
+  color: #5b6e68;
+}
+
+.vc-gate b {
+  color: #14231f;
+  font-size: 1.1rem;
+}
+
+.vc-gate p {
+  max-width: 28ch;
+  font-size: .92rem;
+}
+
+.vc-btn {
+  display: block;
+  width: 200px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: var(--vc-gold);
+  color: var(--vc-deep);
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+}
+
+.vc-btn.line {
+  background: #fff;
+  border: 1.5px solid var(--vc-main);
+  color: var(--vc-main);
+}
+
+.vc-form {
+  flex: none;
+  margin: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid #e3ebe7;
+}
+
+.vc-form textarea {
+  flex: 1;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: #eef3f0;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font: inherit;
+  font-size: .93rem;
+  max-height: 96px;
+  line-height: 1.4;
+  color: #14231f;
+}
+
+.vc-form textarea:focus-visible {
+  box-shadow: 0 0 0 2px var(--vc-main);
+}
+
+.vc-form button {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--vc-main);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .2s, opacity .2s;
+}
+
+.vc-form button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.vc-form button:not(:disabled):hover {
+  transform: scale(1.08);
+}
+
+.vc-form svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  margin-left: 2px;
+}
+
+@keyframes vcOpen {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vcIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vcPop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .vc-panel {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    bottom: calc(80px + var(--vc-kb) + env(safe-area-inset-bottom, 0px));
+    height: min(78vh, 600px, calc(100vh - 100px - var(--vc-kb)));
+    height: min(78dvh, 600px, calc(100dvh - 100px - var(--vc-kb)));
+  }
+  .vc-fab {
+    left: 12px;
+    bottom: calc(12px + var(--vc-kb) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Chế độ tối cho khung chat */
+:root[data-theme="dark"] .vc-panel,
+:root[data-theme="dark"] .vc-form {
+  background: #15231f;
+}
+
+:root[data-theme="dark"] .vc-body {
+  background: #0f1c19;
+}
+
+:root[data-theme="dark"] .vc-row.ad .vc-b {
+  background: #1d302b;
+  color: #e8f1ee;
+}
+
+:root[data-theme="dark"] .vc-form textarea {
+  background: #1d302b;
+  color: #e8f1ee;
+}
+
+:root[data-theme="dark"] .vc-chip {
+  background: #1d302b;
+  color: #8fd8c7;
+  border-color: rgba(143, 216, 199, .35);
+}
+
+:root[data-theme="dark"] .vc-gate b {
+  color: #e8f1ee;
+}
+
+:root[data-theme="dark"] .vc-form {
+  border-top-color: rgba(255, 255, 255, .1);
+}
+
+/* căn bong bóng chat */
+.vc-body {
+  align-items: stretch;
+}
+
+.vc-row {
+  width: 100%;
+  min-width: 0;
+}
+
+.vc-row.me {
+  justify-content: flex-end;
+  flex-direction: row;
+}
+
+.vc-row.ad {
+  justify-content: flex-start;
+}
+
+.vc-b {
+  flex: 0 1 auto;
+  width: fit-content;
+  text-align: left;
+  margin: 0;
+}
+
+.vc-row.me .vc-b {
+  margin-left: auto;
+}
+
+.vc-row img,
+.vc-sp {
+  flex: none;
+  min-width: 28px;
+}
+
+.vc-st {
+  align-self: flex-end;
+}
+
+/* căn đúng khung và bong bóng chat */
+.vc-panel {
+  height: min(560px, calc(100dvh - 120px));
+}
+
+.vc-panel > header,
+.vc-form {
+  flex: none;
+}
+
+.vc-body {
+  min-height: 0;
+}
+
+.vc-row {
+  align-items: flex-end;
+  width: 100%;
+}
+
+.vc-row.me {
+  padding-left: 14%;
+}
+
+.vc-row.ad {
+  padding-right: 14%;
+}
+
+.vc-row .vc-b {
+  max-width: 100%;
+}
+
+.vc-row img,
+.vc-sp {
+  margin-bottom: 0;
+  align-self: flex-end;
+}
+
+.vc-st {
+  margin: 3px 6px 0 0;
+}
+
+.vc-chips {
+  margin-left: 34px;
+}
+
+@media (max-width: 520px) {
+  .vc-panel {
+    height: min(78dvh, 600px);
+  }
+}
+
+/* bong bóng chat ổn định (không co / chồng nhau), nút chat luôn nằm trên cùng */
+.vc-fab {
+  z-index: 9990;
+}
+
+.vc-panel {
+  z-index: 9991;
+}
+
+.vc-body > * {
+  flex: none;
+}
+
+.vc-row {
+  display: flex;
+}
+
+.vc-row.me {
+  padding-left: 16%;
+  padding-right: 0;
+}
+
+.vc-row.ad {
+  padding-right: 16%;
+  padding-left: 0;
+}
+
+.vc-b {
+  display: block;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.vc-row.me .vc-b {
+  margin-left: auto;
+}
+
+.vc-row > img {
+  width: 28px;
+  height: 28px;
+  max-width: none;
+}
+
+.vc-auto {
+  align-self: flex-start;
+  margin: 2px 0 0 36px;
+  font-size: .68rem;
+  color: #7a8c86;
+}
+
+.vc-chips {
+  margin: 10px 0 2px 0;
+}
+
+.vc-chips.after {
+  margin-left: 34px;
+}
+
+.vc-chip {
+  max-width: 100%;
+}
+
+.vc-chip[disabled] {
+  opacity: .5;
+  pointer-events: none;
+}
+
+.vc-panel > header img {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  background: none;
+}
+
+:root[data-theme="dark"] .vc-time,
+:root[data-theme="dark"] .vc-st {
+  color: #8aa59c;
+}
+
+:root[data-theme="dark"] .vc-gate p {
+  color: #9db3ac;
+}
+
+:root[data-theme="dark"] .vc-auto {
+  color: #8aa59c;
+}
+
+/* phiên chat – thanh trạng thái phiên, chủ đề, lịch sử, banner kết thúc */
+.vc-panel > header {
+  gap: 8px;
+  padding-left: 12px;
+}
+
+.vc-panel > header .vc-x {
+  width: 34px;
+  height: 34px;
+}
+
+.vc-panel > header .vc-x[hidden] {
+  display: none;
+}
+
+.vc-panel > header small i.off {
+  background: #9aa9a4;
+}
+
+.vc-sbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 14px;
+  background: #e3f0ec;
+  color: #2c4a43;
+  font-size: .76rem;
+}
+
+.vc-sbar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.vc-end {
+  flex: none;
+  border: 1px solid rgba(20, 90, 80, .4);
+  background: #fff;
+  color: var(--vc-main);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font: 600 .74rem 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+}
+
+.vc-end:hover {
+  background: #f4fbf8;
+}
+
+.vc-closed {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid #e3ebe7;
+  text-align: center;
+  font-size: .85rem;
+  color: #5b6e68;
+}
+
+.vc-closed p {
+  margin: 0;
+}
+
+.vc-newbtn {
+  border: 0;
+  border-radius: 12px;
+  background: var(--vc-gold);
+  color: var(--vc-deep);
+  font: 700 .86rem 'Be Vietnam Pro', sans-serif;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.vc-newbtn:hover {
+  filter: brightness(1.05);
+}
+
+.vc-topics {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 7px;
+}
+
+.vc-topics > span {
+  font-size: .74rem;
+  color: #7a8c86;
+}
+
+.vc-topics > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vc-tp {
+  border: 0;
+  background: var(--vc-main);
+  color: #fff;
+  border-radius: 16px;
+  padding: 7px 13px;
+  font: 600 .83rem 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  transition: transform .15s, filter .15s;
+}
+
+.vc-tp:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
+}
+
+.vc-lh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 2px 2px 8px;
+}
+
+.vc-lh b {
+  color: #14231f;
+}
+
+.vc-none {
+  color: #5b6e68;
+  font-size: .9rem;
+  text-align: center;
+  padding: 18px 8px;
+  margin: 0;
+}
+
+.vc-sess {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #dbe6e1;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font: inherit;
+  cursor: pointer;
+  color: #14231f;
+  transition: background .15s, transform .15s;
+}
+
+.vc-sess:hover {
+  background: #f4fbf8;
+  transform: translateY(-1px);
+}
+
+.vc-sess.on {
+  border-color: var(--vc-main);
+  box-shadow: 0 0 0 1px var(--vc-main) inset;
+}
+
+.vc-sess .vc-sh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vc-sess .vc-sh b {
+  font-size: .9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.vc-sess small {
+  color: #5b6e68;
+  font-size: .8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vc-sess .vc-sm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .72rem;
+  color: #7a8c86;
+}
+
+.vc-sess .vc-sm i {
+  font-style: normal;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--red, #da251d);
+  color: #fff;
+  font-weight: 700;
+  font-size: .7rem;
+  line-height: 18px;
+  text-align: center;
+}
+
+.vc-pill {
+  flex: none;
+  font-style: normal;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 99px;
+}
+
+.vc-pill.open {
+  background: #d8f3e6;
+  color: #0b6b45;
+}
+
+.vc-pill.closed {
+  background: #e6ece9;
+  color: #5b6e68;
+}
+
+:root[data-theme="dark"] .vc-sbar {
+  background: #1a2e29;
+  color: #b9d3cb;
+}
+
+:root[data-theme="dark"] .vc-end {
+  background: #1d302b;
+  color: #8fd8c7;
+  border-color: rgba(143, 216, 199, .35);
+}
+
+:root[data-theme="dark"] .vc-closed {
+  background: #15231f;
+  border-top-color: rgba(255, 255, 255, .1);
+  color: #9db3ac;
+}
+
+:root[data-theme="dark"] .vc-sess {
+  background: #1d302b;
+  border-color: rgba(255, 255, 255, .1);
+  color: #e8f1ee;
+}
+
+:root[data-theme="dark"] .vc-sess:hover {
+  background: #24403a;
+}
+
+:root[data-theme="dark"] .vc-sess small,
+:root[data-theme="dark"] .vc-none {
+  color: #9db3ac;
+}
+
+:root[data-theme="dark"] .vc-lh b {
+  color: #e8f1ee;
+}
+
+:root[data-theme="dark"] .vc-pill.open {
+  background: #134230;
+  color: #7be0b0;
+}
+
+:root[data-theme="dark"] .vc-pill.closed {
+  background: #1d3a35;
+  color: #9db3ac;
+}

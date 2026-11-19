@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#208c5d"/>
+      <stop offset="1" stop-color="#0e5e45"/>
+    </linearGradient>
+    <linearGradient id="hat" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#f8d57c"/>
+      <stop offset="0.5" stop-color="#f1b650"/>
+      <stop offset="1" stop-color="#dc9438"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e0a23f"/>
+      <stop offset="1" stop-color="#b9761f"/>
+    </linearGradient>
+    <clipPath id="body"><path d="M96 208 L316 92 Q336 82 350 100 L446 316 Q270 346 96 208Z"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- thân nón (mặt ngoài) -->
+  <path d="M96 208 L316 92 Q336 82 350 100 L446 316 Q270 346 96 208Z" fill="url(#hat)"/>
+  <!-- mặt trong vành nón, thấy qua mép -->
+  <path d="M96 208 Q270 346 446 316 Q420 332 350 338 Q200 344 96 208Z" fill="url(#under)"/>
+  <!-- đường đan nón -->
+  <g clip-path="url(#body)" stroke="#c07a26" stroke-opacity=".34" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M334 90 Q244 190 140 236"/>
+    <path d="M338 96 Q276 206 206 268"/>
+    <path d="M344 104 Q318 220 270 296"/>
+    <path d="M350 118 Q352 230 332 312"/>
+    <path d="M352 140 Q386 240 390 318"/>
+  </g>
+  <!-- ánh sáng mép trái -->
+  <path d="M112 204 L314 100 Q326 94 334 98 Q236 156 134 214Z" fill="#fff" fill-opacity=".3"/>
+  <!-- chấm đỏ -->
+  <circle cx="355" cy="216" r="15" fill="#d9552c"/>
+  <circle cx="350" cy="211" r="5" fill="#fff" fill-opacity=".35"/>
+  <!-- quai nón -->
+  <path d="M170 232 Q162 272 184 300" fill="none" stroke="#9bd8e6" stroke-width="7" stroke-linecap="round"/>
+  <path d="M372 296 Q380 322 358 342" fill="none" stroke="#9bd8e6" stroke-width="7" stroke-linecap="round"/>
+  <!-- sóng nước -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M60 326 Q112 290 164 320 T270 324 T376 330 T464 308" stroke="#73bdd8" stroke-width="12"/>
+    <path d="M42 372 Q100 336 158 368 T270 370 T382 372 T470 346" stroke="#5aa9cb" stroke-opacity=".9" stroke-width="12"/>
+    <path d="M94 414 Q148 388 202 412 T306 414 T402 400" stroke="#4194ba" stroke-opacity=".8" stroke-width="11"/>
+  </g>
+</svg>

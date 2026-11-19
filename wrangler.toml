@@ -1,0 +1,30 @@
+name = "vietduky1"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+# Giao diện tĩnh nằm trong public/. Các đường dẫn /api/* chạy qua Worker trước.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/p/*"]
+
+# D1 đã tạo sẵn (vietduky).
+[[d1_databases]]
+binding = "DB"
+database_name = "vietduky"
+database_id = "33961d32-9c74-4c16-b136-8b15837a18ef"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["0 20 * * *"]   # chạy hằng ngày (UTC): xoá hẳn tài khoản quá 30 ngày chờ xoá
+
+[vars]
+EMAIL_NAME = "Việt Du Ký"                   # tên người gửi hiện trong hộp thư khách
+EMAIL_FROM = "hello@vietduky.indevs.in"     # địa chỉ khách thấy ở ô "Từ" (phải thêm trước trong Gmail > "Gửi thư với tư cách"; xoá dòng này nếu chưa làm)
+SITE_URL = "https://vietduky.indevs.in"     # địa chỉ website dùng trong liên kết xác minh
+IMAGEKIT_PUBLIC_KEY = "public_eWQXSPCFyJDDNJHKPlvOcMY1ugY="       # khoá công khai (an toàn khi để ở đây)
+IMAGEKIT_URL_ENDPOINT = "https://ik.imagekit.io/lkwjtsw8o"
+TURNSTILE_HOSTNAMES = "vietduky.indevs.in"
+GOOGLE_CLIENT_ID = "717807708737-ss0s4ru9g1k88f838fbcdkb8i7mpkmri.apps.googleusercontent.com"   # Client ID đăng nhập Google (công khai, an toàn khi để ở đây)
+# MFA_KEY: (tuỳ chọn) khoá mã hoá bí mật Google Authenticator, đặt bằng `wrangler secret put MFA_KEY`. Không đặt thì dùng SESSION_SECRET / ADMIN_PASSWORD.
+# ADMIN_SESSION_HOURS = "168"                 # thời hạn phiên quản trị (giờ, 1–720). Mặc định 168 = 7 ngày, tự gia hạn khi đang dùng

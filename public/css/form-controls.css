@@ -1,0 +1,621 @@
+/* Dropdown + chọn ngày tuỳ biến: MỘT bộ giao diện dùng chung cho trang khách và trang quản trị.
+   Màu lấy từ biến --vui-* bên dưới (sáng / tối). Không dùng vòng sáng (box-shadow/outline) khi bấm. */
+:root {
+  --vui-bg: #fff;
+  --vui-field: #fff;
+  --vui-ink: #14231f;
+  --vui-mut: #5b6e68;
+  --vui-line: #d3e0db;
+  --vui-hover: #eef5f2;
+  --vui-on-bg: #dcede7;
+  --vui-on-ink: #0c3b36;
+  --vui-accent: #145a50;
+  --vui-accent-ink: #fff;
+  --vui-gold: #ffcd00;
+  --vui-dis: #b4c0bb;
+  --vui-sh: 0 14px 36px -12px rgba(12, 59, 54, .35);
+}
+
+:root[data-theme="dark"] {
+  --vui-bg: #162b26;
+  --vui-field: #13271f;
+  --vui-ink: #e8f1ee;
+  --vui-mut: #9db3ac;
+  --vui-line: rgba(255, 255, 255, .18);
+  --vui-hover: #1f3a33;
+  --vui-on-bg: #24493f;
+  --vui-on-ink: #8fd8c7;
+  --vui-accent: #8fd8c7;
+  --vui-accent-ink: #0b1916;
+  --vui-dis: #4b625b;
+  --vui-sh: 0 16px 40px -12px rgba(0, 0, 0, .75);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --vui-bg: #162b26;
+    --vui-field: #13271f;
+    --vui-ink: #e8f1ee;
+    --vui-mut: #9db3ac;
+    --vui-line: rgba(255, 255, 255, .18);
+    --vui-hover: #1f3a33;
+    --vui-on-bg: #24493f;
+    --vui-on-ink: #8fd8c7;
+    --vui-accent: #8fd8c7;
+    --vui-accent-ink: #0b1916;
+    --vui-dis: #4b625b;
+    --vui-sh: 0 16px 40px -12px rgba(0, 0, 0, .75);
+  }
+}
+
+.vui-native {
+  display: none !important;
+}
+
+/* ---- nút mở ---- */
+.vui-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--vui-line);
+  border-radius: 12px;
+  background: var(--vui-field);
+  color: var(--vui-ink);
+  font: 400 1rem/1.3 'Be Vietnam Pro', system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s, background .2s;
+}
+
+.vui-btn:hover {
+  border-color: var(--vui-accent);
+  box-shadow: none;
+  transform: none;
+}
+
+.vui-btn:focus,
+.vui-btn:focus-visible,
+.vui-btn:active {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.vui-btn:focus-visible,
+.vui-btn.open {
+  border-color: var(--vui-accent);
+}
+
+.vui-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.vui-btn .vui-t {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+  min-height: 0;
+  padding: 0;
+  color: inherit;
+}
+
+.vui-btn .vui-t.vui-ph {
+  color: var(--vui-mut);
+}
+
+.vui-btn .ms {
+  font-size: 20px;
+  flex: none;
+  color: var(--vui-mut);
+  transition: transform .25s;
+}
+
+.vui-btn.open .ms:last-child {
+  transform: rotate(180deg);
+}
+
+/* ô trong thanh tìm kiếm trang chủ: không viền, hoà vào nền */
+.fld .vui-btn {
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  min-height: 0;
+  border-radius: 0;
+  font-weight: 500;
+}
+
+.fld .vui-btn .ms {
+  color: var(--vui-ink);
+  font-size: 20px;
+}
+
+.fld .vui-btn:hover {
+  border: 0;
+}
+
+/* ô trong form liên hệ / đánh giá: cao bằng các ô nhập */
+form.ct .vui-btn {
+  min-height: 56px;
+  padding: 15px 18px;
+  border: 2px solid var(--vui-line);
+  border-radius: 14px;
+}
+
+form.ct .vui-btn:hover,
+form.ct .vui-btn.open,
+form.ct .vui-btn:focus-visible {
+  border-color: var(--vui-accent);
+}
+
+/* trang quản trị */
+.toolbar .vui-btn {
+  min-height: 42px;
+  background: var(--surface2, var(--vui-field));
+  border-color: transparent;
+}
+
+.toolbar .vui-btn:hover,
+.toolbar .vui-btn.open {
+  border-color: var(--vui-accent);
+}
+
+.toolbar .vui-btn {
+  width: auto;
+  min-width: 150px;
+}
+
+.tpl-row .vui-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.perm-row .vui-btn {
+  min-height: 38px;
+}
+
+.drawer .vui-btn,
+.field .vui-btn {
+  background: var(--surface2, var(--vui-field));
+}
+
+/* ---- bảng chọn nổi ---- */
+.vui-pop {
+  position: fixed;
+  z-index: 3000;
+  background: var(--vui-bg);
+  color: var(--vui-ink);
+  border: 1px solid var(--vui-line);
+  border-radius: 16px;
+  box-shadow: var(--vui-sh);
+  padding: 6px;
+  transform-origin: top left;
+  animation: vuiIn .16s ease-out both;
+  font: 400 .92rem 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.vui-pop.up {
+  transform-origin: bottom left;
+}
+
+@keyframes vuiIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.vui-pop button {
+  outline: 0 !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vui-list {
+  max-height: min(320px, 55vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.vui-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--vui-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transform: none;
+  min-height: 0;
+}
+
+.vui-opt:hover,
+.vui-opt:focus-visible {
+  background: var(--vui-hover);
+}
+
+.vui-opt.on {
+  background: var(--vui-on-bg);
+  color: var(--vui-on-ink);
+  font-weight: 600;
+}
+
+.vui-opt .ms {
+  font-size: 20px;
+  color: inherit;
+}
+
+.vui-cal {
+  padding: 12px;
+  width: 288px;
+}
+
+.vui-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: Fraunces, serif;
+  color: var(--vui-ink);
+}
+
+.vui-h b {
+  color: inherit;
+}
+
+.vui-nav {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--vui-hover);
+  color: var(--vui-on-ink);
+  cursor: pointer;
+  padding: 0;
+  min-height: 0;
+}
+
+.vui-nav .ms {
+  color: inherit;
+  font-size: 20px;
+}
+
+.vui-nav:hover:not(:disabled) {
+  background: var(--vui-on-bg);
+}
+
+.vui-nav:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.vui-g {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.vui-w {
+  font-size: .72rem;
+  color: var(--vui-mut);
+  padding: 4px 0;
+  font-weight: 600;
+}
+
+.vui-d {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--vui-ink);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  min-height: 0;
+  transform: none;
+}
+
+.vui-d:hover:not(:disabled) {
+  background: var(--vui-hover);
+}
+
+.vui-d.td {
+  box-shadow: inset 0 0 0 1.5px var(--vui-gold) !important;
+}
+
+.vui-d.on {
+  background: var(--vui-accent);
+  color: var(--vui-accent-ink);
+  font-weight: 600;
+}
+
+.vui-d:disabled {
+  color: var(--vui-dis);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.vui-f {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vui-line);
+}
+
+.vui-link {
+  border: 0;
+  background: none;
+  color: var(--vui-accent);
+  font: 600 .85rem 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  min-height: 0;
+  transform: none;
+}
+
+.vui-link:hover {
+  background: var(--vui-hover);
+}
+
+/* ô tìm kiếm trang chủ chứa dropdown/ngày: không viền vàng, không nền/độ nổi khi bấm */
+.fld:has(.vui-btn):focus-within,
+.fld:has(.vui-btn.open) {
+  background-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.fld:has(.vui-btn):hover {
+  background-color: var(--vui-hover);
+}
+
+/* =====================================================================
+   Bỏ nháy xanh khi bấm + checkbox / công tắc tuỳ biến
+   ===================================================================== */
+:root {
+  --vui-bd: #8fa39c;
+  --vui-tint: rgba(20, 90, 80, .08);
+  --vui-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.4 8.6l3.1 3.1 6.1-7.4'/%3E%3C/svg%3E");
+  --vui-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] {
+  --vui-bd: rgba(255, 255, 255, .38);
+  --vui-tint: rgba(143, 216, 199, .1);
+  --vui-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230b1916' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.4 8.6l3.1 3.1 6.1-7.4'/%3E%3C/svg%3E");
+  --vui-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230b1916' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --vui-bd: rgba(255, 255, 255, .38);
+    --vui-tint: rgba(143, 216, 199, .1);
+    --vui-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230b1916' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.4 8.6l3.1 3.1 6.1-7.4'/%3E%3C/svg%3E");
+    --vui-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230b1916' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---- Không còn ô xanh nháy khi chạm / bấm; không bôi đen chữ trên nút ---- */
+html,
+body,
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+a,
+button,
+summary,
+label,
+select,
+input,
+textarea,
+[role="button"],
+[tabindex] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button,
+[role="button"],
+summary,
+label.chk,
+.btn,
+.icon-btn,
+.chip,
+.nav a,
+.ghost,
+.seg button,
+.ms,
+th button,
+.vui-opt {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Vòng viền chỉ hiện khi dùng bàn phím (Tab), không hiện khi chuột / ngón tay bấm */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+summary:focus:not(:focus-visible),
+[tabindex]:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: 0;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+/* ---- Checkbox tuỳ biến ---- */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  position: relative;
+  vertical-align: middle;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--vui-bd);
+  border-radius: 7px;
+  background-color: var(--vui-field);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0 0;
+  cursor: pointer;
+  box-shadow: none;
+  accent-color: var(--vui-accent);
+  transition: background-color .18s, border-color .18s, background-size .22s cubic-bezier(.3, 1.7, .5, 1), transform .15s;
+}
+
+input[type="checkbox"]:hover:not(:disabled) {
+  border-color: var(--vui-accent);
+}
+
+input[type="checkbox"]:checked,
+input[type="checkbox"]:indeterminate {
+  background-color: var(--vui-accent);
+  border-color: var(--vui-accent);
+  background-size: 76% 76%;
+}
+
+input[type="checkbox"]:checked {
+  background-image: var(--vui-tick);
+}
+
+input[type="checkbox"]:indeterminate:not(:checked) {
+  background-image: var(--vui-dash);
+}
+
+input[type="checkbox"]:active:not(:disabled) {
+  transform: scale(.86);
+}
+
+input[type="checkbox"]:focus {
+  box-shadow: none;
+  outline: 0;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--vui-gold);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"]:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Nhãn kèm checkbox: cả dòng là vùng bấm */
+label.chk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--vui-line);
+  border-radius: 12px;
+  cursor: pointer;
+  line-height: 1.35;
+  transition: background-color .15s, border-color .15s;
+}
+
+label.chk:hover {
+  background: var(--vui-hover);
+}
+
+label.chk:has(input:checked) {
+  border-color: var(--vui-accent);
+  background: var(--vui-tint);
+}
+
+label.chk:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: .75;
+}
+
+label.chk > span {
+  flex: 1;
+  min-width: 0;
+}
+
+label.chk small {
+  display: block;
+  color: var(--vui-mut);
+  font-weight: 400;
+  font-size: .84em;
+  margin-top: 2px;
+}
+
+/* ---- Công tắc gạt (label.chk.tgl) ---- */
+label.chk.tgl {
+  --k: var(--vui-mut);
+}
+
+label.chk.tgl input[type="checkbox"] {
+  width: 44px;
+  height: 26px;
+  border-radius: 99px;
+  border-width: 0;
+  background-color: var(--vui-bd);
+  background-image: radial-gradient(circle closest-side, #fff 96%, transparent 100%);
+  background-size: 20px 20px;
+  background-position: 3px center;
+  transition: background-color .2s, background-position .22s cubic-bezier(.3, 1.4, .5, 1), transform .15s;
+}
+
+label.chk.tgl input[type="checkbox"]:checked {
+  background-color: var(--vui-accent);
+  background-image: radial-gradient(circle closest-side, var(--vui-accent-ink) 96%, transparent 100%);
+  background-size: 20px 20px;
+  background-position: calc(100% - 3px) center;
+}
+
+label.chk.tgl input[type="checkbox"]:active:not(:disabled) {
+  transform: scale(.94);
+}
+
+.vui-grp {
+  padding: 10px 12px 4px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .6;
+}
+
+.vui-opt.in-grp {
+  padding-left: 18px;
+}
+
+/* Danh sách thả xuống không rộng hơn ô chọn: chữ dài thì xuống dòng thay vì làm tràn */
+.vui-pop {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.vui-opt {
+  overflow-wrap: anywhere;
+  text-align: left;
+}
