@@ -5175,18 +5175,30 @@
       };
     };
     var tools = [
-      ['H', 'Tiêu đề', line('## ')], ['B', 'Đậm', wrap('**', '**', 'đậm')], ['I', 'Nghiêng', wrap('*', '*', 'nghiêng')], ['S', 'Gạch ngang', wrap('~~', '~~', 'gạch')],
-      ['==', 'Tô sáng', wrap('==', '==', 'nổi bật')], ['x²', 'Chỉ số trên', wrap('^', '^', '2')], ['x₂', 'Chỉ số dưới', wrap('~', '~', '2')],
-      ['❝', 'Trích dẫn', line('> ')], ['•', 'Danh sách', line('- ')], ['1.', 'Danh sách số', line('1. ')], ['☑', 'Việc cần làm', line('- [ ] ')],
-      ['`', 'Code', wrap('`', '`', 'code')], ['{ }', 'Khối code', block('```\ncode\n```\n')], ['🔗', 'Liên kết', wrap('[', '](https://)', 'văn bản')],
-      ['▦', 'Bảng', block('| Cột 1 | Cột 2 |\n|:--|--:|\n| A | B |\n')], ['―', 'Đường kẻ', block('\n---\n')], ['[^]', 'Chú thích', function () {
+      ['title', 'Tiêu đề', line('## ')],
+      ['format_bold', 'Đậm', wrap('**', '**', 'đậm')],
+      ['format_italic', 'Nghiêng', wrap('*', '*', 'nghiêng')],
+      ['format_strikethrough', 'Gạch ngang', wrap('~~', '~~', 'gạch')],
+      ['ink_highlighter', 'Tô sáng', wrap('==', '==', 'nổi bật')],
+      ['superscript', 'Chỉ số trên', wrap('^', '^', '2')],
+      ['subscript', 'Chỉ số dưới', wrap('~', '~', '2')],
+      ['format_quote', 'Trích dẫn', line('> ')],
+      ['format_list_bulleted', 'Danh sách', line('- ')],
+      ['format_list_numbered', 'Danh sách số', line('1. ')],
+      ['checklist', 'Việc cần làm', line('- [ ] ')],
+      ['code', 'Code', wrap('`', '`', 'code')],
+      ['data_object', 'Khối code', block('```\ncode\n```\n')],
+      ['link', 'Liên kết', wrap('[', '](https://)', 'văn bản')],
+      ['table', 'Bảng', block('| Cột 1 | Cột 2 |\n|:--|--:|\n| A | B |\n')],
+      ['horizontal_rule', 'Đường kẻ', block('\n---\n')],
+      ['notes', 'Chú thích', function () {
         wrap('[^1]', '', '')();
         ta.value += '\n\n[^1]: Nội dung chú thích';
       }]
     ];
     bar.innerHTML = tools.map(function (t, i) {
-      return '<button type="button" data-t="' + i + '" title="' + t[1] + '" aria-label="' + t[1] + '">' + t[0] + '</button>';
-    }).join('') + '<button type="button" data-t="img" title="Chèn ảnh" aria-label="Chèn ảnh">🖼</button><span class="md-sp"></span><button type="button" id="inPv" aria-pressed="false"><span class="ms">visibility</span> Xem trước</button><input type="file" id="inMdFile" accept="image/*" hidden>';
+      return '<button type="button" data-t="' + i + '" title="' + t[1] + '" aria-label="' + t[1] + '"><span class="ms">' + t[0] + '</span></button>';
+    }).join('') + '<button type="button" data-t="img" title="Chèn ảnh" aria-label="Chèn ảnh"><span class="ms">image</span></button><span class="md-sp"></span><button type="button" id="inPv" aria-pressed="false"><span class="ms">visibility</span> Xem trước</button><input type="file" id="inMdFile" accept="image/*" hidden>';
     bar.onclick = function (e) {
       var b = e.target.closest('button');
       if (!b || preview) {

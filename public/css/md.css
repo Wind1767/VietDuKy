@@ -58,6 +58,15 @@
   font: 600 13px inherit;
   font-family: inherit;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.md-bar button .ms {
+  font-size: 20px;
+  line-height: 1;
 }
 
 .md-bar button:hover,
