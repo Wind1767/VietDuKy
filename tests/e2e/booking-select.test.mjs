@@ -1,4 +1,4 @@
-/* Trang đặt tour: ô chọn tour chia nhóm "Điểm đến" / "Tour" rõ ràng. */
+/* Trang đặt tour: ô chọn lấy danh sách tour đang bán (gồm cả tour tự tạo), không lấy danh sách điểm đến. */
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadPlaywright, staticServer, mockApi, openPage } from '../helpers/browser.mjs';
@@ -49,17 +49,16 @@ async function openDestPop(page) {
   throw new Error('Không mở được danh sách điểm đến');
 }
 
-test('Ô chọn có 2 nhóm: Điểm đến và Tour', { skip }, async () => {
+test('Ô chọn chỉ có nhóm Tour, gồm mọi tour đang bán', { skip }, async () => {
   const groups = await ctx.page.$$eval('select[name="destination"] optgroup', (g) => g.map((x) => ({ label: x.label, n: x.children.length })));
-  assert.deepEqual(groups.map((g) => g.label), ['Điểm đến', 'Tour']);
-  assert.equal(groups[0].n, 6);
-  assert.equal(groups[1].n, 5, 'mọi tour đang bán đều có trong nhóm Tour');
+  assert.deepEqual(groups.map((g) => g.label), ['Tour']);
+  assert.equal(groups[0].n, 5, 'mọi tour đang bán (kể cả tour tự tạo) đều có trong danh sách');
 });
 
 test('Danh sách thả xuống hiện tiêu đề nhóm và chọn được tour', { skip }, async () => {
   await openDestPop(ctx.page);
   const heads = await ctx.page.$$eval('.vui-pop .vui-grp', (e) => e.map((x) => x.textContent.trim()));
-  assert.deepEqual(heads, ['Điểm đến', 'Tour']);
+  assert.deepEqual(heads, ['Tour']);
   await ctx.page.locator('.vui-pop .vui-opt', { hasText: 'Tour tự tạo số 1' }).click();
   assert.equal(await ctx.page.$eval('select[name="destination"]', (s) => s.value), 'Tour tự tạo số 1');
 });

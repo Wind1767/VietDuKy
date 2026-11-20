@@ -798,8 +798,15 @@
     window.vdkApplyParams = function () {
       ['destination', 'date', 'people'].forEach(function (k) {
         var f = contactForm.elements[k];
-        if (f && params.get(k)) {
-          f.value = params.get(k);
+        var v = params.get(k);
+        if (f && v) {
+          if (k === 'destination' && window.vdkDestTour && window.vdkDestTour[v] && f.options) {
+            var has = Array.prototype.some.call(f.options, function (o) {
+              return o.value === v;
+            });
+            v = has ? v : window.vdkDestTour[v];
+          }
+          f.value = v;
         }
       });
     };
@@ -1026,44 +1033,45 @@
           }
         });
       }
-      /* ô chọn điểm đến: điểm đến đang mở + tour khác */
+      /* ô chọn: danh sách tour đang bán (gồm cả tour tự tạo trong trang quản trị).
+         Không tải được tour thì giữ nguyên danh sách điểm đến có sẵn trong HTML. */
       if (destSelects.length) {
-        var names = ds ? ds.map(function (d) {
-          return d.name;
-        }) : ['Vịnh Hạ Long', 'Sa Pa', 'Hội An', 'Huế', 'Đà Lạt', 'Phú Quốc'];
-        var seen = {};
-        names.forEach(function (x) {
-          seen[x] = 1;
-        });
-        var tourNames = (ts || []).filter(function (t) {
-          return t.active && !seen[t.name];
-        });
-        destSelects.forEach(function (sel) {
-          var cur = sel.value;
-          while (sel.options.length > 1 || sel.children.length > 1) {
-            sel.removeChild(sel.lastChild);
+        var seenTour = {};
+        var tourNames = [];
+        var destTour = {};
+        (ts || []).forEach(function (t) {
+          if (!t.active || !t.name) {
+            return;
           }
-          var mk = function (label, list) {
-            if (!list.length) {
-              return;
+          if (t.destination && !destTour[t.destination]) {
+            destTour[t.destination] = t.name;
+          }
+          if (!seenTour[t.name]) {
+            seenTour[t.name] = 1;
+            tourNames.push(t.name);
+          }
+        });
+        /* link cũ dạng ?destination=Sa Pa (thẻ điểm đến ở trang chủ) → chọn tour của điểm đó */
+        window.vdkDestTour = destTour;
+        if (tourNames.length) {
+          destSelects.forEach(function (sel) {
+            var cur = sel.value;
+            while (sel.options.length > 1 || sel.children.length > 1) {
+              sel.removeChild(sel.lastChild);
             }
             var g = document.createElement('optgroup');
-            g.label = label;
-            list.forEach(function (n) {
+            g.label = 'Tour';
+            tourNames.forEach(function (n) {
               var o = document.createElement('option');
               o.value = n;
               o.textContent = n;
               g.appendChild(o);
             });
             sel.appendChild(g);
-          };
-          mk('Điểm đến', names);
-          mk('Tour', tourNames.map(function (t) {
-            return t.name;
-          }));
-          sel.value = cur;
-          sel.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+            sel.value = cur;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        }
         if (window.vdkApplyParams) {
           window.vdkApplyParams();
         }

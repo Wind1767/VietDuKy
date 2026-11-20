@@ -412,6 +412,7 @@ export async function estimateAmount(env, row) {
   if (!row.destination || !row.people) {
     return null;
   }
-  const t = await env.DB.prepare('SELECT price FROM tours WHERE destination = ?1 AND price > 0 ORDER BY active DESC, sort ASC LIMIT 1').bind(row.destination).first();
+  /* đơn có thể ghi tên tour (tour tự tạo) hoặc tên điểm đến: ưu tiên đúng tên tour */
+  const t = await env.DB.prepare('SELECT price FROM tours WHERE (name = ?1 OR destination = ?1) AND price > 0 ORDER BY (name = ?1) DESC, active DESC, sort ASC LIMIT 1').bind(row.destination).first();
   return t ? t.price * row.people : null;
 }
