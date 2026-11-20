@@ -19,6 +19,31 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       localStorage.setItem(k, v);
     } catch (e) {}
   }
+  /* Chữ hiển thị của một ô / phần tử, bỏ qua icon Material (.ms). Icon là chữ ligature nên innerText sẽ lấy luôn
+  tên icon ("edit", "check_circle"...) khi sao chép, xuất CSV, tìm kiếm hay sắp xếp. */
+  function cellText(root) {
+    var out = [];
+    (function walk(n) {
+      if (n.nodeType === 3) {
+        out.push(n.nodeValue);
+        return;
+      }
+      if (n.nodeType !== 1 || n.hidden || n.style.display === 'none' || /^(SCRIPT|STYLE|TEMPLATE)$/.test(n.tagName) || n.classList.contains('ms')) {
+        return;
+      }
+      if (n.tagName === 'SELECT') { // ô chọn: lấy giá trị đang chọn, không lấy mọi lựa chọn
+        out.push(n.selectedOptions.length ? ' ' + n.selectedOptions[0].textContent + ' ' : '');
+        return;
+      }
+      var block = /^(DIV|P|LI|UL|OL|BR|H[1-6]|TR|TD|TH)$/.test(n.tagName);
+      out.push(block ? ' ' : '');
+      for (var c = n.firstChild; c; c = c.nextSibling) {
+        walk(c);
+      }
+      out.push(block ? ' ' : '');
+    })(root);
+    return out.join('').replace(/\s+/g, ' ').trim();
+  }
   function toast(msg) {
     var t = $('toast');
     if (!t) {
@@ -298,7 +323,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
     if (!td || e.target.closest('a, button, input, select, textarea, label')) {
       return;
     }
-    var text = (td.innerText || '').replace(/\s+/g, ' ').trim();
+    var text = cellText(td);
     if (!text || text.length > 300 || !navigator.clipboard) {
       return;
     }
@@ -326,7 +351,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       var cells = [].slice.call(tr.children).filter(function (c) {
         return c.style.display !== 'none';
       }).map(function (c) {
-        return csvCell(c.innerText || '');
+        return csvCell(cellText(c));
       });
       if (cells.some(function (c) {
         return c;
@@ -368,7 +393,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       function apply() {
         var q = input.value.trim().toLowerCase(), shown = 0, rows = table.tBodies[0].rows;
         for (var i = 0; i < rows.length; i++) {
-          var ok = !q || (rows[i].innerText || '').toLowerCase().indexOf(q) > -1;
+          var ok = !q || cellText(rows[i]).toLowerCase().indexOf(q) > -1;
           rows[i].hidden = !ok;
           shown += ok ? 1 : 0;
         }
@@ -396,7 +421,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
             if (r.hidden || !r.cells[ci]) {
               return;
             }
-            var t = (r.cells[ci].innerText || '').trim();
+            var t = cellText(r.cells[ci]);
             if (!t || t === '–' || t === '-') {
               return;
             }
@@ -409,7 +434,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
             }
           });
           if (!bad && n > 1) {
-            out.push('<span>' + (th.innerText || '').trim() + ': <b>' + tot.toLocaleString('vi-VN') +
+            out.push('<span>' + cellText(th) + ': <b>' + tot.toLocaleString('vi-VN') +
               '</b></span>');
           }
         });
@@ -426,7 +451,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       /* sắp xếp khi bấm tiêu đề cột (trong trang đang xem) */
       if (table.tHead) {
         [].forEach.call(table.tHead.rows[0].cells, function (th, ci) {
-          if (th.querySelector('button, a, input') || !(th.innerText || '').trim() || th.getAttribute('data-nosort') !== null) {
+          if (th.querySelector('button, a, input') || !cellText(th) || th.getAttribute('data-nosort') !== null) {
             return;
           }
           th.classList.add('tt-sortable');
@@ -441,7 +466,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
             th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
             var rows = [].slice.call(table.tBodies[0].rows);
             rows.sort(function (a, b) {
-              var x = (a.cells[ci] ? a.cells[ci].innerText : '').trim(), y = (b.cells[ci] ? b.cells[ci].innerText : '').trim();
+              var x = a.cells[ci] ? cellText(a.cells[ci]) : '', y = b.cells[ci] ? cellText(b.cells[ci]) : '';
               var nx = numOf(x), ny = numOf(y);
               if (nx !== null && ny !== null) {
                 return (nx - ny) * dir;
@@ -466,7 +491,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       var menu = bar.querySelector('.tt-cols-menu'), colsBtn = bar.querySelector('.tt-cols');
       if (table.tHead) {
         [].forEach.call(table.tHead.rows[0].cells, function (th, ci) {
-          var name = (th.innerText || '').trim();
+          var name = cellText(th);
           if (!name) {
             return;
           }
@@ -502,7 +527,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
           var c = [].filter.call(tr.cells, function (x) {
             return x.style.display !== 'none';
           }).map(function (x) {
-            return (x.innerText || '').replace(/\s+/g, ' ').trim();
+            return cellText(x);
           });
           if (c.some(Boolean)) {
             rows.push(c.join('\t'));
