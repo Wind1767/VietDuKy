@@ -4,6 +4,7 @@ import { handleAuth, currentUser, USER_SESSIONS_SCHEMA } from './customer-auth.j
 import { deviceInfo } from './session-device.js';
 import { handleChat, adminChat, adminFaq } from './chat.js';
 import { handleReviews, adminReviews } from './reviews.js';
+import { BUG_SCHEMA, publicBugReport, adminBugs } from './bug-reports.js';
 import { adminAccounts } from './customer-accounts.js';
 import { purgeDeletedUsers } from './privacy.js';
 import { adminTools, publicTours, estimateAmount, TOURS_SCHEMA, seedTours } from './tours.js';
@@ -61,7 +62,8 @@ const LIMITS = {
   rvote: { max: 60, windowS: 3600 }, // 60 lần bấm "hữu ích" / giờ / khách
   forgot: { max: 3, windowS: 3600 }, // 3 lần quên mật khẩu / giờ / IP và / email
   fav: { max: 120, windowS: 300 }, // 120 lần thích / bỏ thích / 5 phút / IP
-  coupon: { max: 20, windowS: 600 } // 20 lần kiểm tra mã giảm giá / 10 phút / IP
+  coupon: { max: 20, windowS: 600 }, // 20 lần kiểm tra mã giảm giá / 10 phút / IP
+  bug: { max: 5, windowS: 3600 } // 5 báo lỗi / giờ / IP
 };
 
 export const SCHEMA = [
@@ -86,6 +88,7 @@ export const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS review_votes (review_id INTEGER NOT NULL, user_id INTEGER NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (review_id, user_id))',
   'CREATE INDEX IF NOT EXISTS idx_review_votes_user ON review_votes(user_id)',
   ...TOURS_SCHEMA,
+  ...BUG_SCHEMA,
   ...USER_SESSIONS_SCHEMA,
   ...IK_SCHEMA,
   ...ADMINS_SCHEMA,
@@ -282,6 +285,9 @@ async function route(request, env, url, ctx) {
   if (pathname === '/api/booking' && method === 'POST') {
     return createBooking(request, env, ip, helpers);
   }
+  if (pathname === '/api/bug-report' && method === 'POST') {
+    return publicBugReport(request, env, ip, helpers);
+  }
   if (pathname === '/api/tours' && method === 'GET') {
     return publicTours(env, helpers);
   }
@@ -347,6 +353,9 @@ async function route(request, env, url, ctx) {
   }
   if (pathname === '/api/admin/review-count' || pathname.startsWith('/api/admin/reviews')) {
     return adminReviews(request, env, url, helpers);
+  }
+  if (pathname === '/api/admin/bug-count' || pathname.startsWith('/api/admin/bugs')) {
+    return adminBugs(request, env, url, helpers);
   }
   if (pathname === '/api/admin/chat-unread' || pathname.startsWith('/api/admin/conversations')) {
     return adminChat(request, env, url, helpers);

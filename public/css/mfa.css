@@ -298,3 +298,25 @@
 .mfa-link {
   justify-self: start;
 }
+
+/* Chống chữ bị phóng to rồi co lại sau khi nội dung nạp xong trên điện thoại (font boosting) */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Nội dung 2FA được vẽ lại sau khi tải xong: không chạy hiệu ứng trượt/mờ nữa để khỏi nhảy kích thước */
+.priv .mfa-sec,
+.priv .mfa-list li {
+  animation: none;
+}
+
+#mfaBox {
+  min-height: 120px;
+}
+
+.mfa-btn,
+.mfa-input {
+  box-sizing: border-box;
+  max-width: 100%;
+}

@@ -30,6 +30,7 @@ export const GROUP_LABELS = {
   chat: 'Tin nhắn',
   bot: 'Trả lời tự động',
   reviews: 'Đánh giá của khách (duyệt, trả lời, ẩn)',
+  bugs: 'Báo lỗi website từ khách (xem, đổi trạng thái, xoá)',
   accounts: 'Tài khoản khách (tạo, sửa, khoá)',
   customers: 'Khách hàng',
   departures: 'Lịch khởi hành',
@@ -69,6 +70,7 @@ const MATRIX = {
     chat: RW,
     bot: RW,
     reviews: RW,
+    bugs: RW,
     accounts: RW,
     customers: R,
     departures: R,
@@ -95,6 +97,7 @@ const MATRIX = {
     chat: RW,
     bot: R,
     reviews: R,
+    bugs: R,
     customers: R,
     departures: R,
     tours: R,
@@ -307,6 +310,9 @@ export function groupOf(p) {
   }
   if (p === '/api/admin/review-count' || p.startsWith('/api/admin/reviews')) {
     return 'reviews';
+  }
+  if (p === '/api/admin/bug-count' || p.startsWith('/api/admin/bugs')) {
+    return 'bugs';
   }
   if (p === '/api/admin/chat-unread' || p.startsWith('/api/admin/conversations')) {
     return 'chat';

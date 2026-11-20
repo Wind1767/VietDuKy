@@ -116,7 +116,7 @@
     '<li><span class="ms">mail</span><span data-site="contact_email">buivanphong7191@gmail.com</span></li>' +
     '<li><span class="ms">location_on</span><span data-site="address">Phan Thiết, Lâm Đồng</span></li>' +
     '</ul></div>' +
-    '</div><small data-site="copyright">© 2026 Việt Du Ký. Bảo lưu mọi quyền.</small></div></footer>' +
+    '</div><p class="bugrow"><a class="bugbtn" href="/report?from=' + encodeURIComponent(location.pathname + location.search) + '" id="bugBtn"><span class="ms">warning</span>Báo lỗi website</a></p><small data-site="copyright">© 2026 Việt Du Ký. Bảo lưu mọi quyền.</small></div></footer>' +
     '<button class="top" id="top" aria-label="Lên đầu trang"><span class="ms">arrow_upward</span></button>' +
     '<div class="toast" id="toast"></div>';
 

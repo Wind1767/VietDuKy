@@ -510,12 +510,13 @@
 
   /* ---------- Điều hướng ---------- */
   var view = null;
-  var VIEWS = ['bookings', 'messages', 'faq', 'reviews', 'accounts', 'customers', 'departures', 'tours', 'templates', 'reports', 'activity', 'admins', 'access', 'emails', 'site', 'layout', 'content', 'destinations', 'coupons', 'data', 'mymfa'];
+  var VIEWS = ['bookings', 'messages', 'faq', 'reviews', 'bugs', 'accounts', 'customers', 'departures', 'tours', 'templates', 'reports', 'activity', 'admins', 'access', 'emails', 'site', 'layout', 'content', 'destinations', 'coupons', 'data', 'mymfa'];
   var PERM = {
     bookings: 'bookings',
     messages: 'chat',
     faq: 'bot',
     reviews: 'reviews',
+    bugs: 'bugs',
     accounts: 'accounts',
     customers: 'customers',
     departures: 'departures',
@@ -707,6 +708,8 @@
       renderFaq();
     } else if (name === 'reviews') {
       renderReviews();
+    } else if (name === 'bugs') {
+      renderBugs();
     } else if (name === 'accounts') {
       renderAccounts();
     } else if (name === 'customers') {
@@ -4478,6 +4481,11 @@
     api('/review-count').then(function (r) {
       setRevBadge(r.pending);
     }).catch(function () {});
+    if (can('bugs')) {
+      api('/bug-count').then(function (r) {
+        setBugBadge(r.new);
+      }).catch(function () {});
+    }
   }
   setInterval(pollMsgBadge, 20000);
 
@@ -5076,6 +5084,121 @@
         '</span>';
     }
     return h + '</span>';
+  }
+
+
+  /* ---------- Báo lỗi từ khách ---------- */
+  var BUG = { new: 'Mới', doing: 'Đang xử lý', done: 'Đã xong' };
+  var BUG_ST = { new: 'new', doing: 'called', done: 'won' };
+  var bugState = { status: 'new', page: 1 };
+  function setBugBadge(n) {
+    var b = $('navBug');
+    if (b) {
+      b.hidden = !n;
+      b.textContent = n > 99 ? '99+' : n;
+    }
+  }
+  function renderBugs() {
+    main.innerHTML = '<div class="page-h"><div><h1>Báo lỗi</h1><p>Lỗi website do khách gửi từ nút “Báo lỗi” ở cuối trang.</p></div>' +
+      '<div class="h-acts"><button class="btn" id="bgRefresh"><span class="ms">refresh</span>Làm mới</button></div></div>' +
+      '<div class="chips" id="bgChips"></div><div id="bgItems"><div class="card"><div class="skel line"></div>' + '<div class="skel line"></div>'.repeat(3) + '</div></div><div id="bgPager"></div>';
+    $('bgRefresh').onclick = loadBugs;
+    loadBugs();
+  }
+  function loadBugs() {
+    api('/bugs?status=' + bugState.status + '&page=' + bugState.page).then(function (r) {
+      if (view !== 'bugs') {
+        return;
+      }
+      setBugBadge(r.counts.new);
+      var write = can('bugs', true);
+      var total = r.counts.new + r.counts.doing + r.counts.done;
+      var chips = [['new', BUG.new, r.counts.new], ['doing', BUG.doing, r.counts.doing], ['done', BUG.done, r.counts.done], ['', 'Tất cả', total]];
+      $('bgChips').innerHTML = chips.map(function (c) {
+        return '<button type="button" class="chip" aria-pressed="' + (c[0] === bugState.status) + '" data-s="' + c[0] + '">' + c[1] + ' <b>' + c[2] + '</b></button>';
+      }).join('');
+      $('bgChips').querySelectorAll('.chip').forEach(function (b) {
+        b.onclick = function () {
+          bugState.status = b.dataset.s;
+          bugState.page = 1;
+          loadBugs();
+        };
+      });
+      var box = $('bgItems');
+      if (!r.items.length) {
+        box.innerHTML = '<div class="card state"><span class="ms">check_circle</span><h2>Không có báo lỗi nào</h2><p>Chưa có báo lỗi trong mục này.</p></div>';
+        $('bgPager').innerHTML = '';
+        return;
+      }
+      box.innerHTML = r.items.map(function (x) {
+        return '<article class="card rv-card" data-id="' + x.id + '"><header><div class="who"><b>' + esc(x.title) + '</b><small>' +
+          vnDate(x.created_at) + ' ' + vnTime(x.created_at) + ' · ' + (x.user_name ? esc(x.user_name) : 'Khách chưa đăng nhập') +
+          (x.contact ? ' · ' + esc(x.contact) : '') + '</small></div><span class="st ' + BUG_ST[x.status] + '">' + BUG[x.status] + '</span></header>' +
+          '<p class="rv-body">' + esc(x.body) + '</p>' +
+          '<div class="rv-meta"><span>' + (x.page ? 'Trang: ' + esc(x.page) : '') + (x.ua ? '<br>Thiết bị: ' + esc(x.ua) : '') + '</span></div>' +
+          (write ? '<label class="field"><span>Ghi chú nội bộ</span><textarea class="bg-note" rows="2" maxlength="1000">' + esc(x.note || '') + '</textarea></label>' +
+          '<div class="rv-acts">' +
+          (x.status !== 'doing' ? '<button class="btn" data-act="doing"><span class="ms">schedule</span>Đang xử lý</button>' : '') +
+          (x.status !== 'done' ? '<button class="btn primary" data-act="done"><span class="ms">check</span>Đã xong</button>' : '') +
+          (x.status !== 'new' ? '<button class="btn" data-act="new"><span class="ms">refresh</span>Mở lại</button>' : '') +
+          '<button class="btn" data-act="note"><span class="ms">save</span>Lưu ghi chú</button>' +
+          '<button class="btn danger" data-act="delete"><span class="ms">delete</span>Xoá</button></div>' : (x.note ? '<p class="muted">Ghi chú: ' + esc(x.note) + '</p>' : '')) + '</article>';
+      }).join('');
+      box.querySelectorAll('.rv-card').forEach(function (card) {
+        var id = card.dataset.id;
+        card.querySelectorAll('[data-act]').forEach(function (b) {
+          b.onclick = function () {
+            var act = b.dataset.act;
+            function send(body) {
+              b.disabled = true;
+              api('/bugs/' + id, { method: 'PATCH', body: body }).then(function () {
+                toast('Đã cập nhật');
+                loadBugs();
+              }).catch(function (ex) {
+                b.disabled = false;
+                toast(ex.message, true);
+              });
+            }
+            if (act === 'delete') {
+              confirmBox('Xoá báo lỗi này? Không khôi phục được.', { title: 'Xoá báo lỗi', ok: 'Xoá', danger: true }).then(function (ok) {
+                if (!ok) {
+                  return;
+                }
+                api('/bugs/' + id, { method: 'DELETE' }).then(function () {
+                  toast('Đã xoá báo lỗi');
+                  loadBugs();
+                }).catch(function (ex) {
+                  toast(ex.message, true);
+                });
+              });
+            } else if (act === 'note') {
+              send({ note: card.querySelector('.bg-note').value });
+            } else {
+              send({ status: act, note: card.querySelector('.bg-note').value });
+            }
+          };
+        });
+      });
+      var pages = Math.max(Math.ceil(r.total / r.pageSize), 1);
+      $('bgPager').innerHTML = pages > 1 ? '<div class="rv-pager"><button class="icon-btn" id="bgPrev" aria-label="Trang trước"' + (r.page <= 1 ? ' disabled' : '') +
+        '><span class="ms">chevron_left</span></button><span>Trang ' + r.page + '/' + pages + '</span><button class="icon-btn" id="bgNext" aria-label="Trang sau"' +
+        (r.page >= pages ? ' disabled' : '') + '><span class="ms">chevron_right</span></button></div>' : '';
+      if (pages > 1) {
+        $('bgPrev').onclick = function () {
+          bugState.page--;
+          loadBugs();
+        };
+        $('bgNext').onclick = function () {
+          bugState.page++;
+          loadBugs();
+        };
+      }
+    }).catch(function (ex) {
+      if (view === 'bugs') {
+        $('bgItems').innerHTML = '';
+        errorState(ex.message, renderBugs);
+      }
+    });
   }
 
   function renderReviews() {

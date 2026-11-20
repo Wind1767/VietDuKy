@@ -546,12 +546,9 @@
         if (!sec || !window.vdkMfa) {
           return;
         }
-        sec.addEventListener('toggle', function once() {
-          if (sec.open) {
-            sec.removeEventListener('toggle', once);
-            vdkMfa.create('/api/auth/mfa').settingsUI($('#mfaBox'));
-          }
-        });
+        /* Nạp sẵn nội dung ngay khi vào trang (lúc mục còn đóng): khi mở ra, nút và chữ đã có đúng kích thước,
+        không còn phải chờ ~1 giây rồi mới co giãn lại trên điện thoại. */
+        vdkMfa.create('/api/auth/mfa').settingsUI($('#mfaBox'));
       })();
       (function avatars() {
         var big = $('#avBig'), msg = $('#avMsg'), del = $('#avDel'), cur = u.avatar || '';
