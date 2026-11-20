@@ -5,7 +5,7 @@
   if (!box) {
     return;
   }
-  var ICON = { booking: 'luggage', bug: 'warning', review: 'star', admin: 'campaign', system: 'mail' };
+  var ICON = { post: 'description', booking: 'luggage', bug: 'warning', review: 'star', admin: 'campaign', system: 'mail' };
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -43,7 +43,7 @@
         var l = safe(n.link);
         return '<article class="inbox-item' + (n.read ? '' : ' unread') + '" data-id="' + n.id + '" style="animation-delay:' + Math.min(i, 8) * 0.06 + 's">' +
           '<span class="ms inbox-ic">' + (ICON[n.kind] || 'mail') + '</span><div class="inbox-bd"><h3>' + esc(n.title) + '</h3><time>' + when(n.created_at) + '</time>' +
-          (n.body ? '<p>' + esc(n.body) + '</p>' : '') +
+          (n.body ? (n.kind === 'post' && window.vdkMd ? '<div class="md">' + window.vdkMd.render(n.body) + '</div>' : '<p>' + esc(n.body) + '</p>') : '') +
           (n.image && /^https:\/\//.test(n.image) ? '<img src="' + esc(n.image) + '" alt="" loading="lazy">' : '') +
           (l ? '<a class="btn line sm" href="' + esc(l) + '">Xem chi tiết</a>' : '') + '</div></article>';
       }).join('');

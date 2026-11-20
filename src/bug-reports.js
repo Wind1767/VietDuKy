@@ -4,7 +4,8 @@ import { currentUser } from './customer-auth.js';
 
 export const BUG_SCHEMA = [
   'CREATE TABLE IF NOT EXISTS bug_reports (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, page TEXT, contact TEXT, user_id INTEGER, ua TEXT, status TEXT NOT NULL DEFAULT \'new\', note TEXT NOT NULL DEFAULT \'\')',
-  'CREATE INDEX IF NOT EXISTS idx_bug_reports_status ON bug_reports(status, created_at)'
+  'CREATE INDEX IF NOT EXISTS idx_bug_reports_status ON bug_reports(status, created_at)',
+  'CREATE INDEX IF NOT EXISTS idx_bug_reports_created ON bug_reports(created_at)'
 ];
 const STATUSES = ['new', 'doing', 'done'];
 const PAGE_SIZE = 15;
@@ -66,9 +67,12 @@ export async function adminBugs(request, env, url, h) {
     const page = Math.max(parseInt(url.searchParams.get('page')) || 1, 1);
     const where = ok ? 'WHERE b.status = ?1' : 'WHERE ?1 = ?1';
     const arg = ok ? status : '';
-    const total = (await env.DB.prepare(`SELECT COUNT(*) AS n FROM bug_reports b ${where}`).bind(arg).first()).n;
-    const { results } = await env.DB.prepare(`SELECT b.*, u.name AS user_name FROM bug_reports b LEFT JOIN users u ON u.id = b.user_id ${where} ORDER BY b.created_at DESC, b.id DESC LIMIT ?2 OFFSET ?3`).bind(arg, PAGE_SIZE, (page - 1) * PAGE_SIZE).all();
-    const c = await env.DB.prepare('SELECT status, COUNT(*) AS n FROM bug_reports GROUP BY status').all();
+    const [tot, list, c] = await env.DB.batch([
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM bug_reports b ${where}`).bind(arg),
+      env.DB.prepare(`SELECT b.*, u.name AS user_name FROM bug_reports b LEFT JOIN users u ON u.id = b.user_id ${where} ORDER BY b.created_at DESC, b.id DESC LIMIT ?2 OFFSET ?3`).bind(arg, PAGE_SIZE, (page - 1) * PAGE_SIZE),
+      env.DB.prepare('SELECT status, COUNT(*) AS n FROM bug_reports GROUP BY status')
+    ]);
+    const total = tot.results[0].n, results = list.results;
     const counts = { new: 0, doing: 0, done: 0 };
     for (const r of c.results) {
       if (r.status in counts) {
@@ -93,13 +97,13 @@ export async function adminBugs(request, env, url, h) {
       throw new h.HttpError(400, 'Không có gì để cập nhật.');
     }
     args.push(Date.now(), Number(m[1]));
-    const r = await env.DB.prepare(`UPDATE bug_reports SET ${sets.join(', ')}, updated_at = ?${args.length - 1} WHERE id = ?${args.length} RETURNING id`).bind(...args).first();
+    const r = await env.DB.prepare(`UPDATE bug_reports SET ${sets.join(', ')}, updated_at = ?${args.length - 1} WHERE id = ?${args.length} RETURNING id, user_id, title`).bind(...args).first();
     if (!r) {
       throw new h.HttpError(404, 'Không tìm thấy báo lỗi.');
     }
     if (b.status !== undefined) {
-      const bug = await env.DB.prepare('SELECT user_id, title, note FROM bug_reports WHERE id = ?1').bind(r.id).first();
-      if (bug && bug.user_id) {
+      const bug = r;
+      if (bug.user_id) {
         const L = { new: 'Đã mở lại', doing: 'Đang xử lý', done: 'Đã xử lý xong' };
         await h.notify(bug.user_id, { kind: 'bug', title: 'Báo lỗi #' + r.id + ': ' + L[b.status], body: 'Báo lỗi “' + bug.title + '” của bạn: ' + L[b.status].toLowerCase() + '. Cảm ơn bạn đã góp ý!' });
       }

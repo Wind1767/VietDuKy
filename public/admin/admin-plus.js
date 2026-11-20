@@ -539,7 +539,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
     '<h4>Trang xem gần đây</h4><div class="dock-recent" id="dkRecent"></div>' +
     '<h4>Ghi chú nhanh <small>(lưu trên máy này)</small></h4><textarea id="dkNote" rows="4" placeholder="Việc cần nhớ, SĐT khách, ghi chú ca trực…" aria-label="Ghi chú nhanh"></textarea>' +
     '</div>';
-  document.body.appendChild(dock);
+  /* Nút công cụ nổi góc trái dưới đã được gỡ khỏi giao diện (dock không gắn vào trang). */
   var fab = dock.querySelector('.dock-fab'), panel = dock.querySelector('.dock-panel');
   function dockOpen(on) {
     panel.hidden = !on;

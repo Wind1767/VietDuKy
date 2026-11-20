@@ -2756,3 +2756,30 @@ footer .soc a:hover {
     animation: none;
   }
 }
+
+/* Nút hòm thư: hiện dần cùng nhịp với tên người dùng; chấm số nảy lên khi có thông báo mới */
+.menu a.bell {
+  animation: nameIn .6s cubic-bezier(.2, .7, .2, 1) .08s both;
+}
+
+.bell b:not([hidden]) {
+  animation: bellPop .5s cubic-bezier(.3, 1.6, .5, 1) .5s both;
+}
+
+@keyframes bellPop {
+  from {
+    opacity: 0;
+    transform: scale(.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu a.bell,
+  .bell b:not([hidden]) {
+    animation: none;
+  }
+}

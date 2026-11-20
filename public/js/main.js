@@ -208,7 +208,6 @@
         acctLink.title = 'Tài khoản của bạn';
         acctLink.classList.add('swap');
         acctLink.parentNode.insertAdjacentHTML('afterend', '<li class="nl late" style="--i:6"><button class="navlogout" id="navLogout" type="button"><span class="ms">logout</span><span>Đăng xuất</span></button></li>');
-        acctLink.parentNode.insertAdjacentHTML('afterend', '<li class="nl late" style="--i:6"><a class="bell" href="/inbox" aria-label="Hòm thư" title="Hòm thư"><span class="ms">mail</span><b id="bellN" hidden></b></a></li>');
         fetch('/api/inbox/count', { credentials: 'same-origin' }).then(function (r) {
           return r.ok ? r.json() : null;
         }).then(function (c) {
@@ -218,6 +217,7 @@
             b.hidden = false;
           }
         }).catch(function () {});
+        acctLink.parentNode.insertAdjacentHTML('afterend', '<li class="nl late" style="--i:6"><a class="bell" href="/inbox" aria-label="Hòm thư" title="Hòm thư"><span class="ms">mail</span><b id="bellN" hidden></b></a></li>');
         document.getElementById('navLogout').onclick = function () {
           fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(function () {}).then(function () {
             location.href = '/';

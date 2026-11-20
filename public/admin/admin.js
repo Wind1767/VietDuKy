@@ -5097,13 +5097,15 @@
       (write ? '<form class="card card-pad" id="inForm" style="display:grid;gap:12px;max-width:640px">' +
       '<label class="field"><span>Gửi tới</span><select id="inTo"><option value="all">Tất cả khách</option><option value="one">Một khách (theo email)</option></select></label>' +
       '<label class="field" id="inMailW" hidden><span>Email khách</span><input id="inMail" type="email" maxlength="120" placeholder="khach@gmail.com"></label>' +
+      '<label class="field"><span>Dạng</span><select id="inFmt"><option value="text">Thông báo ngắn</option><option value="post">Bài viết (Markdown)</option></select></label>' +
       '<label class="field"><span>Tiêu đề</span><input id="inTitle" maxlength="120" required></label>' +
-      '<label class="field"><span>Nội dung</span><textarea id="inBody" rows="4" maxlength="2000"></textarea></label>' +
+      '<div class="field"><span>Nội dung</span><div class="md-bar" id="inBar" hidden></div><textarea id="inBody" rows="4" maxlength="2000"></textarea><div class="md md-prev" id="inMd" hidden></div></div>' +
       '<div class="field"><span>Ảnh đính kèm (tuỳ chọn)</span><img id="inPrev" alt="" hidden style="max-width:240px;border-radius:12px;margin-bottom:8px">' +
       '<div><input id="inImg" placeholder="https://ik.imagekit.io/…"> <button class="btn" id="inUp" type="button"><span class="ms">add_a_photo</span>Tải ảnh lên</button><input type="file" id="inFile" accept="image/*" hidden></div></div>' +
       '<div><button class="btn primary" id="inSend"><span class="ms">send</span>Gửi thông báo</button></div></form>' : '') +
       '<h2 style="margin:24px 0 10px">Đã gửi gần đây</h2><div id="inList"><div class="card"><div class="skel line"></div></div></div>';
     if (write) {
+      setupMdEditor();
       $('inTo').onchange = function () {
         $('inMailW').hidden = this.value !== 'one';
       };
@@ -5130,9 +5132,10 @@
         e.preventDefault();
         var btn = $('inSend');
         btn.disabled = true;
-        api('/inbox', { method: 'POST', body: { to: $('inTo').value === 'one' ? $('inMail').value : 'all', title: $('inTitle').value, body: $('inBody').value, image: $('inImg').value.trim() } }).then(function () {
+        api('/inbox', { method: 'POST', body: { to: $('inTo').value === 'one' ? $('inMail').value : 'all', title: $('inTitle').value, format: $('inFmt').value, body: $('inBody').value, image: $('inImg').value.trim() } }).then(function () {
           toast('Đã gửi thông báo');
           $('inForm').reset();
+          $('inFmt').onchange();
           $('inMailW').hidden = true;
           $('inPrev').hidden = true;
           loadInbox();
@@ -5145,6 +5148,87 @@
     }
     loadInbox();
   }
+  /* Soạn bài viết Markdown: thanh định dạng + nút Soạn / Xem trước */
+  function setupMdEditor() {
+    var ta = $('inBody'), bar = $('inBar'), pv = $('inMd'), preview = false;
+    var wrap = function (a, b, ph) {
+      return function () {
+        var s = ta.selectionStart, e = ta.selectionEnd, v = ta.value, sel = v.slice(s, e) || ph;
+        ta.value = v.slice(0, s) + a + sel + b + v.slice(e);
+        ta.focus();
+        ta.setSelectionRange(s + a.length, s + a.length + sel.length);
+      };
+    };
+    var line = function (p) {
+      return function () {
+        var s = ta.selectionStart, v = ta.value, st = v.lastIndexOf('\n', s - 1) + 1;
+        ta.value = v.slice(0, st) + p + v.slice(st);
+        ta.focus();
+        ta.setSelectionRange(s + p.length, s + p.length);
+      };
+    };
+    var block = function (t) {
+      return function () {
+        var s = ta.selectionStart, v = ta.value;
+        ta.value = v.slice(0, s) + (s && v[s - 1] !== '\n' ? '\n' : '') + t + v.slice(ta.selectionEnd);
+        ta.focus();
+      };
+    };
+    var tools = [
+      ['H', 'Tiêu đề', line('## ')], ['B', 'Đậm', wrap('**', '**', 'đậm')], ['I', 'Nghiêng', wrap('*', '*', 'nghiêng')], ['S', 'Gạch ngang', wrap('~~', '~~', 'gạch')],
+      ['==', 'Tô sáng', wrap('==', '==', 'nổi bật')], ['x²', 'Chỉ số trên', wrap('^', '^', '2')], ['x₂', 'Chỉ số dưới', wrap('~', '~', '2')],
+      ['❝', 'Trích dẫn', line('> ')], ['•', 'Danh sách', line('- ')], ['1.', 'Danh sách số', line('1. ')], ['☑', 'Việc cần làm', line('- [ ] ')],
+      ['`', 'Code', wrap('`', '`', 'code')], ['{ }', 'Khối code', block('```\ncode\n```\n')], ['🔗', 'Liên kết', wrap('[', '](https://)', 'văn bản')],
+      ['▦', 'Bảng', block('| Cột 1 | Cột 2 |\n|:--|--:|\n| A | B |\n')], ['―', 'Đường kẻ', block('\n---\n')], ['[^]', 'Chú thích', function () {
+        wrap('[^1]', '', '')();
+        ta.value += '\n\n[^1]: Nội dung chú thích';
+      }]
+    ];
+    bar.innerHTML = tools.map(function (t, i) {
+      return '<button type="button" data-t="' + i + '" title="' + t[1] + '" aria-label="' + t[1] + '">' + t[0] + '</button>';
+    }).join('') + '<button type="button" data-t="img" title="Chèn ảnh" aria-label="Chèn ảnh">🖼</button><span class="md-sp"></span><button type="button" id="inPv" aria-pressed="false"><span class="ms">visibility</span> Xem trước</button><input type="file" id="inMdFile" accept="image/*" hidden>';
+    bar.onclick = function (e) {
+      var b = e.target.closest('button');
+      if (!b || preview) {
+        return;
+      }
+      if (b.dataset.t === 'img') {
+        $('inMdFile').click();
+      } else if (b.dataset.t) {
+        tools[+b.dataset.t][2]();
+      }
+    };
+    $('inMdFile').onchange = function () {
+      var f = this.files[0];
+      if (f) {
+        window.ikUpload(f, '/api/admin/imagekit', 1600).then(function (r) {
+          block('![mô tả ảnh](' + r.url + ')\n')();
+        }).catch(function (ex) {
+          toast(ex.message, true);
+        });
+      }
+      this.value = '';
+    };
+    $('inPv').onclick = function () {
+      preview = !preview;
+      this.setAttribute('aria-pressed', preview);
+      this.lastChild.textContent = preview ? ' Soạn' : ' Xem trước';
+      ta.hidden = preview;
+      pv.hidden = !preview;
+      if (preview) {
+        pv.innerHTML = ta.value.trim() ? window.vdkMd.render(ta.value) : '<p class="muted">Chưa có nội dung.</p>';
+      }
+    };
+    $('inFmt').onchange = function () {
+      var post = this.value === 'post';
+      bar.hidden = !post;
+      ta.rows = post ? 14 : 4;
+      ta.maxLength = post ? 20000 : 2000;
+      if (!post && preview) {
+        $('inPv').onclick();
+      }
+    };
+  }
   function loadInbox() {
     api('/inbox').then(function (r) {
       if (view !== 'inbox') {
@@ -5156,9 +5240,9 @@
         return;
       }
       box.innerHTML = r.items.map(function (x) {
-        return '<article class="card rv-card" data-id="' + x.id + '"><header><div class="who"><b>' + esc(x.title) + '</b><small>' + vnDate(x.created_at) + ' ' + vnTime(x.created_at) +
+        return '<article class="card rv-card" data-id="' + x.id + '"><header><div class="who"><b>' + esc(x.title) + (x.kind === 'post' ? ' <span class="st won">Bài viết</span>' : '') + '</b><small>' + vnDate(x.created_at) + ' ' + vnTime(x.created_at) +
           ' · Gửi tới: ' + (x.user_id ? esc(x.user_name || '') + ' (' + esc(x.user_email || '') + ')' : 'tất cả khách') + '</small></div></header>' +
-          (x.body ? '<p class="rv-body">' + esc(x.body) + '</p>' : '') + (x.image ? '<img src="' + esc(x.image) + '" alt="" style="max-width:240px;border-radius:12px">' : '') +
+          (x.body ? (x.kind === 'post' ? '<div class="md">' + window.vdkMd.render(x.body) + '</div>' : '<p class="rv-body">' + esc(x.body) + '</p>') : '') + (x.image ? '<img src="' + esc(x.image) + '" alt="" style="max-width:240px;border-radius:12px">' : '') +
           (can('chat', true) ? '<div class="rv-acts"><button class="btn danger" data-del="' + x.id + '"><span class="ms">delete</span>Xoá</button></div>' : '') + '</article>';
       }).join('');
       box.querySelectorAll('[data-del]').forEach(function (b) {
