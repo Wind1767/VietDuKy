@@ -97,6 +97,13 @@ export async function adminBugs(request, env, url, h) {
     if (!r) {
       throw new h.HttpError(404, 'Không tìm thấy báo lỗi.');
     }
+    if (b.status !== undefined) {
+      const bug = await env.DB.prepare('SELECT user_id, title, note FROM bug_reports WHERE id = ?1').bind(r.id).first();
+      if (bug && bug.user_id) {
+        const L = { new: 'Đã mở lại', doing: 'Đang xử lý', done: 'Đã xử lý xong' };
+        await h.notify(bug.user_id, { kind: 'bug', title: 'Báo lỗi #' + r.id + ': ' + L[b.status], body: 'Báo lỗi “' + bug.title + '” của bạn: ' + L[b.status].toLowerCase() + '. Cảm ơn bạn đã góp ý!' });
+      }
+    }
     await h.logAct(env, 'Cập nhật báo lỗi', '#' + r.id + (b.status ? ' → ' + b.status : ''));
     return h.json({ ok: true });
   }

@@ -785,21 +785,22 @@ footer a:hover {
 }
 
 footer .bugrow {
-  margin: 32px 0 0;
+  margin: 22px 0 0;
   text-align: center;
 }
 
 footer .bugbtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 20px;
-  border: 1.5px solid rgba(255, 255, 255, .35);
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, .3);
   border-radius: 999px;
   color: inherit;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 12px;
+  opacity: .85;
 }
 
 footer .bugbtn:hover {

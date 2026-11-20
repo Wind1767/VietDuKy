@@ -308,6 +308,9 @@ export async function adminReviews(request, env, url, h) {
     const u = await env.DB.prepare('SELECT name, email, phone FROM users WHERE id = ?1').bind(hit.user_id).first();
     await h.logAct(env, 'status' in b ? `${STATUS_LABEL[b.status]} đánh giá #${id}` : 'Phản hồi đánh giá #' +
       id, u ? u.name : '');
+    if ('status' in b && hit.user_id) {
+      await h.notify(hit.user_id, { kind: 'review', title: 'Đánh giá của bạn: ' + STATUS_LABEL[b.status], body: b.status === 'approved' ? 'Cảm ơn bạn! Đánh giá đã được hiển thị trên website.' : 'Đánh giá của bạn chưa được hiển thị công khai.', link: '/reviews' });
+    }
     return h.json({ ...hit, ...(u || {}) });
   }
 

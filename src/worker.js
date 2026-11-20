@@ -4,6 +4,7 @@ import { handleAuth, currentUser, USER_SESSIONS_SCHEMA } from './customer-auth.j
 import { deviceInfo } from './session-device.js';
 import { handleChat, adminChat, adminFaq } from './chat.js';
 import { handleReviews, adminReviews } from './reviews.js';
+import { INBOX_SCHEMA, handleInbox, adminInbox, notify } from './inbox.js';
 import { BUG_SCHEMA, publicBugReport, adminBugs } from './bug-reports.js';
 import { adminAccounts } from './customer-accounts.js';
 import { purgeDeletedUsers } from './privacy.js';
@@ -89,6 +90,7 @@ export const SCHEMA = [
   'CREATE INDEX IF NOT EXISTS idx_review_votes_user ON review_votes(user_id)',
   ...TOURS_SCHEMA,
   ...BUG_SCHEMA,
+  ...INBOX_SCHEMA,
   ...USER_SESSIONS_SCHEMA,
   ...IK_SCHEMA,
   ...ADMINS_SCHEMA,
@@ -251,7 +253,7 @@ async function route(request, env, url, ctx) {
   const mail = (to, content) => defer(Promise.resolve(content).then(c => sendEmail(env, { to, ...c })).catch(err => console.error('Gửi email thông báo lỗi:', err && err.message || err)));
   setContactEmail(env.EMAIL_FROM || env.GMAIL_USER);
   const adminTo = env.ADMIN_EMAIL || env.GMAIL_USER || '';
-  const helpers = { turnstile: (b, action) => verifyTurnstile(request, env, b, action, HttpError), adminTo, DESTINATIONS, destExists, HttpError, json, readJson, clean, cleanSite: (k, v) => cleanValue(k, v, { HttpError, clean }), limit, LIMITS, vName, vPhone, vDest, vDate, vPeople, logAct, site, defer, mail, notice: noticeEmail, adminMail: content => mail(adminTo, content),
+  const helpers = { notify: (uid, n) => notify(env, uid, n), turnstile: (b, action) => verifyTurnstile(request, env, b, action, HttpError), adminTo, DESTINATIONS, destExists, HttpError, json, readJson, clean, cleanSite: (k, v) => cleanValue(k, v, { HttpError, clean }), limit, LIMITS, vName, vPhone, vDest, vDate, vPeople, logAct, site, defer, mail, notice: noticeEmail, adminMail: content => mail(adminTo, content),
     // Email theo mẫu chỉnh được trong trang quản trị: tpl('khoá mẫu', biến, { rows, quote, link })
     tpl: async (key, vars, extra) => noticeEmail({ ...(await tplFields(env, key, vars)).fields, ...extra }) };
 
@@ -311,6 +313,9 @@ async function route(request, env, url, ctx) {
   if (pathname.startsWith('/api/auth/')) {
     return handleAuth(request, env, url, ip, helpers);
   }
+  if (pathname === '/api/inbox' || pathname.startsWith('/api/inbox/')) {
+    return handleInbox(request, env, url, helpers);
+  }
   if (pathname.startsWith('/api/chat/')) {
     return handleChat(request, env, url, ip, helpers);
   }
@@ -353,6 +358,9 @@ async function route(request, env, url, ctx) {
   }
   if (pathname === '/api/admin/review-count' || pathname.startsWith('/api/admin/reviews')) {
     return adminReviews(request, env, url, helpers);
+  }
+  if (pathname === '/api/admin/inbox' || pathname.startsWith('/api/admin/inbox/')) {
+    return adminInbox(request, env, url, helpers);
   }
   if (pathname === '/api/admin/bug-count' || pathname.startsWith('/api/admin/bugs')) {
     return adminBugs(request, env, url, helpers);
@@ -1136,6 +1144,9 @@ async function updateBooking(request, env, id, h) {
   }
   await logAct(env, 'Cập nhật đơn #' + id, row.name +
     ('status' in body ? ' → ' + STATUS_LABEL[body.status] : ''));
+  if ('status' in body && row.user_id && h) {
+    await h.notify(row.user_id, { kind: 'booking', title: 'Đơn #' + id + ': ' + STATUS_LABEL[row.status], body: (row.destination ? 'Điểm đến: ' + row.destination + '. ' : '') + 'Trạng thái đơn đặt tour của bạn đã được cập nhật.', link: '/account' });
+  }
   if (body.status === 'won' && row.user_id && h) {
     const u = await env.DB.prepare('SELECT email, name FROM users WHERE id = ?1').bind(row.user_id).first().catch(() => null);
     if (u) {

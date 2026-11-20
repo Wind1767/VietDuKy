@@ -311,6 +311,9 @@ export function groupOf(p) {
   if (p === '/api/admin/review-count' || p.startsWith('/api/admin/reviews')) {
     return 'reviews';
   }
+  if (p === '/api/admin/inbox' || p.startsWith('/api/admin/inbox/')) {
+    return 'chat';
+  }
   if (p === '/api/admin/bug-count' || p.startsWith('/api/admin/bugs')) {
     return 'bugs';
   }

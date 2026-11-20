@@ -510,10 +510,11 @@
 
   /* ---------- Điều hướng ---------- */
   var view = null;
-  var VIEWS = ['bookings', 'messages', 'faq', 'reviews', 'bugs', 'accounts', 'customers', 'departures', 'tours', 'templates', 'reports', 'activity', 'admins', 'access', 'emails', 'site', 'layout', 'content', 'destinations', 'coupons', 'data', 'mymfa'];
+  var VIEWS = ['bookings', 'messages', 'inbox', 'faq', 'reviews', 'bugs', 'accounts', 'customers', 'departures', 'tours', 'templates', 'reports', 'activity', 'admins', 'access', 'emails', 'site', 'layout', 'content', 'destinations', 'coupons', 'data', 'mymfa'];
   var PERM = {
     bookings: 'bookings',
     messages: 'chat',
+    inbox: 'chat',
     faq: 'bot',
     reviews: 'reviews',
     bugs: 'bugs',
@@ -708,6 +709,8 @@
       renderFaq();
     } else if (name === 'reviews') {
       renderReviews();
+    } else if (name === 'inbox') {
+      renderInbox();
     } else if (name === 'bugs') {
       renderBugs();
     } else if (name === 'accounts') {
@@ -5086,6 +5089,93 @@
     return h + '</span>';
   }
 
+
+  /* ---------- Gửi thông báo tới hòm thư của khách ---------- */
+  function renderInbox() {
+    var write = can('chat', true);
+    main.innerHTML = '<div class="page-h"><div><h1>Gửi thông báo</h1><p>Thông báo hiện trong hòm thư của khách (kèm ảnh nếu muốn). Thông báo đổi trạng thái đơn, báo lỗi và đánh giá được gửi tự động.</p></div></div>' +
+      (write ? '<form class="card card-pad" id="inForm" style="display:grid;gap:12px;max-width:640px">' +
+      '<label class="field"><span>Gửi tới</span><select id="inTo"><option value="all">Tất cả khách</option><option value="one">Một khách (theo email)</option></select></label>' +
+      '<label class="field" id="inMailW" hidden><span>Email khách</span><input id="inMail" type="email" maxlength="120" placeholder="khach@gmail.com"></label>' +
+      '<label class="field"><span>Tiêu đề</span><input id="inTitle" maxlength="120" required></label>' +
+      '<label class="field"><span>Nội dung</span><textarea id="inBody" rows="4" maxlength="2000"></textarea></label>' +
+      '<div class="field"><span>Ảnh đính kèm (tuỳ chọn)</span><img id="inPrev" alt="" hidden style="max-width:240px;border-radius:12px;margin-bottom:8px">' +
+      '<div><input id="inImg" placeholder="https://ik.imagekit.io/…"> <button class="btn" id="inUp" type="button"><span class="ms">add_a_photo</span>Tải ảnh lên</button><input type="file" id="inFile" accept="image/*" hidden></div></div>' +
+      '<div><button class="btn primary" id="inSend"><span class="ms">send</span>Gửi thông báo</button></div></form>' : '') +
+      '<h2 style="margin:24px 0 10px">Đã gửi gần đây</h2><div id="inList"><div class="card"><div class="skel line"></div></div></div>';
+    if (write) {
+      $('inTo').onchange = function () {
+        $('inMailW').hidden = this.value !== 'one';
+      };
+      $('inUp').onclick = function () {
+        $('inFile').click();
+      };
+      $('inFile').onchange = function () {
+        var f = this.files[0], b = $('inUp');
+        if (!f) {
+          return;
+        }
+        b.disabled = true;
+        window.ikUpload(f, '/api/admin/imagekit', 1600).then(function (r) {
+          $('inImg').value = r.url;
+          $('inPrev').src = r.url;
+          $('inPrev').hidden = false;
+        }).catch(function (ex) {
+          toast(ex.message, true);
+        }).then(function () {
+          b.disabled = false;
+        });
+      };
+      $('inForm').onsubmit = function (e) {
+        e.preventDefault();
+        var btn = $('inSend');
+        btn.disabled = true;
+        api('/inbox', { method: 'POST', body: { to: $('inTo').value === 'one' ? $('inMail').value : 'all', title: $('inTitle').value, body: $('inBody').value, image: $('inImg').value.trim() } }).then(function () {
+          toast('Đã gửi thông báo');
+          $('inForm').reset();
+          $('inMailW').hidden = true;
+          $('inPrev').hidden = true;
+          loadInbox();
+        }).catch(function (ex) {
+          toast(ex.message, true);
+        }).then(function () {
+          btn.disabled = false;
+        });
+      };
+    }
+    loadInbox();
+  }
+  function loadInbox() {
+    api('/inbox').then(function (r) {
+      if (view !== 'inbox') {
+        return;
+      }
+      var box = $('inList');
+      if (!r.items.length) {
+        box.innerHTML = '<div class="card state"><span class="ms">campaign</span><h2>Chưa gửi thông báo nào</h2></div>';
+        return;
+      }
+      box.innerHTML = r.items.map(function (x) {
+        return '<article class="card rv-card" data-id="' + x.id + '"><header><div class="who"><b>' + esc(x.title) + '</b><small>' + vnDate(x.created_at) + ' ' + vnTime(x.created_at) +
+          ' · Gửi tới: ' + (x.user_id ? esc(x.user_name || '') + ' (' + esc(x.user_email || '') + ')' : 'tất cả khách') + '</small></div></header>' +
+          (x.body ? '<p class="rv-body">' + esc(x.body) + '</p>' : '') + (x.image ? '<img src="' + esc(x.image) + '" alt="" style="max-width:240px;border-radius:12px">' : '') +
+          (can('chat', true) ? '<div class="rv-acts"><button class="btn danger" data-del="' + x.id + '"><span class="ms">delete</span>Xoá</button></div>' : '') + '</article>';
+      }).join('');
+      box.querySelectorAll('[data-del]').forEach(function (b) {
+        b.onclick = function () {
+          confirmBox('Xoá thông báo này khỏi hòm thư của khách?', { title: 'Xoá thông báo', ok: 'Xoá', danger: true }).then(function (ok) {
+            if (ok) {
+              api('/inbox/' + b.dataset.del, { method: 'DELETE' }).then(loadInbox).catch(function (ex) {
+                toast(ex.message, true);
+              });
+            }
+          });
+        };
+      });
+    }).catch(function (ex) {
+      toast(ex.message, true);
+    });
+  }
 
   /* ---------- Báo lỗi từ khách ---------- */
   var BUG = { new: 'Mới', doing: 'Đang xử lý', done: 'Đã xong' };

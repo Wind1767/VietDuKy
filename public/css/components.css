@@ -2653,3 +2653,106 @@ footer .soc a:hover {
   opacity: 0.6;
   cursor: wait;
 }
+
+/* ===== Hòm thư ===== */
+.bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.bell b {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 99px;
+  background: var(--red, #da251d);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.bell b[hidden] {
+  display: none;
+}
+
+.inbox {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.inbox-top {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inbox-empty {
+  text-align: center;
+  color: var(--mut, #5b6e68);
+}
+
+.inbox-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper, #fff);
+  cursor: default;
+  animation: vdkItem .5s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.inbox-item.unread {
+  border-color: var(--gold, #ffcd00);
+  box-shadow: inset 4px 0 0 var(--gold, #ffcd00);
+  cursor: pointer;
+}
+
+.inbox-ic {
+  flex: none;
+  color: var(--jade2, #145a50);
+}
+
+.inbox-bd {
+  min-width: 0;
+}
+
+.inbox-bd h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.inbox-bd time {
+  color: var(--mut, #5b6e68);
+  font-size: 12px;
+}
+
+.inbox-bd p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.inbox-bd img {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 12px;
+}
+
+.inbox-bd .btn {
+  margin-top: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inbox-item {
+    animation: none;
+  }
+}
