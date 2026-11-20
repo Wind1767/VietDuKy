@@ -126,6 +126,7 @@ function ensureSchema(env) {
       .then(() => env.DB.prepare('ALTER TABLE messages ADD COLUMN session_id INTEGER').run().catch(() => {}))
       .then(() => env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id, id)').run())
       .then(() => migrateChatSessions(env))
+      .then(() => migrateReviewsPerTour(env))
       .then(() => env.DB.prepare("ALTER TABLE tours ADD COLUMN image TEXT").run().catch(() => {}))
       .then(() => env.DB.prepare("ALTER TABLE tours ADD COLUMN summary TEXT").run().catch(() => {}))
       .then(() => env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)').run())
@@ -153,6 +154,25 @@ async function migrateChatSessions(env) {
     "CASE WHEN MAX(created_at) >= ?1 THEN NULL ELSE 'admin' END, MIN(created_at), MAX(created_at), CASE WHEN MAX(created_at) >= ?1 THEN NULL ELSE MAX(created_at) END " +
     "FROM messages WHERE session_id IS NULL GROUP BY user_id").bind(weekAgo).run();
   await env.DB.prepare('UPDATE messages SET session_id = (SELECT MAX(s.id) FROM chat_sessions s WHERE s.user_id = messages.user_id) WHERE session_id IS NULL').run();
+}
+
+/* Bảng reviews cũ có "user_id INTEGER NOT NULL UNIQUE" (mỗi khách một đánh giá) nên khách không đăng được đánh giá thứ hai.
+Worker chỉ CREATE TABLE IF NOT EXISTS, không chạy migration 0024, nên tự dựng lại bảng ở đây. Bảng đã đúng thì bỏ qua. */
+async function migrateReviewsPerTour(env) {
+  const row = await env.DB.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'reviews'").first();
+  if (!row || !/user_id\s+INTEGER\s+NOT\s+NULL\s+UNIQUE/i.test(row.sql || '')) {
+    return;
+  }
+  await env.DB.batch([
+    'DROP TABLE IF EXISTS reviews_per_tour',
+    'CREATE TABLE reviews_per_tour (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, rating INTEGER NOT NULL, destination TEXT, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT \'pending\', reply TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)',
+    'INSERT INTO reviews_per_tour (id, user_id, rating, destination, body, status, reply, created_at, updated_at) SELECT id, user_id, rating, destination, body, status, reply, created_at, updated_at FROM reviews',
+    'DROP TABLE reviews',
+    'ALTER TABLE reviews_per_tour RENAME TO reviews',
+    'CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status, created_at)',
+    'CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id)',
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_tour ON reviews(user_id, COALESCE(destination, ''))"
+  ].map(sql => env.DB.prepare(sql)));
 }
 
 export default {
