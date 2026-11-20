@@ -150,8 +150,12 @@
           err.textContent = t;
           err.hidden = false;
         }
-        if (mode === 'login' && mfa.passkeySupported()) {
+        if (mode === 'login') {
           var pk = document.createElement('button');
+          pk.hidden = true; // chỉ hiện khi trình duyệt hỗ trợ và quản trị chưa tắt passkey
+          mfa.passkeyOn().then(function (on) {
+            pk.hidden = !on;
+          });
           pk.type = 'button';
           pk.className = 'mfa-btn block';
           pk.textContent = 'Đăng nhập bằng passkey';

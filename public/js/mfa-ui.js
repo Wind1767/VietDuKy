@@ -106,6 +106,16 @@ Dùng: var mfa = vdkMfa.create('/api/auth/mfa');  (khách)   hoặc   vdkMfa.cre
         }
       });
     }
+    /* passkey có được dùng không: trình duyệt hỗ trợ và quản trị chưa tắt (cấu hình do máy chủ trả) */
+    var cfgP = null;
+    function passkeyOn() {
+      cfgP = cfgP || call('GET', '/config').catch(function () {
+        return {};
+      });
+      return cfgP.then(function (c) {
+        return c.passkey !== false && passkeySupported();
+      });
+    }
     function googleButton(box, onDone, onError, path) {
       return call('GET', '/config').then(function (cfg) {
         if (!cfg.google_client_id) {
@@ -556,7 +566,9 @@ Dùng: var mfa = vdkMfa.create('/api/auth/mfa');  (khách)   hoặc   vdkMfa.cre
       function draw() {
         clear(box);
         box.appendChild(totpSection());
-        box.appendChild(passkeySection());
+        if (state.passkey_enabled !== false) { // quản trị đã tắt passkey: ẩn cả phần thêm / xoá
+          box.appendChild(passkeySection());
+        }
         box.appendChild(googleSection());
       }
       render();
@@ -567,6 +579,7 @@ Dùng: var mfa = vdkMfa.create('/api/auth/mfa');  (khách)   hoặc   vdkMfa.cre
       post: post,
       googleButton: googleButton,
       passkeyLogin: passkeyLogin,
+      passkeyOn: passkeyOn,
       challengeUI: challengeUI,
       settingsUI: settingsUI,
       passkeySupported: passkeySupported,

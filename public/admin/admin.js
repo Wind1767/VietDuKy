@@ -474,7 +474,10 @@
         $('loginGoogle').remove();
       }
     });
-    if (mfaApi.passkeySupported()) {
+    mfaApi.passkeyOn().then(function (on) { // trình duyệt hỗ trợ và chưa bị tắt trong Cài đặt
+      if (!on) {
+        return;
+      }
       $('loginPasskey').hidden = false;
       show();
       $('loginPasskey').onclick = function () {
@@ -483,7 +486,7 @@
           fail(mfaApi.describe(ex));
         });
       };
-    }
+    });
   }
   setupQuickLogin();
 
@@ -2741,7 +2744,7 @@
       id: 'feat',
       icon: 'lock_open',
       title: 'Bật / tắt tính năng',
-      desc: 'Tắt tạm một tính năng mà không cần sửa code. Tắt là ẩn mọi thứ liên quan trên website, máy chủ chặn thật, và trang của tính năng đó chỉ hiện 404. Riêng Turnstile và xác minh email: tắt nghĩa là bỏ qua bước đó, không chặn khách.',
+      desc: 'Tắt tạm một tính năng mà không cần sửa code. Tắt là ẩn mọi thứ liên quan trên website, máy chủ chặn thật, và trang của tính năng đó chỉ hiện 404. Riêng Turnstile, xác minh email và passkey làm lớp hai: tắt nghĩa là bỏ qua bước đó, không chặn người dùng.',
       f: [
         ['feat_booking', 'Nhận đặt tour', 'b'], ['feat_register', 'Cho đăng ký tài khoản mới', 'b'], ['feat_chat', 'Khách nhắn tin (chat)', 'b'], ['feat_reviews', 'Khách gửi đánh giá', 'b'],
         ['feat_login', 'Đăng nhập + tài khoản của khách (tắt thì khách đặt tour không cần tài khoản; chat, yêu thích, hòm thư cũng tắt theo)', 'b'],
@@ -2760,6 +2763,10 @@
         ['feat_pages', 'Các trang tự tạo (/p/…)', 'b'],
         ['feat_share', 'Nút chia sẻ tour', 'b'],
         ['feat_filter', 'Thanh tìm kiếm / lọc / sắp xếp tour', 'b'],
+        ['feat_google', 'Đăng nhập / liên kết bằng Google (khách)', 'b'],
+        ['feat_google_admin', 'Đăng nhập / liên kết bằng Google (quản trị)', 'b'],
+        ['feat_passkey', 'Passkey (khách): đăng nhập, thêm mới, làm lớp hai', 'b'],
+        ['feat_passkey_admin', 'Passkey (quản trị): đăng nhập, thêm mới, làm lớp hai', 'b'],
         ['feat_turnstile', 'Xác minh chống spam Cloudflare Turnstile ở form khách', 'b'],
         ['feat_turnstile_admin', 'Xác minh Turnstile ở đăng nhập quản trị', 'b'],
         ['maint_on', 'CHẾ ĐỘ BẢO TRÌ (phủ kín trang khách, chặn đặt tour/đăng ký/chat/đánh giá)', 'b'], ['maint_text', 'Lời nhắn khi bảo trì', 'a']
@@ -2992,8 +2999,8 @@
           msg: 'Bật chế độ bảo trì sẽ phủ kín trang khách và chặn đặt tour, đăng ký, chat, đánh giá. Tiếp tục?',
           title: 'Bật bảo trì',
           ok: 'Bật bảo trì'
-        } : (dirty.feat_turnstile === false || dirty.feat_turnstile_admin === false || dirty.feat_email_verify === false) ? {
-          msg: 'Bạn đang tắt một lớp bảo vệ (xác minh Turnstile hoặc xác minh email). Khi tắt, bước đó được bỏ qua nên bot và tài khoản email giả sẽ dễ lọt vào hơn' +
+        } : (dirty.feat_turnstile === false || dirty.feat_turnstile_admin === false || dirty.feat_email_verify === false || dirty.feat_passkey === false || dirty.feat_passkey_admin === false) ? {
+          msg: 'Bạn đang tắt một lớp bảo vệ (xác minh Turnstile, xác minh email hoặc passkey làm lớp hai). Khi tắt, bước đó được bỏ qua nên bot và tài khoản email giả sẽ dễ lọt vào hơn' +
             (dirty.feat_turnstile_admin === false ? ', kể cả ở đăng nhập quản trị' : '') + '. Chỉ nên tắt khi dịch vụ đó đang lỗi. Tiếp tục?',
           title: 'Tắt lớp bảo vệ',
           ok: 'Tắt'

@@ -2,11 +2,32 @@
 ctx cho biết cách lấy phiên, tạo phiên và tìm người dùng của từng loại tài khoản (xem customer-auth.js và worker.js). */
 import { newNonce, checkNonce, verifyGoogleToken, putChallenge, peekChallenge, burnChallenge, bumpTries, mfaState, methodsOf, totpBegin, totpActivate, totpRemove, regenRecovery, checkSecondFactor, otpauthUri, rpOf, passkeyRegOptions, passkeyRegister, passkeyAuthOptions, passkeyAuthVerify } from './mfa.js';
 
+import { getSite } from './site-settings.js';
+
 const MFA_LIMIT = { max: 20, windowS: 900 }; // 20 lần thử xác minh / 15 phút / IP
+
+/* Công tắc đăng nhập Google / passkey (Cài đặt → Bật / tắt tính năng): khách theo feat_google / feat_passkey,
+quản trị theo bản *_admin. Tắt Google = không đăng nhập / liên kết bằng Google. Tắt passkey = không đăng nhập bằng
+passkey, không thêm passkey mới, và passkey không còn bị đòi làm lớp hai (bỏ qua luôn, không chặn). */
+export async function loginFlags(env, kind) {
+  const s = await getSite(env);
+  const sfx = kind === 'admin' ? '_admin' : '';
+  return { google: s['feat_google' + sfx] !== false, passkey: s['feat_passkey' + sfx] !== false };
+}
+async function needFlag(env, h, kind, which, msg) {
+  if (!(await loginFlags(env, kind))[which]) {
+    throw new h.HttpError(503, msg);
+  }
+}
+const GOOGLE_OFF = 'Đăng nhập bằng Google đang tạm tắt.';
+const PASSKEY_OFF = 'Passkey đang tạm tắt.';
 
 /* Sau khi mật khẩu đúng: nếu tài khoản bật lớp hai thì chưa cấp phiên, trả "vé" để nhập mã / dùng passkey. */
 export async function mfaGate(env, h, kind, uid) {
-  const methods = await methodsOf(env, kind, uid);
+  let methods = await methodsOf(env, kind, uid);
+  if (!(await loginFlags(env, kind)).passkey) {
+    methods = methods.filter((m) => m !== 'passkey'); // đã tắt passkey: không đòi passkey làm lớp hai
+  }
   if (!methods.length) {
     return null;
   }
@@ -23,12 +44,13 @@ export async function mfaGate(env, h, kind, uid) {
   });
 }
 
-export async function mfaConfig(env, h) {
-  const clientId = String(env.GOOGLE_CLIENT_ID || '').trim();
+export async function mfaConfig(env, h, kind) {
+  const f = await loginFlags(env, kind);
+  const clientId = f.google ? String(env.GOOGLE_CLIENT_ID || '').trim() : '';
   return h.json({
     google_client_id: clientId,
     nonce: clientId ? await newNonce(env) : '',
-    passkey: true
+    passkey: f.passkey
   });
 }
 
@@ -38,7 +60,7 @@ export async function mfaPublic(sub, request, env, url, ip, h, ctx) {
   const bad = (msg = 'Xác minh không thành công. Hãy thử lại.') => new h.HttpError(401, msg);
 
   if (sub === '/config' && request.method === 'GET') {
-    return mfaConfig(env, h);
+    return mfaConfig(env, h, kind);
   }
   if (request.method !== 'POST') {
     return null;
@@ -49,6 +71,7 @@ export async function mfaPublic(sub, request, env, url, ip, h, ctx) {
   }
 
   if (sub === '/google') {
+    await needFlag(env, h, kind, 'google', GOOGLE_OFF);
     await h.limit(env, 'mfa:' + ip, MFA_LIMIT);
     const b = await h.readJson(request);
     const clientId = String(env.GOOGLE_CLIENT_ID || '').trim();
@@ -89,6 +112,7 @@ export async function mfaPublic(sub, request, env, url, ip, h, ctx) {
   }
 
   if (sub === '/passkey/options') {
+    await needFlag(env, h, kind, 'passkey', PASSKEY_OFF);
     await h.limit(env, 'mfa:' + ip, MFA_LIMIT);
     const b = await h.readJson(request);
     let uid = 0;
@@ -103,6 +127,7 @@ export async function mfaPublic(sub, request, env, url, ip, h, ctx) {
   }
 
   if (sub === '/passkey/verify') {
+    await needFlag(env, h, kind, 'passkey', PASSKEY_OFF);
     await h.limit(env, 'mfa:' + ip, MFA_LIMIT);
     const b = await h.readJson(request);
     let want = 0, ticket = null;
@@ -153,11 +178,13 @@ export async function mfaSettings(sub, request, env, url, ip, h, ctx, user) {
 
   if (sub === '/security' && request.method === 'GET') {
     const s = await mfaState(env, kind, uid);
+    const f = await loginFlags(env, kind);
     return h.json({
       ...s,
       google: await ctx.googleLinked(user),
       has_password: ctx.hasPassword(user),
-      google_enabled: !!env.GOOGLE_CLIENT_ID
+      google_enabled: !!env.GOOGLE_CLIENT_ID && f.google,
+      passkey_enabled: f.passkey
     });
   }
   if (request.method !== 'POST') {
@@ -170,6 +197,7 @@ export async function mfaSettings(sub, request, env, url, ip, h, ctx, user) {
   await h.limit(env, 'mfa:' + ip, MFA_LIMIT);
 
   if (sub === '/google/link') { // đã đăng nhập bằng email: chứng minh quyền sở hữu tài khoản Google rồi liên kết
+    await needFlag(env, h, kind, 'google', GOOGLE_OFF);
     const b = await h.readJson(request);
     const clientId = String(env.GOOGLE_CLIENT_ID || '').trim();
     if (!clientId) {
@@ -246,9 +274,11 @@ export async function mfaSettings(sub, request, env, url, ip, h, ctx, user) {
     return h.json({ ok: true, recovery: await regenRecovery(env, kind, uid) });
   }
   if (sub === '/passkey/reg-options') {
+    await needFlag(env, h, kind, 'passkey', PASSKEY_OFF);
     return h.json(await passkeyRegOptions(env, kind, uid, user, rp));
   }
   if (sub === '/passkey/register') {
+    await needFlag(env, h, kind, 'passkey', PASSKEY_OFF);
     const b = await h.readJson(request);
     try {
       const k = await passkeyRegister(env, kind, uid, b, rp);
