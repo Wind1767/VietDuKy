@@ -2641,6 +2641,12 @@ a.kpi:hover {
   cursor: pointer;
   transition: background .35s;
   padding: 0;
+  /* nhãn dài không được làm công tắc co lại (núm rộng cố định 20px nên sẽ tràn ra ngoài) */
+  flex: none;
+}
+
+.row-sw > span {
+  min-width: 0;
 }
 
 .sw i {

@@ -120,3 +120,9 @@ test('Worker: trang của tính năng đã tắt trả 404, các trang khác v�
   assert.equal((await get('/tours')).status, 200, 'trang không gắn công tắc vẫn hiện');
   assert.equal((await get('/register')).status, 200, 'công tắc khác vẫn bật');
 });
+
+test('Công tắc .sw không co lại khi nhãn dài (núm rộng cố định nên sẽ tràn ra ngoài)', () => {
+  const css = readFileSync(new URL('../../public/admin/admin.css', import.meta.url), 'utf8');
+  const rule = css.match(/\n\.sw \{([^}]*)\}/)[1];
+  assert.match(rule, /flex:\s*none/);
+});
