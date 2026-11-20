@@ -148,7 +148,7 @@
     });
     set('#diem-den .sec-h h2', s.dest_title);
     set('#diem-den .sec-h p', s.dest_sub);
-    if (document.querySelector('.ph')) {
+    if (document.querySelector('.ph') && /^\/about\/?(\.html)?$/.test(location.pathname)) {
       set('.ph h1', s.about_hero_title);
       set('.ph p', s.about_hero_sub);
       var two = document.querySelector('.two .r');
