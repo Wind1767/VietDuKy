@@ -2744,7 +2744,7 @@
       desc: 'Tắt tạm một tính năng mà không cần sửa code. Tắt là ẩn mọi thứ liên quan trên website, máy chủ chặn thật, và trang của tính năng đó chỉ hiện 404. Riêng Turnstile và xác minh email: tắt nghĩa là bỏ qua bước đó, không chặn khách.',
       f: [
         ['feat_booking', 'Nhận đặt tour', 'b'], ['feat_register', 'Cho đăng ký tài khoản mới', 'b'], ['feat_chat', 'Khách nhắn tin (chat)', 'b'], ['feat_reviews', 'Khách gửi đánh giá', 'b'],
-        ['feat_login', 'Đăng nhập + trang tài khoản của khách', 'b'],
+        ['feat_login', 'Đăng nhập + tài khoản của khách (tắt thì khách đặt tour không cần tài khoản; chat, yêu thích, hòm thư cũng tắt theo)', 'b'],
         ['feat_email_verify', 'Bắt khách xác minh email khi đăng ký', 'b'],
         ['feat_bugreport', 'Báo lỗi website', 'b'],
         ['feat_upload', 'Khách tải ảnh đại diện lên (ImageKit)', 'b'],
@@ -2752,6 +2752,14 @@
         ['feat_compare', 'So sánh tour', 'b'],
         ['feat_coupons', 'Mã giảm giá', 'b'],
         ['feat_inbox', 'Hòm thư thông báo của khách', 'b'],
+        ['feat_forgot', 'Quên mật khẩu / đặt lại mật khẩu', 'b'],
+        ['feat_cancel', 'Khách tự huỷ đơn đặt tour', 'b'],
+        ['feat_votes', 'Bình chọn "hữu ích" cho đánh giá', 'b'],
+        ['feat_about', 'Trang Về chúng tôi', 'b'],
+        ['feat_tours', 'Trang danh sách Tour', 'b'],
+        ['feat_pages', 'Các trang tự tạo (/p/…)', 'b'],
+        ['feat_share', 'Nút chia sẻ tour', 'b'],
+        ['feat_filter', 'Thanh tìm kiếm / lọc / sắp xếp tour', 'b'],
         ['feat_turnstile', 'Xác minh chống spam Cloudflare Turnstile ở form khách', 'b'],
         ['feat_turnstile_admin', 'Xác minh Turnstile ở đăng nhập quản trị', 'b'],
         ['maint_on', 'CHẾ ĐỘ BẢO TRÌ (phủ kín trang khách, chặn đặt tour/đăng ký/chat/đánh giá)', 'b'], ['maint_text', 'Lời nhắn khi bảo trì', 'a']

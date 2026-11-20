@@ -6,9 +6,10 @@ compatibility_date = "2025-01-01"
 [assets]
 directory = "./public"
 binding = "ASSETS"
+not_found_handling = "404-page" # trang không tồn tại (và trang của tính năng đã tắt) hiện public/404.html
 # Trang của tính năng có công tắc (Cài đặt → Bật / tắt tính năng) cũng chạy qua Worker trước để trả 404 khi tắt:
 # xem PAGE_FLAG trong src/site-settings.js. Thêm trang mới có công tắc thì thêm cả ở đây.
-run_worker_first = ["/api/*", "/p/*", "/reviews*", "/inbox*", "/login*", "/account*", "/forgot*", "/reset*", "/register*", "/verify*", "/report*", "/contact*"]
+run_worker_first = ["/api/*", "/p/*", "/reviews*", "/inbox*", "/login*", "/account*", "/forgot*", "/reset*", "/register*", "/verify*", "/report*", "/contact*", "/about*", "/tours*"]
 
 # D1 đã tạo sẵn (vietduky).
 [[d1_databases]]

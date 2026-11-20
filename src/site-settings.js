@@ -83,6 +83,14 @@ export const DEFS = {
   feat_compare: ['b', 0, true],
   feat_coupons: ['b', 0, true],
   feat_inbox: ['b', 0, true],
+  feat_about: ['b', 0, true],
+  feat_tours: ['b', 0, true],
+  feat_pages: ['b', 0, true],
+  feat_forgot: ['b', 0, true],
+  feat_cancel: ['b', 0, true],
+  feat_votes: ['b', 0, true],
+  feat_share: ['b', 0, true],
+  feat_filter: ['b', 0, true],
   maint_on: ['b', 0, false], maint_text: ['s', 240, 'Website đang được bảo trì, vui lòng quay lại sau ít phút.'],
   // SEO
   meta_title: ['s', 70, ''], meta_desc: ['s', 200, ''],
@@ -116,22 +124,30 @@ export function dropSiteCache() {
 xem run_worker_first trong wrangler.toml). Thêm trang mới: thêm vào đây và vào run_worker_first. */
 export const PAGE_FLAG = {
   '/reviews': 'feat_reviews',
-  '/inbox': 'feat_inbox',
+  '/inbox': ['feat_inbox', 'feat_login'], // hòm thư cần tài khoản
   '/login': 'feat_login',
   '/account': 'feat_login',
-  '/forgot': 'feat_login',
-  '/reset': 'feat_login',
-  '/register': 'feat_register',
+  '/forgot': ['feat_forgot', 'feat_login'],
+  '/reset': ['feat_forgot', 'feat_login'],
+  '/register': ['feat_register', 'feat_login'],
   '/verify': 'feat_email_verify',
   '/report': 'feat_bugreport',
-  '/contact': 'feat_booking'
+  '/contact': 'feat_booking',
+  '/about': 'feat_about',
+  '/tours': 'feat_tours'
 };
+/* Các trang tự tạo /p/<tên> dùng chung một công tắc */
+export const PAGES_FLAG = 'feat_pages';
 
 /* Trả về tên công tắc đang tắt của trang này, hoặc '' nếu trang được phép hiện. */
 export async function pageOffFlag(env, pathname) {
   const key = pathname.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
-  const flag = PAGE_FLAG[key];
-  return flag && (await getSite(env))[flag] === false ? flag : '';
+  const flags = pathname.startsWith('/p/') ? [PAGES_FLAG] : [].concat(PAGE_FLAG[key] || []);
+  if (!flags.length) {
+    return '';
+  }
+  const site = await getSite(env);
+  return flags.find((f) => site[f] === false) || '';
 }
 
 export async function getSite(env) {

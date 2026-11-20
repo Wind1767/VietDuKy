@@ -241,7 +241,7 @@
   }
 
   /* Công tắc tính năng phía khách: tắt thì ẩn phần giao diện liên quan (class trên <html>, luật CSS ở components.css) */
-  var FEATS = ['upload', 'login', 'register', 'chat', 'reviews', 'booking', 'bugreport', 'favorites', 'compare', 'coupons', 'inbox', 'email_verify'];
+  var FEATS = ['upload', 'login', 'register', 'chat', 'reviews', 'booking', 'bugreport', 'favorites', 'compare', 'coupons', 'inbox', 'email_verify', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter'];
   function features(s) {
     var root = document.documentElement;
     FEATS.forEach(function (k) {

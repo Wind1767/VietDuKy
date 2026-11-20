@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 
 test('Các công tắc mới đều bật sẵn theo mặc định', () => {
-  for (const k of ['feat_login', 'feat_bugreport', 'feat_upload', 'feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify', 'feat_favorites', 'feat_compare', 'feat_coupons', 'feat_inbox']) {
+  for (const k of ['feat_login', 'feat_bugreport', 'feat_upload', 'feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify', 'feat_favorites', 'feat_compare', 'feat_coupons', 'feat_inbox', 'feat_about', 'feat_tours', 'feat_pages', 'feat_forgot', 'feat_cancel', 'feat_votes', 'feat_share', 'feat_filter']) {
     assert.deepEqual(DEFS[k], ['b', 0, true], k);
   }
 });
@@ -83,8 +83,10 @@ test('Trang của tính năng đã tắt bị 404, bật lại thì hiện bình
 test('Mỗi trang có công tắc đều tồn tại và được Worker chạy trước (run_worker_first)', () => {
   const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
   const first = toml.match(/run_worker_first\s*=\s*\[([^\]]*)\]/)[1];
-  for (const [path, flag] of Object.entries(PAGE_FLAG)) {
-    assert.ok(DEFS[flag], flag + ' phải có trong DEFS');
+  for (const [path, flags] of Object.entries(PAGE_FLAG)) {
+    for (const flag of [].concat(flags)) {
+      assert.ok(DEFS[flag], flag + ' phải có trong DEFS');
+    }
     assert.ok(existsSync(new URL('../../public' + path + '.html', import.meta.url)), path + '.html');
     assert.ok(first.includes('"' + path + '*"'), path + ' thiếu trong run_worker_first');
   }
@@ -93,7 +95,7 @@ test('Mỗi trang có công tắc đều tồn tại và được Worker chạy 
 test('Mỗi công tắc phía khách đều có luật ẩn trong CSS và có tên trong site.js', () => {
   const css = readFileSync(new URL('../../public/css/components.css', import.meta.url), 'utf8');
   const js = readFileSync(new URL('../../public/js/site.js', import.meta.url), 'utf8');
-  for (const k of ['upload', 'login', 'register', 'email_verify', 'chat', 'reviews', 'inbox', 'bugreport', 'favorites', 'compare', 'coupons', 'booking']) {
+  for (const k of ['upload', 'login', 'register', 'email_verify', 'chat', 'reviews', 'inbox', 'bugreport', 'favorites', 'compare', 'coupons', 'booking', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter']) {
     assert.ok(css.includes('.no-' + k + ' '), 'thiếu luật .no-' + k);
     assert.ok(js.includes("'" + k + "'"), 'site.js thiếu ' + k);
   }
@@ -118,11 +120,37 @@ test('Worker: trang của tính năng đã tắt trả 404, các trang khác v�
     assert.equal((await get(path)).status, 404, path);
   }
   assert.equal((await get('/tours')).status, 200, 'trang không gắn công tắc vẫn hiện');
-  assert.equal((await get('/register')).status, 200, 'công tắc khác vẫn bật');
+  assert.equal((await get('/register')).status, 404, 'đăng ký cần tài khoản nên tắt theo đăng nhập');
+  assert.equal((await get('/about')).status, 200, 'công tắc khác vẫn bật');
 });
 
 test('Công tắc .sw không co lại khi nhãn dài (núm rộng cố định nên sẽ tràn ra ngoài)', () => {
   const css = readFileSync(new URL('../../public/admin/admin.css', import.meta.url), 'utf8');
   const rule = css.match(/\n\.sw \{([^}]*)\}/)[1];
   assert.match(rule, /flex:\s*none/);
+});
+
+test('Trang cần nhiều công tắc: tắt một trong số đó là 404; trang tự tạo /p/ có công tắc riêng', async () => {
+  assert.equal(await pageOffFlag(env, '/inbox'), '');
+  setFlag('feat_login', false);
+  assert.equal(await pageOffFlag(env, '/inbox'), 'feat_login', 'hòm thư cần tài khoản nên tắt theo đăng nhập');
+  assert.equal(await pageOffFlag(env, '/forgot'), 'feat_login');
+  assert.equal(await pageOffFlag(env, '/register'), 'feat_login');
+  setFlag('feat_login', true);
+  setFlag('feat_forgot', false);
+  assert.equal(await pageOffFlag(env, '/reset'), 'feat_forgot');
+  assert.equal(await pageOffFlag(env, '/login'), '');
+  assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), '');
+  setFlag('feat_pages', false);
+  assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), 'feat_pages');
+  assert.equal(await pageOffFlag(env, '/p/gioi-thieu/'), 'feat_pages');
+});
+
+test('Trang 404 riêng: có noindex, dùng đường dẫn tuyệt đối và được cấu hình làm trang không tìm thấy', () => {
+  const html = readFileSync(new URL('../../public/404.html', import.meta.url), 'utf8');
+  const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
+  assert.match(html, /name="robots"/);
+  assert.match(html, /noindex/);
+  assert.doesNotMatch(html, /(?:href|src)="(?!\/|https?:|#|data:)[^"]+"/, 'trang này hiện ở mọi URL nên không dùng đường dẫn tương đối');
+  assert.match(toml, /not_found_handling\s*=\s*"404-page"/);
 });

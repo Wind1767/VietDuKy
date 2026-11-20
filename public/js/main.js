@@ -196,7 +196,7 @@
 
   /* Đã đăng nhập thì "Đăng nhập" đổi thành tên người dùng, dẫn tới trang tài khoản */
   var acctLink = document.getElementById('acctLink');
-  if (acctLink && window.fetch) {
+  if (acctLink && window.fetch && !(window.VDK_SITE && window.VDK_SITE.feat_login === false)) {
     fetch('/api/auth/me', { credentials: 'same-origin' })
       .then(function (r) {
       return r.ok ? r.json() : null;
@@ -886,6 +886,10 @@
         return r.json();
       }).then(function (d) {
         if (!d.user) {
+          if (d.why === 'login_off') { // quản trị đã tắt đăng nhập: khách đặt tour không cần tài khoản, chỉ để lại tên + SĐT (+ email nếu muốn)
+            contactForm.classList.add('guest');
+            return;
+          }
           showGate();
           return;
         }

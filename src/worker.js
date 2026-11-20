@@ -189,13 +189,14 @@ export default {
     const url = new URL(request.url);
     try {
       if (!url.pathname.startsWith('/api/')) {
+        /* Trang của tính năng đã tắt: trả đúng trang 404 (public/404.html), giống hệt trang không tồn tại.
+        Hỏi một đường dẫn không có thật để nền tảng tự trả 404.html với mã 404 (not_found_handling = "404-page"). */
+        if (await pageOffFlag(env, url.pathname)) {
+          return env.ASSETS.fetch(new Request(new URL('/__tinh-nang-da-tat__', url), { method: 'GET', headers: request.headers }));
+        }
         // Trang tự tạo: /p/ten-trang dùng chung một khung page.html, nội dung nạp qua /api/pages/ten-trang
         if (/^\/p\/[a-z0-9-]+\/?$/.test(url.pathname)) {
           return env.ASSETS.fetch(new Request(new URL('/page', url), request));
-        }
-        /* Trang của tính năng đã tắt: trả 404 y như trang không tồn tại (hỏi một đường dẫn không có thật để lấy đúng 404 của nền tảng) */
-        if (await pageOffFlag(env, url.pathname)) {
-          return env.ASSETS.fetch(new Request(new URL('/__tinh-nang-da-tat__', url), { method: 'GET', headers: request.headers }));
         }
         return env.ASSETS.fetch(request);
       }
@@ -273,6 +274,7 @@ async function route(request, env, url, ctx) {
   {
     const pm = pathname.match(/^\/api\/pages\/([a-z0-9-]+)$/);
     if (pm && method === 'GET') {
+      await requireFlag(env, 'feat_pages', helpers, 'Không tìm thấy.');
       return publicPage(env, helpers, pm[1]);
     }
   }
@@ -293,7 +295,13 @@ async function route(request, env, url, ctx) {
     }
   }
   /* Công tắc ẩn tính năng: khi tắt, máy chủ từ chối luôn (giao diện đã ẩn nút tương ứng) */
-  if (pathname === '/api/auth/favorite' || pathname === '/api/auth/favorites') {
+  if (pathname === '/api/auth/forgot' || pathname === '/api/auth/reset') {
+    await requireFlag(env, 'feat_forgot', helpers, 'Tính năng quên mật khẩu đang tạm tắt.');
+  } else if (pathname === '/api/auth/bookings/cancel') {
+    await requireFlag(env, 'feat_cancel', helpers, 'Khách tự huỷ đơn đang tạm tắt. Vui lòng gọi hotline.');
+  } else if (/^\/api\/reviews\/\d+\/helpful$/.test(pathname)) {
+    await requireFlag(env, 'feat_votes', helpers, 'Bình chọn hữu ích đang tạm tắt.');
+  } else if (pathname === '/api/auth/favorite' || pathname === '/api/auth/favorites') {
     await requireFlag(env, 'feat_favorites', helpers, 'Tính năng yêu thích đang tạm tắt.');
   } else if (pathname === '/api/inbox' || pathname.startsWith('/api/inbox/')) {
     await requireFlag(env, 'feat_inbox', helpers, 'Hòm thư thông báo đang tạm tắt.');
@@ -608,13 +616,15 @@ async function createBooking(request, env, ip, h) {
     throw new HttpError(403, 'Yêu cầu không hợp lệ.');
   }
 
-  // Bắt buộc có tài khoản đã xác minh email mới đặt được đơn
+  // Cần tài khoản đã xác minh email mới đặt được đơn. Riêng khi quản trị tắt đăng nhập thì ai cũng đặt được
+  // (đơn không gắn tài khoản, gửi thẳng cho quản trị).
   let user = null;
   try {
     user = await currentUser(request, env, { HttpError });
   } catch { /* chưa cấu hình khoá phiên: coi như chưa đăng nhập */
   }
-  if (!user) {
+  const guest = !user && (await getSite(env)).feat_login === false;
+  if (!user && !guest) {
     throw new HttpError(401, 'Bạn cần đăng nhập để đặt tour.', undefined, 'login_required');
   }
 
@@ -626,8 +636,11 @@ async function createBooking(request, env, ip, h) {
     return json({ ok: true });
   }
 
-  const name = vName(clean(b.name, 80) || user.name);
-  const phone = vPhone(clean(b.phone, 20) || user.phone || '');
+  const name = vName(clean(b.name, 80) || (user ? user.name : ''));
+  const phone = vPhone(clean(b.phone, 20) || (user ? user.phone : '') || '');
+  /* khách không đăng nhập: email là tuỳ chọn (để nhận thư xác nhận), SĐT mới là bắt buộc */
+  const guestEmail = guest ? clean(b.email, 254).toLowerCase() : '';
+  const email = user ? user.email : (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(guestEmail) ? guestEmail : '');
   const destination = await vDestAny(env, b.destination);
   const date = vDate(b.date);
   const people = vPeople(b.people);
@@ -643,7 +656,7 @@ async function createBooking(request, env, ip, h) {
   }
   const now = Date.now();
   await env.DB.prepare('INSERT INTO bookings (created_at, updated_at, name, phone, destination, depart_date, people, message, source, user_id, coupon, discount) ' +
-    'VALUES (?1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)').bind(now, name, phone, destination || null, date, people, message || null, source, user.id, cp ? cp.c.code : null, cp ? cp.discount : null).run();
+    'VALUES (?1, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)').bind(now, name, phone, destination || null, date, people, message || null, source, user ? user.id : null, cp ? cp.c.code : null, cp ? cp.discount : null).run();
   const cpRow = cp ? [['Mã giảm giá', cp.c.code +
         (cp.discount ? ' (−' +
           String(cp.discount).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ)' : '')]] : [];
@@ -651,19 +664,21 @@ async function createBooking(request, env, ip, h) {
   const tv = {
     ten: name.split(/\s+/).pop(),
     ho_ten: name,
-    email: user.email,
+    email,
     diem_den: destination || ''
   };
   h.adminMail(h.tpl('booking_admin', tv, {
-    rows: [['Họ tên', name], ['SĐT', phone], ['Email', user.email], ['Điểm đến', destination || ''], ['Ngày đi', date ? date.split('-').reverse().join('/') : ''], ['Số người', people ? String(people) : ''], ...cpRow],
+    rows: [['Họ tên', name], ['SĐT', phone], ['Email', email || (guest ? 'Không có (khách không đăng nhập)' : '')], ['Điểm đến', destination || ''], ['Ngày đi', date ? date.split('-').reverse().join('/') : ''], ['Số người', people ? String(people) : ''], ...cpRow],
     quote: message || '',
     link: h.site + '/admin/#/bookings'
   }));
-  h.mail(user.email, h.tpl('booking_user', tv, {
-    rows: [['Điểm đến', destination || 'Chưa chọn'], ['Ngày đi', date ? date.split('-').reverse().join('/') : ''], ['Số người', people ? String(people) : ''], ['SĐT liên hệ', phone], ...cpRow],
-    quote: message || '',
-    link: h.site + '/account'
-  }));
+  if (email) { // khách không đăng nhập và không để email thì không có thư xác nhận
+    h.mail(email, h.tpl('booking_user', tv, {
+      rows: [['Điểm đến', destination || 'Chưa chọn'], ['Ngày đi', date ? date.split('-').reverse().join('/') : ''], ['Số người', people ? String(people) : ''], ['SĐT liên hệ', phone], ...cpRow],
+      quote: message || '',
+      link: h.site + (user ? '/account' : '')
+    }));
+  }
   return json({ ok: true }, 201);
 }
 

@@ -4,7 +4,7 @@
 - kết thúc phiên bất cứ lúc nào, xem lại các phiên cũ ở mục lịch sử. */
 (function () {
   'use strict';
-  if (document.getElementById('vdkChat') || !window.fetch || (window.VDK_SITE && window.VDK_SITE.feat_chat === false)) {
+  if (document.getElementById('vdkChat') || !window.fetch || (window.VDK_SITE && (window.VDK_SITE.feat_chat === false || window.VDK_SITE.feat_login === false))) {
     return; // đã có khung chat, hoặc quản trị đã tắt chat
   }
 

@@ -99,12 +99,13 @@ Kiểm tra ở rộng ~360px: bảng so sánh tour (`.x-table`), thanh `.x-tray`
 
 ## Công tắc tính năng (Cài đặt → Bật / tắt tính năng)
 - Cờ `feat_*` nằm trong `DEFS` (`src/site-settings.js`), mặc định bật. Có hai loại:
-  - **Tính năng** (đặt tour, đăng ký, đăng nhập, chat, đánh giá, hòm thư, báo lỗi, tải ảnh, yêu thích, so sánh, mã giảm giá): tắt thì ẩn giao diện, máy chủ chặn (503), và trang của nó trả 404.
+  - **Tính năng** (đặt tour, đăng ký, đăng nhập, chat, đánh giá, hòm thư, báo lỗi, tải ảnh, yêu thích, so sánh, mã giảm giá, quên mật khẩu, huỷ đơn, bình chọn hữu ích, trang Về chúng tôi / Tour / trang tự tạo, chia sẻ, lọc tour): tắt thì ẩn giao diện, máy chủ chặn (503), và trang của nó trả 404.
   - **Lớp bảo vệ** (`feat_turnstile`, `feat_turnstile_admin`, `feat_email_verify`): tắt thì bỏ qua bước đó, không chặn khách. Cả ba thuộc nhóm quyền `maint` (`RESTRICTED`) và có hộp xác nhận khi tắt.
 - Máy chủ: `requireFeature` (bị bảo trì chặn theo) cho đặt tour/đăng ký/chat/đánh giá; `requireFlag` chỉ xét đúng cờ, dùng cho các cờ còn lại (khối `requireFlag` trong `worker.js`, `imagekit.js`).
-- Trang 404: `PAGE_FLAG` (`site-settings.js`) ánh xạ trang → cờ; `worker.js` chạy trước các trang đó (`run_worker_first` trong `wrangler.toml`) và hỏi một đường dẫn không có thật để trả đúng 404 của nền tảng. Thêm trang có công tắc: thêm vào `PAGE_FLAG` **và** `run_worker_first` (có test canh).
-- Giao diện khách: `site.js` (`features`, danh sách `FEATS`) bật class `no-<tên>` trên `<html>`; luật ẩn nằm trong `components.css`. `turnstile.js` đọc `window.VDK_SITE` (đăng nhập quản trị tự đọc `/api/site`).
-- Thêm công tắc mới: `DEFS`, mục `feat` trong `admin.js`, chặn ở máy chủ, luật `.no-<tên>` + `FEATS`, và test ở `tests/unit/feature-toggles.test.mjs`.
+- **Tắt đăng nhập (`feat_login`)**: `currentUser` luôn trả null (không nhận phiên nào, `/api/auth/me` báo `why: 'login_off'`), nên chat, yêu thích, hòm thư, viết đánh giá, huỷ đơn đều không dùng được và bị ẩn theo. Riêng đặt tour vẫn mở nếu `feat_booking` bật: `createBooking` nhận đơn không gắn tài khoản (`user_id` NULL), bắt buộc tên + SĐT, email tuỳ chọn (ô `.guest-only` trong `contact.html`).
+- Trang 404: `PAGE_FLAG` (`site-settings.js`, giá trị là một cờ hoặc mảng cờ) ánh xạ trang → cờ; `worker.js` chạy trước các trang đó (`run_worker_first` trong `wrangler.toml`) và hỏi một đường dẫn không có thật để nền tảng trả `public/404.html` (`not_found_handling = "404-page"`). Trang 404 dùng đường dẫn tuyệt đối vì hiện ở mọi URL. Thêm trang có công tắc: thêm vào `PAGE_FLAG` **và** `run_worker_first` (có test canh).
+- Giao diện khách: `site.js` (`features`, danh sách `FEATS`) bật class `no-<tên>` trên `<html>`; luật ẩn nằm trong `components.css` (dùng `!important` để thắng luật hiển thị sẵn có). `turnstile.js` đọc `window.VDK_SITE` (đăng nhập quản trị tự đọc `/api/site`).
+- Thêm công tắc mới: `DEFS`, mục `feat` trong `admin.js`, chặn ở máy chủ, luật `.no-<tên>` + `FEATS`, và test ở `tests/unit/feature-toggles.test.mjs` / `guest-booking.test.mjs`.
 
 ## Khi giao việc
 Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) nếu người dùng yêu cầu, không zip cả dự án.

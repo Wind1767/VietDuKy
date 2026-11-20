@@ -1359,16 +1359,22 @@ form.ct .pw input {
 /* Công tắc tính năng (Cài đặt → Bật / tắt tính năng): site.js gắn class no-<tên> lên <html> khi một tính năng bị tắt.
 Tắt thì ẩn mọi thứ liên quan; máy chủ cũng chặn, và trang của tính năng đó trả 404 (PAGE_FLAG trong src/site-settings.js). */
 .ts-box[hidden] {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* tải ảnh đại diện */
 .no-upload #avBtn,
 .no-upload #avFile {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
-/* đăng nhập + tài khoản */
+/* đăng nhập + tài khoản (chat, yêu thích, hòm thư, viết đánh giá đều cần tài khoản nên ẩn theo) */
+.no-login .navlogout,
+.no-login li:has(> .navlogout),
+.no-login .acct-out,
+.no-login #vdkChat,
+.no-login .fav-btn,
+.no-login #rvWrite,
 .no-login a[href^="/login"],
 .no-login a[href^="/account"],
 .no-login a[href^="/forgot"],
@@ -1378,32 +1384,32 @@ Tắt thì ẩn mọi thứ liên quan; máy chủ cũng chặn, và trang của
 .no-login li:has(> #acctLink),
 .no-login .bell,
 .no-login li:has(> .bell) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* đăng ký */
 .no-register a[href^="/register"],
 .no-register li:has(> a[href^="/register"]) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* xác minh email: bỏ ô "gửi lại email" */
 .no-email_verify .auth-resend,
 .no-email_verify a[href^="/verify"],
 .no-email_verify li:has(> a[href^="/verify"]) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* chat */
 .no-chat #vdkChat {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* đánh giá */
 .no-reviews [data-block="reviews"],
 .no-reviews a[href^="/reviews"],
 .no-reviews li:has(> a[href^="/reviews"]) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* hòm thư */
@@ -1411,33 +1417,54 @@ Tắt thì ẩn mọi thứ liên quan; máy chủ cũng chặn, và trang của
 .no-inbox .bell,
 .no-inbox li:has(> a[href^="/inbox"]),
 .no-inbox li:has(> .bell) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* báo lỗi */
 .no-bugreport .bugrow,
 .no-bugreport a[href^="/report"],
 .no-bugreport li:has(> a[href^="/report"]) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* yêu thích */
 .no-favorites .fav-btn,
 .no-favorites .orders:has(#favs) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
+}
+
+/* trang Về chúng tôi, trang Tour, trang tự tạo, quên mật khẩu */
+.no-about a[href^="/about"],
+.no-about li:has(> a[href^="/about"]),
+.no-tours a[href^="/tours"],
+.no-tours li:has(> a[href^="/tours"]),
+.no-pages a[href^="/p/"],
+.no-pages li:has(> a[href^="/p/"]),
+.no-forgot a[href^="/forgot"],
+.no-forgot li:has(> a[href^="/forgot"]) {
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
+}
+
+/* khách tự huỷ đơn, bình chọn hữu ích, nút chia sẻ tour, thanh lọc/sắp xếp tour */
+.no-cancel [data-cancel],
+.no-votes .rv-help,
+.no-share .x-share,
+.no-filter .x-bar,
+.no-filter .x-empty {
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* so sánh tour */
 .no-compare .x-cmp,
 .no-compare .x-tray {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* mã giảm giá */
 .no-coupons .cp-hint,
 .no-coupons input[name="coupon"],
 .no-coupons :is(label, div, p):has(> input[name="coupon"]) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 /* đặt tour: ẩn các nút dẫn tới trang đặt tour; thẻ dẫn tới trang đó thì không bấm được nữa */
@@ -1446,13 +1473,23 @@ Tắt thì ẩn mọi thứ liên quan; máy chủ cũng chặn, và trang của
 .no-booking a[href^="/contact?"],
 .no-booking [data-block="cta"],
 .no-booking li:has(> a[href^="/contact"]:not(.card)) {
-  display: none;
+  display: none !important; /* thắng mọi luật hiển thị sẵn có của từng phần tử */
 }
 
 .no-booking a.card[href^="/contact"],
 .no-booking [data-block="tours"] a[href^="/contact"] {
   pointer-events: none;
   cursor: default;
+}
+
+/* ô email chỉ dành cho khách đặt tour khi không có tài khoản (quản trị tắt đăng nhập) */
+.ct .guest-only {
+  display: none;
+}
+
+.no-login .ct .guest-only,
+.ct.guest .guest-only {
+  display: block;
 }
 
 /* avatar ảnh trong đánh giá */

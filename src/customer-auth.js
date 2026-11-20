@@ -154,6 +154,10 @@ export async function currentUser(request, env, h, diag) {
     }
     return null;
   };
+  /* Quản trị tắt đăng nhập: không nhận phiên nào nữa (khách đặt tour không cần tài khoản, xem createBooking) */
+  if ((await getSite(env)).feat_login === false) {
+    return why('login_off');
+  }
   const token = readToken(request);
   if (!token) {
     return why('no_cookie');
