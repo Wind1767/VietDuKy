@@ -98,9 +98,13 @@ Kiểm tra ở rộng ~360px: bảng so sánh tour (`.x-table`), thanh `.x-tray`
 - Admin Tổng quan nhớ khoảng thời gian và chỉ số đã chọn.
 
 ## Công tắc tính năng (Cài đặt → Bật / tắt tính năng)
-- Cờ `feat_*` nằm trong `DEFS` (`src/site-settings.js`), mặc định bật. Máy chủ chặn thật: `requireFeature` (bị bảo trì chặn theo) dùng cho đặt tour/đăng ký/chat/đánh giá trong `worker.js`; `requireFlag` chỉ xét đúng cờ, dùng cho `feat_login`, `feat_bugreport`, `feat_upload` (khách tải ảnh đại diện, `imagekit.js`).
-- `feat_turnstile` tắt xác minh Cloudflare ở form khách (`verifyTurnstile` bỏ qua và xoá token). Đăng nhập quản trị (`admin_login`) luôn bắt buộc, không tắt được. Cờ này thuộc nhóm quyền `maint` (`RESTRICTED`) và có hộp xác nhận khi tắt.
-- Phía khách: `site.js` (`features`) bật class `no-upload` trên `<html>` và gọi `vdkTS.refresh()`; `turnstile.js` đọc `window.VDK_SITE.feat_turnstile` để ẩn khung và coi như đã xác minh. Thêm công tắc mới: thêm vào `DEFS`, mục `feat` trong `admin.js`, chặn ở máy chủ, và test ở `tests/unit/feature-toggles.test.mjs`.
+- Cờ `feat_*` nằm trong `DEFS` (`src/site-settings.js`), mặc định bật. Có hai loại:
+  - **Tính năng** (đặt tour, đăng ký, đăng nhập, chat, đánh giá, hòm thư, báo lỗi, tải ảnh, yêu thích, so sánh, mã giảm giá): tắt thì ẩn giao diện, máy chủ chặn (503), và trang của nó trả 404.
+  - **Lớp bảo vệ** (`feat_turnstile`, `feat_turnstile_admin`, `feat_email_verify`): tắt thì bỏ qua bước đó, không chặn khách. Cả ba thuộc nhóm quyền `maint` (`RESTRICTED`) và có hộp xác nhận khi tắt.
+- Máy chủ: `requireFeature` (bị bảo trì chặn theo) cho đặt tour/đăng ký/chat/đánh giá; `requireFlag` chỉ xét đúng cờ, dùng cho các cờ còn lại (khối `requireFlag` trong `worker.js`, `imagekit.js`).
+- Trang 404: `PAGE_FLAG` (`site-settings.js`) ánh xạ trang → cờ; `worker.js` chạy trước các trang đó (`run_worker_first` trong `wrangler.toml`) và hỏi một đường dẫn không có thật để trả đúng 404 của nền tảng. Thêm trang có công tắc: thêm vào `PAGE_FLAG` **và** `run_worker_first` (có test canh).
+- Giao diện khách: `site.js` (`features`, danh sách `FEATS`) bật class `no-<tên>` trên `<html>`; luật ẩn nằm trong `components.css`. `turnstile.js` đọc `window.VDK_SITE` (đăng nhập quản trị tự đọc `/api/site`).
+- Thêm công tắc mới: `DEFS`, mục `feat` trong `admin.js`, chặn ở máy chủ, luật `.no-<tên>` + `FEATS`, và test ở `tests/unit/feature-toggles.test.mjs`.
 
 ## Khi giao việc
 Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) nếu người dùng yêu cầu, không zip cả dự án.

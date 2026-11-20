@@ -1,10 +1,40 @@
 /* Cloudflare Turnstile (widget đã tạo sẵn). Site key công khai; secret chỉ ở Worker. */
 (function () {
   'use strict';
-  var KEY = '0x4AAAAAAGBeoGyZaT3JewGo', loading = null, ids = new WeakMap(), acts = new WeakMap();
-  /* Quản trị tắt xác minh ở form khách (feat_turnstile). Đăng nhập quản trị luôn bắt buộc. */
+  var KEY = '0x4AAAAAAGBeoGyZaT3JewGo', loading = null, ids = new WeakMap(), acts = new WeakMap(), adminCfg = null;
+  /* Cài đặt website (công khai, không có bí mật): site.js nạp sẵn cho trang khách; trang quản trị tự đọc /api/site. */
+  function flags() {
+    return window.VDK_SITE && window.VDK_SITE.site_name ? window.VDK_SITE : adminCfg;
+  }
+  /* Quản trị tắt xác minh thì bỏ qua luôn: feat_turnstile cho form khách, feat_turnstile_admin cho đăng nhập quản trị */
   function off(action) {
-    return action !== 'admin_login' && !!window.VDK_SITE && window.VDK_SITE.feat_turnstile === false;
+    var f = flags();
+    return !!f && (action === 'admin_login' ? f.feat_turnstile_admin : f.feat_turnstile) === false;
+  }
+  /* Chờ cài đặt (tối đa 2,5 giây) để không dựng khung xác minh rồi mới ẩn. Không đọc được thì coi như đang bật. */
+  function whenFlags(action, cb) {
+    if (flags()) {
+      cb();
+      return;
+    }
+    var done = false, fin = function () {
+      if (!done) {
+        done = true;
+        document.removeEventListener('vdk:site', fin);
+        cb();
+      }
+    };
+    setTimeout(fin, 2500);
+    if (action === 'admin_login' && window.fetch) {
+      fetch('/api/site').then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (d) {
+        adminCfg = d && d.site || null;
+        fin();
+      }).catch(fin);
+    } else {
+      document.addEventListener('vdk:site', fin);
+    }
   }
   function load() {
     if (window.turnstile) {
@@ -29,34 +59,37 @@
   var api = window.vdkTS = {
     mount: function (el, action) {
       var box = boxOf(el);
-      if (!box || ids.has(box)) {
+      if (!box || ids.has(box) || acts.has(box)) {
         return;
       }
       acts.set(box, action || box.dataset.action || '');
-      if (off(acts.get(box))) {
-        box.hidden = true;
-        return;
-      }
-      ids.set(box, null);
-      load().then(function () {
-        if (!window.turnstile) {
-          box.textContent = 'Không tải được khung xác minh. Hãy kiểm tra mạng rồi tải lại trang.';
+      whenFlags(acts.get(box), function () {
+        if (off(acts.get(box))) {
+          box.hidden = true;
           return;
         }
-        ids.set(box, window.turnstile.render(box, {
-          sitekey: KEY,
-          action: action || box.dataset.action,
-          theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
-          callback: function () {
-            box.dataset.ok = '1';
-          },
-          'expired-callback': function () {
-            box.dataset.ok = '';
-          },
-          'error-callback': function () {
-            box.dataset.ok = '';
+        box.hidden = false;
+        ids.set(box, null);
+        load().then(function () {
+          if (!window.turnstile) {
+            box.textContent = 'Không tải được khung xác minh. Hãy kiểm tra mạng rồi tải lại trang.';
+            return;
           }
-        }));
+          ids.set(box, window.turnstile.render(box, {
+            sitekey: KEY,
+            action: acts.get(box),
+            theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
+            callback: function () {
+              box.dataset.ok = '1';
+            },
+            'expired-callback': function () {
+              box.dataset.ok = '';
+            },
+            'error-callback': function () {
+              box.dataset.ok = '';
+            }
+          }));
+        });
       });
     },
     token: function (el) {
@@ -67,11 +100,16 @@
       var b = boxOf(el);
       return (!!b && off(acts.get(b) || b.dataset.action || '')) || !!api.token(el);
     },
-    /* gọi lại khi cài đặt website tải xong: ẩn các khung đã tạo nếu xác minh đang tắt */
+    /* gọi lại khi cài đặt website tải xong: ẩn khung nếu xác minh đang tắt, dựng lại nếu vừa được bật */
     refresh: function () {
       document.querySelectorAll('.ts-box').forEach(function (b) {
-        if (off(acts.get(b) || b.dataset.action || '')) {
+        var act = acts.get(b) || b.dataset.action || '';
+        if (off(act)) {
           b.hidden = true;
+        } else if (b.hidden && !ids.has(b)) {
+          b.hidden = false;
+          acts.delete(b);
+          api.mount(b, act);
         }
       });
     },

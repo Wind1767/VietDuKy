@@ -77,6 +77,12 @@ export const DEFS = {
   feat_bugreport: ['b', 0, true],
   feat_upload: ['b', 0, true],
   feat_turnstile: ['b', 0, true],
+  feat_turnstile_admin: ['b', 0, true],
+  feat_email_verify: ['b', 0, true],
+  feat_favorites: ['b', 0, true],
+  feat_compare: ['b', 0, true],
+  feat_coupons: ['b', 0, true],
+  feat_inbox: ['b', 0, true],
   maint_on: ['b', 0, false], maint_text: ['s', 240, 'Website đang được bảo trì, vui lòng quay lại sau ít phút.'],
   // SEO
   meta_title: ['s', 70, ''], meta_desc: ['s', 200, ''],
@@ -92,6 +98,8 @@ export const RESTRICTED = {
   maint_on: 'maint',
   maint_text: 'maint',
   feat_turnstile: 'maint',
+  feat_turnstile_admin: 'maint',
+  feat_email_verify: 'maint',
   nav_items: 'layout',
   home_blocks: 'layout'
 };
@@ -102,6 +110,28 @@ const defaults = () => Object.fromEntries(Object.entries(DEFS).map(([k, d]) => [
 let cache = null, cacheAt = 0;
 export function dropSiteCache() {
   cache = null;
+}
+
+/* Trang khách nào thuộc công tắc nào: công tắc tắt thì vào trang chỉ thấy 404 (worker.js chạy trước các đường dẫn này,
+xem run_worker_first trong wrangler.toml). Thêm trang mới: thêm vào đây và vào run_worker_first. */
+export const PAGE_FLAG = {
+  '/reviews': 'feat_reviews',
+  '/inbox': 'feat_inbox',
+  '/login': 'feat_login',
+  '/account': 'feat_login',
+  '/forgot': 'feat_login',
+  '/reset': 'feat_login',
+  '/register': 'feat_register',
+  '/verify': 'feat_email_verify',
+  '/report': 'feat_bugreport',
+  '/contact': 'feat_booking'
+};
+
+/* Trả về tên công tắc đang tắt của trang này, hoặc '' nếu trang được phép hiện. */
+export async function pageOffFlag(env, pathname) {
+  const key = pathname.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+  const flag = PAGE_FLAG[key];
+  return flag && (await getSite(env))[flag] === false ? flag : '';
 }
 
 export async function getSite(env) {

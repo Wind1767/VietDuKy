@@ -240,12 +240,23 @@
     }
   }
 
-  /* Công tắc tính năng phía khách: ẩn nút tải ảnh, bỏ khung xác minh chống spam khi quản trị đã tắt */
+  /* Công tắc tính năng phía khách: tắt thì ẩn phần giao diện liên quan (class trên <html>, luật CSS ở components.css) */
+  var FEATS = ['upload', 'login', 'register', 'chat', 'reviews', 'booking', 'bugreport', 'favorites', 'compare', 'coupons', 'inbox', 'email_verify'];
   function features(s) {
-    document.documentElement.classList.toggle('no-upload', s.feat_upload === false);
+    var root = document.documentElement;
+    FEATS.forEach(function (k) {
+      root.classList.toggle('no-' + k, s['feat_' + k] === false);
+    });
+    if (s.feat_chat === false) {
+      var chat = document.getElementById('vdkChat');
+      if (chat) {
+        chat.remove();
+      }
+    }
     if (window.vdkTS && window.vdkTS.refresh) {
       window.vdkTS.refresh();
     }
+    document.dispatchEvent(new Event('vdk:site'));
   }
 
   function apply(s) {

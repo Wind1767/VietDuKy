@@ -1356,10 +1356,103 @@ form.ct .pw input {
   margin: 4px 0 8px;
 }
 
-/* quản trị đã tắt xác minh chống spam / tải ảnh lên (Cài đặt → Bật / tắt tính năng) */
-.ts-box[hidden],
-.no-upload #avBtn {
+/* Công tắc tính năng (Cài đặt → Bật / tắt tính năng): site.js gắn class no-<tên> lên <html> khi một tính năng bị tắt.
+Tắt thì ẩn mọi thứ liên quan; máy chủ cũng chặn, và trang của tính năng đó trả 404 (PAGE_FLAG trong src/site-settings.js). */
+.ts-box[hidden] {
   display: none;
+}
+
+/* tải ảnh đại diện */
+.no-upload #avBtn,
+.no-upload #avFile {
+  display: none;
+}
+
+/* đăng nhập + tài khoản */
+.no-login a[href^="/login"],
+.no-login a[href^="/account"],
+.no-login a[href^="/forgot"],
+.no-login #acctLink,
+.no-login li:has(> a[href^="/login"]),
+.no-login li:has(> a[href^="/account"]),
+.no-login li:has(> #acctLink),
+.no-login .bell,
+.no-login li:has(> .bell) {
+  display: none;
+}
+
+/* đăng ký */
+.no-register a[href^="/register"],
+.no-register li:has(> a[href^="/register"]) {
+  display: none;
+}
+
+/* xác minh email: bỏ ô "gửi lại email" */
+.no-email_verify .auth-resend,
+.no-email_verify a[href^="/verify"],
+.no-email_verify li:has(> a[href^="/verify"]) {
+  display: none;
+}
+
+/* chat */
+.no-chat #vdkChat {
+  display: none;
+}
+
+/* đánh giá */
+.no-reviews [data-block="reviews"],
+.no-reviews a[href^="/reviews"],
+.no-reviews li:has(> a[href^="/reviews"]) {
+  display: none;
+}
+
+/* hòm thư */
+.no-inbox a[href^="/inbox"],
+.no-inbox .bell,
+.no-inbox li:has(> a[href^="/inbox"]),
+.no-inbox li:has(> .bell) {
+  display: none;
+}
+
+/* báo lỗi */
+.no-bugreport .bugrow,
+.no-bugreport a[href^="/report"],
+.no-bugreport li:has(> a[href^="/report"]) {
+  display: none;
+}
+
+/* yêu thích */
+.no-favorites .fav-btn,
+.no-favorites .orders:has(#favs) {
+  display: none;
+}
+
+/* so sánh tour */
+.no-compare .x-cmp,
+.no-compare .x-tray {
+  display: none;
+}
+
+/* mã giảm giá */
+.no-coupons .cp-hint,
+.no-coupons input[name="coupon"],
+.no-coupons :is(label, div, p):has(> input[name="coupon"]) {
+  display: none;
+}
+
+/* đặt tour: ẩn các nút dẫn tới trang đặt tour; thẻ dẫn tới trang đó thì không bấm được nữa */
+.no-booking .navcta,
+.no-booking .btn[href^="/contact"],
+.no-booking a[href^="/contact?"],
+.no-booking [data-block="cta"],
+.no-booking li:has(> a[href^="/contact"]:not(.card)) {
+  display: none;
+}
+
+.no-booking a.card[href^="/contact"],
+.no-booking [data-block="tours"] a[href^="/contact"] {
+  pointer-events: none;
+  cursor: default;
 }
 
 /* avatar ảnh trong đánh giá */

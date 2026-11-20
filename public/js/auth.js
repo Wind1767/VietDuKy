@@ -210,7 +210,10 @@
           });
           return;
         }
-        if (mode === 'register') {
+        if (mode === 'register' && d && d.verified) { // quản trị đã tắt xác minh email: dùng được ngay
+          card.innerHTML = stateHTML('check_circle', 'ok', 'Đã tạo tài khoản', 'Bạn có thể đăng nhập ngay bằng email và mật khẩu vừa đăng ký.') +
+            '<a class="btn gold" href="/login' + location.search + '">Đăng nhập</a></div>';
+        } else if (mode === 'register') {
           showSent(body.email.trim().toLowerCase());
         } else if (mode === 'forgot') {
           card.innerHTML = stateHTML('mark_email_read', '', 'Kiểm tra hộp thư', 'Nếu <b>' +

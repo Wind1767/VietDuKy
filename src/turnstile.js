@@ -2,13 +2,11 @@
 import { getSite } from './site-settings.js';
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-/* Quản trị có thể tắt xác minh ở form khách (Cài đặt → Bật / tắt tính năng).
-Đăng nhập quản trị luôn bắt buộc xác minh, không tắt được. */
+/* Quản trị có thể tắt xác minh (Cài đặt → Bật / tắt tính năng): tắt thì bỏ qua luôn, không chặn.
+Form khách theo feat_turnstile, đăng nhập quản trị theo feat_turnstile_admin. */
 export async function turnstileDisabled(env, action) {
-  if (action === 'admin_login') {
-    return false;
-  }
-  return (await getSite(env)).feat_turnstile === false;
+  const s = await getSite(env);
+  return (action === 'admin_login' ? s.feat_turnstile_admin : s.feat_turnstile) === false;
 }
 
 export async function verifyTurnstile(request, env, body, action, HttpError) {

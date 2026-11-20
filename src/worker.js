@@ -13,7 +13,7 @@ import { ADMINS_SCHEMA, ROLES, permsOf, parsePerms, authorize, maskPII, isMasked
 import { verifyTurnstile } from './turnstile.js';
 import { IK_SCHEMA, ikAuth, ikUrlOk } from './imagekit.js';
 import { DEST_SCHEMA, seedDestinations, publicDestinations, adminDestinations, destExists } from './destinations.js';
-import { SITE_SCHEMA, publicSite, adminSite, requireFeature, requireFlag, cleanValue } from './site-settings.js';
+import { SITE_SCHEMA, publicSite, adminSite, requireFeature, requireFlag, getSite, pageOffFlag, cleanValue } from './site-settings.js';
 import { adminLayout } from './site-layout.js';
 import { CONTENT_SCHEMA, publicBlocks, publicPage, adminContent } from './custom-content.js';
 import { COUPON_SCHEMA, publicCouponCheck, adminCoupons, checkCoupon, redeem, calcDiscount } from './coupons.js';
@@ -193,6 +193,10 @@ export default {
         if (/^\/p\/[a-z0-9-]+\/?$/.test(url.pathname)) {
           return env.ASSETS.fetch(new Request(new URL('/page', url), request));
         }
+        /* Trang của tính năng đã tắt: trả 404 y như trang không tồn tại (hỏi một đường dẫn không có thật để lấy đúng 404 của nền tảng) */
+        if (await pageOffFlag(env, url.pathname)) {
+          return env.ASSETS.fetch(new Request(new URL('/__tinh-nang-da-tat__', url), { method: 'GET', headers: request.headers }));
+        }
         return env.ASSETS.fetch(request);
       }
       await ensureSchema(env);
@@ -287,6 +291,18 @@ async function route(request, env, url, ctx) {
     } else if (pathname === '/api/bug-report') {
       await requireFlag(env, 'feat_bugreport', helpers, 'Tạm ngừng nhận báo lỗi. Vui lòng liên hệ hotline.');
     }
+  }
+  /* Công tắc ẩn tính năng: khi tắt, máy chủ từ chối luôn (giao diện đã ẩn nút tương ứng) */
+  if (pathname === '/api/auth/favorite' || pathname === '/api/auth/favorites') {
+    await requireFlag(env, 'feat_favorites', helpers, 'Tính năng yêu thích đang tạm tắt.');
+  } else if (pathname === '/api/inbox' || pathname.startsWith('/api/inbox/')) {
+    await requireFlag(env, 'feat_inbox', helpers, 'Hòm thư thông báo đang tạm tắt.');
+  } else if (pathname === '/api/coupon/check') {
+    await requireFlag(env, 'feat_coupons', helpers, 'Mã giảm giá đang tạm tắt.');
+  } else if (pathname === '/api/reviews' || pathname.startsWith('/api/reviews/')) {
+    await requireFlag(env, 'feat_reviews', helpers, 'Đánh giá đang tạm tắt.');
+  } else if (pathname.startsWith('/api/chat/')) {
+    await requireFlag(env, 'feat_chat', helpers, 'Tin nhắn trực tuyến đang tạm tắt. Vui lòng gọi hotline.');
   }
   if (pathname === '/api/booking' && method === 'POST') {
     return createBooking(request, env, ip, helpers);
@@ -620,7 +636,7 @@ async function createBooking(request, env, ip, h) {
   const source = b.source === 'home' ? 'home' : 'contact';
 
   // Mã giảm giá (không bắt buộc): kiểm tra lại ở máy chủ rồi trừ một lượt dùng
-  const code = clean(b.coupon, 30);
+  const code = (await getSite(env)).feat_coupons === false ? '' : clean(b.coupon, 30); // tắt mã giảm giá: bỏ qua mã
   const cp = code ? await checkCoupon(env, h, code, { destination, people }) : null;
   if (cp) {
     await redeem(env, h, cp.c);

@@ -2741,13 +2741,19 @@
       id: 'feat',
       icon: 'lock_open',
       title: 'Bật / tắt tính năng',
-      desc: 'Tắt tạm một tính năng mà không cần sửa code. Máy chủ chặn thật, không chỉ ẩn nút.',
+      desc: 'Tắt tạm một tính năng mà không cần sửa code. Tắt là ẩn mọi thứ liên quan trên website, máy chủ chặn thật, và trang của tính năng đó chỉ hiện 404. Riêng Turnstile và xác minh email: tắt nghĩa là bỏ qua bước đó, không chặn khách.',
       f: [
         ['feat_booking', 'Nhận đặt tour', 'b'], ['feat_register', 'Cho đăng ký tài khoản mới', 'b'], ['feat_chat', 'Khách nhắn tin (chat)', 'b'], ['feat_reviews', 'Khách gửi đánh giá', 'b'],
-        ['feat_login', 'Cho khách đăng nhập', 'b'],
-        ['feat_bugreport', 'Nhận báo lỗi từ khách', 'b'],
+        ['feat_login', 'Đăng nhập + trang tài khoản của khách', 'b'],
+        ['feat_email_verify', 'Bắt khách xác minh email khi đăng ký', 'b'],
+        ['feat_bugreport', 'Báo lỗi website', 'b'],
         ['feat_upload', 'Khách tải ảnh đại diện lên (ImageKit)', 'b'],
-        ['feat_turnstile', 'Xác minh chống spam Cloudflare Turnstile ở form khách (đăng nhập quản trị luôn bắt buộc)', 'b'],
+        ['feat_favorites', 'Yêu thích tour / điểm đến', 'b'],
+        ['feat_compare', 'So sánh tour', 'b'],
+        ['feat_coupons', 'Mã giảm giá', 'b'],
+        ['feat_inbox', 'Hòm thư thông báo của khách', 'b'],
+        ['feat_turnstile', 'Xác minh chống spam Cloudflare Turnstile ở form khách', 'b'],
+        ['feat_turnstile_admin', 'Xác minh Turnstile ở đăng nhập quản trị', 'b'],
         ['maint_on', 'CHẾ ĐỘ BẢO TRÌ (phủ kín trang khách, chặn đặt tour/đăng ký/chat/đánh giá)', 'b'], ['maint_text', 'Lời nhắn khi bảo trì', 'a']
       ]
     },
@@ -2978,10 +2984,11 @@
           msg: 'Bật chế độ bảo trì sẽ phủ kín trang khách và chặn đặt tour, đăng ký, chat, đánh giá. Tiếp tục?',
           title: 'Bật bảo trì',
           ok: 'Bật bảo trì'
-        } : dirty.feat_turnstile === false ? {
-          msg: 'Tắt Turnstile nghĩa là form đặt tour, đăng ký, đăng nhập, quên mật khẩu và đánh giá không còn được chống spam/bot. Chỉ nên tắt khi Turnstile đang lỗi. Tiếp tục?',
-          title: 'Tắt xác minh chống spam',
-          ok: 'Tắt xác minh'
+        } : (dirty.feat_turnstile === false || dirty.feat_turnstile_admin === false || dirty.feat_email_verify === false) ? {
+          msg: 'Bạn đang tắt một lớp bảo vệ (xác minh Turnstile hoặc xác minh email). Khi tắt, bước đó được bỏ qua nên bot và tài khoản email giả sẽ dễ lọt vào hơn' +
+            (dirty.feat_turnstile_admin === false ? ', kể cả ở đăng nhập quản trị' : '') + '. Chỉ nên tắt khi dịch vụ đó đang lỗi. Tiếp tục?',
+          title: 'Tắt lớp bảo vệ',
+          ok: 'Tắt'
         } : null;
         if (warn) {
           confirmBox(warn.msg, {

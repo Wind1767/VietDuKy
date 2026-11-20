@@ -8,8 +8,13 @@ import { tplFields, getTpl } from './email-templates.js';
 import { deviceInfo, maskIp, countryClash, sameDevice } from './session-device.js';
 import { mfaGate, mfaPublic, mfaSettings } from './mfa-routes.js';
 import { checkSecondFactor, methodsOf } from './mfa.js';
+import { getSite } from './site-settings.js';
 
 const enc = new TextEncoder();
+/* Quản trị tắt "Yêu cầu xác minh email": đăng ký xong dùng được ngay, tài khoản chưa xác minh cũng đăng nhập được */
+async function skipVerify(env) {
+  return (await getSite(env)).feat_email_verify === false;
+}
 const PBKDF2_ITER = 100000; // mức tối đa Cloudflare Workers cho phép
 const SESSION_TTL_S = 30 * 24 * 3600; // đăng nhập giữ tối đa 30 ngày
 const SESSION_IDLE_MS = 14 * 86400000; // 14 ngày không dùng thì phiên mất hiệu lực
@@ -164,7 +169,7 @@ export async function currentUser(request, env, h, diag) {
     await env.DB.prepare('DELETE FROM user_sessions WHERE id = ?1').bind(sid).run().catch(() => {});
     return why(!sameDevice(s_dev, dev.key) ? 'device' : countryClash(s_country, dev.country) ? 'country' : 'expired');
   }
-  if (!u.verified_at || u.blocked_at) {
+  if ((!u.verified_at && !(await skipVerify(env))) || u.blocked_at) {
     return why(u.blocked_at ? 'blocked' : 'unverified');
   }
   if (now - s_seen > SESSION_TOUCH_MS) {
@@ -337,13 +342,17 @@ async function register(request, env, url, ip, h) {
     throw new h.HttpError(409, 'Email này đã có tài khoản. Hãy đăng nhập.', undefined, 'exists');
   }
 
+  const skip = await skipVerify(env), now = Date.now();
   let user;
   if (old) { // đăng ký lại khi chưa xác minh: lấy thông tin mới nhất
-    user = await env.DB.prepare('UPDATE users SET name = ?1, phone = ?2, pass_hash = ?3 WHERE id = ?4 RETURNING id, email, name')
-      .bind(name, phone, passHash, old.id).first();
+    user = await env.DB.prepare('UPDATE users SET name = ?1, phone = ?2, pass_hash = ?3, verified_at = COALESCE(?5, verified_at) WHERE id = ?4 RETURNING id, email, name')
+      .bind(name, phone, passHash, old.id, skip ? now : null).first();
   } else {
-    user = await env.DB.prepare('INSERT INTO users (created_at, email, name, phone, pass_hash) VALUES (?1, ?2, ?3, ?4, ?5) RETURNING id, email, name')
-      .bind(Date.now(), email, name, phone, passHash).first();
+    user = await env.DB.prepare('INSERT INTO users (created_at, email, name, phone, pass_hash, verified_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6) RETURNING id, email, name')
+      .bind(now, email, name, phone, passHash, skip ? now : null).first();
+  }
+  if (skip) { // không cần xác minh email: bỏ qua việc gửi thư
+    return h.json({ ok: true, verified: true }, 201);
   }
 
   // dọn dần tài khoản không xác minh quá 7 ngày
@@ -417,7 +426,7 @@ async function login(request, env, url, ip, h) {
   if (u.blocked_at) {
     throw new h.HttpError(403, 'Tài khoản này đã bị khoá. Vui lòng liên hệ hotline 1900 1234.', undefined, 'blocked');
   }
-  if (!u.verified_at) {
+  if (!u.verified_at && !(await skipVerify(env))) {
     throw new h.HttpError(403, 'Email này chưa được xác minh. Hãy mở email xác minh, hoặc gửi lại email mới.', undefined, 'unverified');
   }
 
