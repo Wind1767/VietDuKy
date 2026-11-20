@@ -240,9 +240,18 @@
     }
   }
 
+  /* Công tắc tính năng phía khách: ẩn nút tải ảnh, bỏ khung xác minh chống spam khi quản trị đã tắt */
+  function features(s) {
+    document.documentElement.classList.toggle('no-upload', s.feat_upload === false);
+    if (window.vdkTS && window.vdkTS.refresh) {
+      window.vdkTS.refresh();
+    }
+  }
+
   function apply(s) {
     window.VDK_SITE = s;
     applyCss(s);
+    features(s);
     var go = function () {
       content(s);
       blocks(s);
@@ -337,6 +346,7 @@
   };
   if (S && S.site_name) {
     applyCss(S);
+    features(S);
     document.addEventListener('DOMContentLoaded', function () {
       content(S);
       blocks(S);

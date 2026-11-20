@@ -97,5 +97,10 @@ Kiểm tra ở rộng ~360px: bảng so sánh tour (`.x-table`), thanh `.x-tray`
 - Admin: nút "Tạo mật khẩu ngẫu nhiên" (theo `minPass()`) khi tạo/sửa tài khoản quản trị và tài khoản khách; kiểm tra độ dài ở trình duyệt trước khi gửi (cùng luật với server).
 - Admin Tổng quan nhớ khoảng thời gian và chỉ số đã chọn.
 
+## Công tắc tính năng (Cài đặt → Bật / tắt tính năng)
+- Cờ `feat_*` nằm trong `DEFS` (`src/site-settings.js`), mặc định bật. Máy chủ chặn thật: `requireFeature` (bị bảo trì chặn theo) dùng cho đặt tour/đăng ký/chat/đánh giá trong `worker.js`; `requireFlag` chỉ xét đúng cờ, dùng cho `feat_login`, `feat_bugreport`, `feat_upload` (khách tải ảnh đại diện, `imagekit.js`).
+- `feat_turnstile` tắt xác minh Cloudflare ở form khách (`verifyTurnstile` bỏ qua và xoá token). Đăng nhập quản trị (`admin_login`) luôn bắt buộc, không tắt được. Cờ này thuộc nhóm quyền `maint` (`RESTRICTED`) và có hộp xác nhận khi tắt.
+- Phía khách: `site.js` (`features`) bật class `no-upload` trên `<html>` và gọi `vdkTS.refresh()`; `turnstile.js` đọc `window.VDK_SITE.feat_turnstile` để ẩn khung và coi như đã xác minh. Thêm công tắc mới: thêm vào `DEFS`, mục `feat` trong `admin.js`, chặn ở máy chủ, và test ở `tests/unit/feature-toggles.test.mjs`.
+
 ## Khi giao việc
 Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) nếu người dùng yêu cầu, không zip cả dự án.

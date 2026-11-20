@@ -1,7 +1,23 @@
 /* Cloudflare Turnstile: browser -> Worker -> siteverify. Secret nằm ở env.TURNSTILE_SECRET (wrangler secret), không ghi vào mã. */
+import { getSite } from './site-settings.js';
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
+/* Quản trị có thể tắt xác minh ở form khách (Cài đặt → Bật / tắt tính năng).
+Đăng nhập quản trị luôn bắt buộc xác minh, không tắt được. */
+export async function turnstileDisabled(env, action) {
+  if (action === 'admin_login') {
+    return false;
+  }
+  return (await getSite(env)).feat_turnstile === false;
+}
+
 export async function verifyTurnstile(request, env, body, action, HttpError) {
+  if (await turnstileDisabled(env, action)) {
+    if (body) {
+      delete body['cf-turnstile-response'];
+    }
+    return;
+  }
   const hostnames = new Set(String(env.TURNSTILE_HOSTNAMES || '').split(',').map(s => s.trim()).filter(Boolean));
   if (!env.TURNSTILE_SECRET || !hostnames.size) {
     console.error('Turnstile chưa cấu hình: thiếu secret TURNSTILE_SECRET hoặc biến TURNSTILE_HOSTNAMES.');

@@ -2744,6 +2744,10 @@
       desc: 'Tắt tạm một tính năng mà không cần sửa code. Máy chủ chặn thật, không chỉ ẩn nút.',
       f: [
         ['feat_booking', 'Nhận đặt tour', 'b'], ['feat_register', 'Cho đăng ký tài khoản mới', 'b'], ['feat_chat', 'Khách nhắn tin (chat)', 'b'], ['feat_reviews', 'Khách gửi đánh giá', 'b'],
+        ['feat_login', 'Cho khách đăng nhập', 'b'],
+        ['feat_bugreport', 'Nhận báo lỗi từ khách', 'b'],
+        ['feat_upload', 'Khách tải ảnh đại diện lên (ImageKit)', 'b'],
+        ['feat_turnstile', 'Xác minh chống spam Cloudflare Turnstile ở form khách (đăng nhập quản trị luôn bắt buộc)', 'b'],
         ['maint_on', 'CHẾ ĐỘ BẢO TRÌ (phủ kín trang khách, chặn đặt tour/đăng ký/chat/đánh giá)', 'b'], ['maint_text', 'Lời nhắn khi bảo trì', 'a']
       ]
     },
@@ -2970,10 +2974,19 @@
             btn.disabled = false;
           });
         };
-        if (dirty.maint_on === true) {
-          confirmBox('Bật chế độ bảo trì sẽ phủ kín trang khách và chặn đặt tour, đăng ký, chat, đánh giá. Tiếp tục?', {
-            title: 'Bật bảo trì',
-            ok: 'Bật bảo trì',
+        var warn = dirty.maint_on === true ? {
+          msg: 'Bật chế độ bảo trì sẽ phủ kín trang khách và chặn đặt tour, đăng ký, chat, đánh giá. Tiếp tục?',
+          title: 'Bật bảo trì',
+          ok: 'Bật bảo trì'
+        } : dirty.feat_turnstile === false ? {
+          msg: 'Tắt Turnstile nghĩa là form đặt tour, đăng ký, đăng nhập, quên mật khẩu và đánh giá không còn được chống spam/bot. Chỉ nên tắt khi Turnstile đang lỗi. Tiếp tục?',
+          title: 'Tắt xác minh chống spam',
+          ok: 'Tắt xác minh'
+        } : null;
+        if (warn) {
+          confirmBox(warn.msg, {
+            title: warn.title,
+            ok: warn.ok,
             danger: true
           }).then(function (ok) {
             if (ok) {

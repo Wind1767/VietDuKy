@@ -73,6 +73,10 @@ export const DEFS = {
   faq_items: ['l', { max: 20, cols: { q: 160, a: 500 } }, [{ "q": "Đặt tour cần chuẩn bị giấy tờ gì?", "a": "Bạn cần CCCD hoặc hộ chiếu còn hạn. Trẻ em dưới 14 tuổi mang theo giấy khai sinh hoặc hộ chiếu." }, { "q": "Giá tour đã gồm những gì?", "a": "Giá trọn gói gồm khách sạn, xe đưa đón, vé tham quan, bữa ăn theo chương trình và hướng dẫn viên. Chi tiêu cá nhân không nằm trong giá." }, { "q": "Tôi có thể đổi ngày đi không?", "a": "Có. Bạn được đổi ngày miễn phí nếu báo trước 7 ngày khởi hành." }, { "q": "Tour có phù hợp với gia đình có trẻ nhỏ không?", "a": "Có. Chúng tôi có lịch trình nhịp chậm cho gia đình, người lớn tuổi và trẻ nhỏ." }]],
   // Tính năng bật/tắt
   feat_booking: ['b', 0, true], feat_register: ['b', 0, true], feat_chat: ['b', 0, true], feat_reviews: ['b', 0, true],
+  feat_login: ['b', 0, true],
+  feat_bugreport: ['b', 0, true],
+  feat_upload: ['b', 0, true],
+  feat_turnstile: ['b', 0, true],
   maint_on: ['b', 0, false], maint_text: ['s', 240, 'Website đang được bảo trì, vui lòng quay lại sau ít phút.'],
   // SEO
   meta_title: ['s', 70, ''], meta_desc: ['s', 200, ''],
@@ -87,6 +91,7 @@ export const RESTRICTED = {
   custom_css: 'css',
   maint_on: 'maint',
   maint_text: 'maint',
+  feat_turnstile: 'maint',
   nav_items: 'layout',
   home_blocks: 'layout'
 };
@@ -282,6 +287,14 @@ export async function adminSite(request, env, h, actor) {
     return h.json({ site: await getSite(env) });
   }
   throw new h.HttpError(405, 'Phương thức không hỗ trợ.');
+}
+
+/* Như requireFeature nhưng chỉ xét đúng công tắc đó, không bị ảnh hưởng bởi chế độ bảo trì
+(dùng cho đăng nhập, báo lỗi, tải ảnh: bảo trì vẫn như cũ). */
+export async function requireFlag(env, key, h, msg) {
+  if ((await getSite(env))[key] === false) {
+    throw new h.HttpError(503, msg || 'Tính năng này đang tạm tắt.');
+  }
 }
 
 /* Chặn thao tác khi tính năng đang tắt (gọi từ worker / auth / chat / reviews) */

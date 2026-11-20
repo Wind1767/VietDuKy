@@ -1,4 +1,5 @@
 /* ImageKit: ký yêu cầu tải ảnh lên từ trình duyệt (khoá bí mật chỉ nằm ở Worker, secret IMAGEKIT_PRIVATE_KEY) */
+import { requireFlag } from './site-settings.js';
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 
 export const IK_SCHEMA = [
@@ -56,6 +57,7 @@ async function ikDelete(env, fileId) {
 export async function avatarApi(request, env, url, h, user) {
   const p = url.pathname, db = env.DB;
   if (p === '/api/auth/imagekit') {
+    await requireFlag(env, 'feat_upload', h, 'Tải ảnh lên đang tạm tắt. Vui lòng thử lại sau.');
     return ikAuth(env, h, '/vietduky/avatars');
   }
   if (p === '/api/auth/avatars') { // dọn các ảnh cũ còn sót từ bản trước (chỉ giữ ảnh đang dùng)

@@ -1,7 +1,11 @@
 /* Cloudflare Turnstile (widget đã tạo sẵn). Site key công khai; secret chỉ ở Worker. */
 (function () {
   'use strict';
-  var KEY = '0x4AAAAAAGBeoGyZaT3JewGo', loading = null, ids = new WeakMap();
+  var KEY = '0x4AAAAAAGBeoGyZaT3JewGo', loading = null, ids = new WeakMap(), acts = new WeakMap();
+  /* Quản trị tắt xác minh ở form khách (feat_turnstile). Đăng nhập quản trị luôn bắt buộc. */
+  function off(action) {
+    return action !== 'admin_login' && !!window.VDK_SITE && window.VDK_SITE.feat_turnstile === false;
+  }
   function load() {
     if (window.turnstile) {
       return Promise.resolve();
@@ -26,6 +30,11 @@
     mount: function (el, action) {
       var box = boxOf(el);
       if (!box || ids.has(box)) {
+        return;
+      }
+      acts.set(box, action || box.dataset.action || '');
+      if (off(acts.get(box))) {
+        box.hidden = true;
         return;
       }
       ids.set(box, null);
@@ -55,7 +64,16 @@
       return id != null && window.turnstile ? (window.turnstile.getResponse(id) || '') : '';
     },
     ready: function (el) {
-      return !!api.token(el);
+      var b = boxOf(el);
+      return (!!b && off(acts.get(b) || b.dataset.action || '')) || !!api.token(el);
+    },
+    /* gọi lại khi cài đặt website tải xong: ẩn các khung đã tạo nếu xác minh đang tắt */
+    refresh: function () {
+      document.querySelectorAll('.ts-box').forEach(function (b) {
+        if (off(acts.get(b) || b.dataset.action || '')) {
+          b.hidden = true;
+        }
+      });
     },
     reset: function (el) {
       var b = boxOf(el), id = b && ids.get(b);

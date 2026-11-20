@@ -13,7 +13,7 @@ import { ADMINS_SCHEMA, ROLES, permsOf, parsePerms, authorize, maskPII, isMasked
 import { verifyTurnstile } from './turnstile.js';
 import { IK_SCHEMA, ikAuth, ikUrlOk } from './imagekit.js';
 import { DEST_SCHEMA, seedDestinations, publicDestinations, adminDestinations, destExists } from './destinations.js';
-import { SITE_SCHEMA, publicSite, adminSite, requireFeature, cleanValue } from './site-settings.js';
+import { SITE_SCHEMA, publicSite, adminSite, requireFeature, requireFlag, cleanValue } from './site-settings.js';
 import { adminLayout } from './site-layout.js';
 import { CONTENT_SCHEMA, publicBlocks, publicPage, adminContent } from './custom-content.js';
 import { COUPON_SCHEMA, publicCouponCheck, adminCoupons, checkCoupon, redeem, calcDiscount } from './coupons.js';
@@ -282,6 +282,10 @@ async function route(request, env, url, ctx) {
       await requireFeature(env, 'feat_chat', helpers, 'Tin nhắn trực tuyến đang tạm tắt. Vui lòng gọi hotline.');
     } else if (pathname === '/api/reviews') {
       await requireFeature(env, 'feat_reviews', helpers, 'Tạm ngừng nhận đánh giá mới.');
+    } else if (pathname === '/api/auth/login') {
+      await requireFlag(env, 'feat_login', helpers, 'Tạm ngừng đăng nhập tài khoản khách. Vui lòng thử lại sau.');
+    } else if (pathname === '/api/bug-report') {
+      await requireFlag(env, 'feat_bugreport', helpers, 'Tạm ngừng nhận báo lỗi. Vui lòng liên hệ hotline.');
     }
   }
   if (pathname === '/api/booking' && method === 'POST') {

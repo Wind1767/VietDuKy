@@ -582,6 +582,10 @@
           }
         }).catch(function () {});
         $('#avBtn').onclick = function () {
+          if (window.VDK_SITE && window.VDK_SITE.feat_upload === false) {
+            msg.textContent = 'Tải ảnh lên đang tạm tắt. Vui lòng thử lại sau.';
+            return;
+          }
           $('#avFile').click();
         };
         $('#avFile').onchange = function () {

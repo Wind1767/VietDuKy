@@ -1356,6 +1356,12 @@ form.ct .pw input {
   margin: 4px 0 8px;
 }
 
+/* quản trị đã tắt xác minh chống spam / tải ảnh lên (Cài đặt → Bật / tắt tính năng) */
+.ts-box[hidden],
+.no-upload #avBtn {
+  display: none;
+}
+
 /* avatar ảnh trong đánh giá */
 .rv-av {
   overflow: hidden;
