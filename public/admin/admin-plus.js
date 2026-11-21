@@ -565,6 +565,10 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
     '<h4>Ghi chú nhanh <small>(lưu trên máy này)</small></h4><textarea id="dkNote" rows="4" placeholder="Việc cần nhớ, SĐT khách, ghi chú ca trực…" aria-label="Ghi chú nhanh"></textarea>' +
     '</div>';
   /* Nút công cụ nổi góc trái dưới đã được gỡ khỏi giao diện (dock không gắn vào trang). */
+  /* Bộ công cụ chưa gắn vào trang nên tìm phần tử trong chính dock, không dùng document */
+  function dk(id) {
+    return dock.querySelector('#' + id);
+  }
   var fab = dock.querySelector('.dock-fab'), panel = dock.querySelector('.dock-panel');
   function dockOpen(on) {
     panel.hidden = !on;
@@ -597,17 +601,17 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       return;
     }
     var on = app.classList.toggle('focus-mode');
-    $('dkFocus').querySelector('.ms').textContent = on ? 'fullscreen_exit' : 'fullscreen';
+    dk('dkFocus').querySelector('.ms').textContent = on ? 'fullscreen_exit' : 'fullscreen';
     toast(on ? 'Chế độ tập trung: bấm F để thoát' : 'Đã thoát chế độ tập trung');
   }
-  $('dkFocus').onclick = toggleFocus;
-  $('dkPrint').onclick = function () {
+  dk('dkFocus').onclick = toggleFocus;
+  dk('dkPrint').onclick = function () {
     dockOpen(false);
     setTimeout(function () {
       window.print();
     }, 150);
   };
-  $('dkTop').onclick = function () {
+  dk('dkTop').onclick = function () {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     dockOpen(false);
   };
@@ -630,7 +634,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
       }, sec * 1000);
     }
   }
-  var auto = $('dkAuto');
+  var auto = dk('dkAuto');
   auto.value = load('vdk-auto', '0');
   if (auto.value !== '0') {
     setAuto(parseInt(auto.value, 10));
@@ -663,7 +667,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
     }, 700);
   }
   function renderRecent() {
-    var box = $('dkRecent');
+    var box = dk('dkRecent');
     box.innerHTML = '';
     var list = recent.filter(function (r) {
       return r.h !== location.hash;
@@ -687,7 +691,7 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
   trackView();
 
   /* ghi chú nhanh */
-  var note = $('dkNote'), noteT;
+  var note = dk('dkNote'), noteT;
   note.value = load('vdk-note', '');
   note.addEventListener('input', function () {
     clearTimeout(noteT);

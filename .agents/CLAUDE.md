@@ -125,3 +125,8 @@ Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) n�
 - Lượt thích đánh giá = `MAX(0, reviews.helpful_adj + số review_votes)`; admin đặt số mong muốn qua `PATCH /api/admin/reviews/:id {helpful}` (lưu phần chênh vào `helpful_adj`).
 - Cột thêm sau cho CSDL cũ khai báo trong `COLUMNS` / `LATE_COLUMNS` (src/worker.js) thay vì một chuỗi `.then(ALTER...)`. Truy vấn đọc liên quan nên gộp bằng `env.DB.batch([...])` (một lượt gọi D1); helper test `batch` trả `{results}` cho SELECT.
 - Gửi thông báo cho nhiều khách: `POST /api/admin/inbox {users:[id…]}`; tìm khách `GET /api/admin/inbox/customers?q=`.
+
+## Giao diện & số liệu
+- Không được bịa số trên trang khách. Khối số liệu trang chủ lấy từ `stats_items` (admin: Cài đặt website → Số liệu nổi bật): số tự nhập hoặc `auto:trips|customers|destinations|tours|reviews` (đếm thật trong `siteStats`); rỗng/0 thì ẩn, không có dòng nào thì ẩn cả khối. `hero_trust` mặc định rỗng (dòng tin cậy ở banner lấy từ đánh giá thật).
+- Panel trượt (`openPanel`) tự thêm nút Huỷ trước nút chính và hỏi lại khi đóng bằng X / nền mờ / Esc nếu đã sửa; thanh lưu của Cài đặt website và Menu & trang chủ có nút "Huỷ thay đổi". Dùng chữ "Huỷ" thống nhất.
+- Form admin dùng `.col-narrow` + `.form-stack` + `.form-acts` (khoảng cách 20px, nút tách khỏi ô nhập), không dùng style nội tuyến.

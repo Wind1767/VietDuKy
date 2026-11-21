@@ -44,7 +44,7 @@ export const DEFS = {
   banner_style: ['e', ['info', 'promo', 'warn'], 'promo'], banner_closable: ['b', 0, true],
   // Trang chủ
   hero_lead: ['s', 240, 'Từ vịnh xanh ngọc bích đến phố cổ lung linh đèn lồng, mỗi chuyến đi là một câu chuyện riêng.'],
-  typed_words: ['s', 200, 'Hạ Long, Sa Pa, Hội An, Huế, Đà Lạt, Phú Quốc'], hero_trust: ['s', 80, '4,9/5 từ hơn 9.800 khách hàng'],
+  typed_words: ['s', 200, 'Hạ Long, Sa Pa, Hội An, Huế, Đà Lạt, Phú Quốc'], hero_trust: ['s', 80, ''],
   cta_title: ['s', 100, 'Sẵn sàng cho chuyến đi tiếp theo?'], cta_text: ['s', 160, 'Để lại thông tin, tư vấn viên sẽ gọi lại trong 30 phút.'], cta_btn: ['s', 40, 'Nhận tư vấn miễn phí'],
   // Nội dung các trang
   dest_title: ['s', 80, 'Sáu miền đất, sáu cảm xúc'], dest_sub: ['s', 160, 'Chọn điểm đến bạn mơ ước, chúng tôi lo phần còn lại.'],
@@ -70,6 +70,13 @@ export const DEFS = {
         "title": "Tận tâm",
         "text": "Mỗi khách hàng là một người bạn."
       }]],
+  /* Số liệu nổi bật: value là số admin tự nhập, hoặc auto:trips|customers|destinations|tours|reviews để lấy số thật từ CSDL. Để trống / bằng 0 thì ẩn dòng đó. */
+  stats_items: ['l', { max: 6, cols: { icon: 24, label: 40, value: 24 } }, [
+    { icon: 'luggage', label: 'Chuyến đi hoàn tất', value: 'auto:trips' },
+    { icon: 'groups', label: 'Khách đã đăng ký', value: 'auto:customers' },
+    { icon: 'map', label: 'Điểm đến', value: 'auto:destinations' },
+    { icon: 'badge', label: 'Hướng dẫn viên', value: '' }
+  ]],
   faq_items: ['l', { max: 20, cols: { q: 160, a: 500 } }, [{ "q": "Đặt tour cần chuẩn bị giấy tờ gì?", "a": "Bạn cần CCCD hoặc hộ chiếu còn hạn. Trẻ em dưới 14 tuổi mang theo giấy khai sinh hoặc hộ chiếu." }, { "q": "Giá tour đã gồm những gì?", "a": "Giá trọn gói gồm khách sạn, xe đưa đón, vé tham quan, bữa ăn theo chương trình và hướng dẫn viên. Chi tiêu cá nhân không nằm trong giá." }, { "q": "Tôi có thể đổi ngày đi không?", "a": "Có. Bạn được đổi ngày miễn phí nếu báo trước 7 ngày khởi hành." }, { "q": "Tour có phù hợp với gia đình có trẻ nhỏ không?", "a": "Có. Chúng tôi có lịch trình nhịp chậm cho gia đình, người lớn tuổi và trẻ nhỏ." }]],
   // Tính năng bật/tắt
   feat_booking: ['b', 0, true], feat_register: ['b', 0, true], feat_chat: ['b', 0, true], feat_reviews: ['b', 0, true],
@@ -120,7 +127,7 @@ export const RESTRICTED = {
 };
 
 /* Biểu tượng cho phép (đã nạp sẵn trong font trang khách) */
-export const ICONS = ['eco', 'handshake', 'favorite', 'verified', 'support_agent', 'star', 'groups', 'mood', 'route', 'map', 'restaurant', 'luggage', 'explore', 'lock', 'schedule', 'sell'];
+export const ICONS = ['eco', 'handshake', 'favorite', 'verified', 'support_agent', 'star', 'groups', 'mood', 'route', 'map', 'restaurant', 'luggage', 'explore', 'lock', 'schedule', 'sell', 'badge', 'confirmation_number', 'thumb_up', 'location_on', 'call', 'group'];
 const defaults = () => Object.fromEntries(Object.entries(DEFS).map(([k, d]) => [k, d[2]]));
 let cache = null, cacheAt = 0;
 export function dropSiteCache() {
@@ -292,8 +299,30 @@ export function cleanValue(key, v, h) {
 }
 
 /* GET /api/site – công khai */
+/* Số thật từ CSDL cho khối "Số liệu nổi bật" (không có số nào được bịa: auto:* đếm dữ liệu thật, còn lại do admin nhập) */
+const STAT_SQL = "SELECT (SELECT COUNT(*) FROM bookings WHERE status = 'won') AS trips, " +
+  "(SELECT COUNT(*) FROM users WHERE verified_at IS NOT NULL AND email NOT LIKE '%@virtual.invalid') AS customers, " +
+  "(SELECT COUNT(*) FROM destinations WHERE active = 1) AS destinations, (SELECT COUNT(*) FROM tours WHERE active = 1) AS tours, " +
+  "(SELECT COUNT(*) FROM reviews r JOIN users u ON u.id = r.user_id WHERE r.status = 'approved' AND u.email NOT LIKE '%@virtual.invalid') AS reviews";
+export async function siteStats(env, items) {
+  const list = Array.isArray(items) ? items : [];
+  let real = null;
+  if (list.some(i => /^auto:/.test(i.value))) {
+    try {
+      real = await env.DB.prepare(STAT_SQL).first();
+    } catch { /* bảng chưa có */
+    }
+  }
+  return list.map(i => {
+    const m = /^auto:(\w+)$/.exec(i.value);
+    const n = m ? Number(real && real[m[1]]) : Number(String(i.value).replace(/[.,\s]/g, ''));
+    return { icon: i.icon, label: i.label, n: Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0 };
+  }).filter(i => i.label && i.n > 0);
+}
+
 export async function publicSite(env, h) {
-  return h.json({ site: await getSite(env), rules: RULES }, 200, { 'Cache-Control': 'public, max-age=30' });
+  const site = await getSite(env);
+  return h.json({ site, rules: RULES, stats: await siteStats(env, site.stats_items) }, 200, { 'Cache-Control': 'public, max-age=30' });
 }
 
 /* GET/PUT /api/admin/site */

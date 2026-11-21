@@ -1680,14 +1680,39 @@
     onChanged = changed || null;
     drawerOpener = document.activeElement;
     var d = $('drawer');
+    /* Có nút Huỷ ngay trước nút chính nếu form chưa có; đóng bằng X / nền mờ / Esc khi đã sửa dở sẽ hỏi lại */
+    if (foot && foot.indexOf('Huỷ') < 0 && foot.indexOf('data-dcancel') < 0) {
+      var at = foot.indexOf('<button class="btn primary');
+      var cancel = '<button class="btn" type="button" data-dcancel>Huỷ</button>';
+      foot = at < 0 ? cancel + foot : foot.slice(0, at) + cancel + foot.slice(at);
+    }
     d.innerHTML = '<header><div><h2>' + esc(title) + '</h2><span class="muted">' + esc(sub || '') + '</span></div><button class="icon-btn" id="dClose" aria-label="Đóng"><span class="ms">close</span></button></header>' +
       '<div class="body">' + body + '</div><footer>' + foot + '</footer>';
+    drawerDirty = false;
+    d.oninput = d.onchange = function () {
+      drawerDirty = true;
+    };
     $('scrim').hidden = false;
     d.hidden = false;
-    $('dClose').onclick = function () {
-      closeDrawer();
-    };
+    $('dClose').onclick = tryCloseDrawer;
+    var dc = d.querySelector('[data-dcancel]');
+    if (dc) {
+      dc.onclick = tryCloseDrawer;
+    }
     return d;
+  }
+  var drawerDirty = false;
+  function tryCloseDrawer() {
+    if (!drawerDirty) {
+      closeDrawer();
+      return;
+    }
+    confirmBox('Bạn đã sửa nhưng chưa lưu. Đóng và bỏ các thay đổi này?', { title: 'Bỏ thay đổi?', ok: 'Bỏ thay đổi', cancel: 'Tiếp tục sửa', danger: true }).then(function (ok) {
+      if (ok) {
+        drawerDirty = false;
+        closeDrawer();
+      }
+    });
   }
   var toursCache = null, tplCache = null;
   function getTours(force) {
@@ -2132,7 +2157,7 @@
       }).join('') + '</datalist></section>' +
         '<section class="card site-sec"><div class="card-pad"><h2><span class="ms">dashboard</span> Các khối ở trang chủ</h2><p class="muted">Tắt để ẩn khỏi trang chủ (dữ liệu không mất), dùng mũi tên để đổi thứ tự. Banner lớn đầu trang luôn ở trên cùng.</p></div>' +
         '<div class="card-pad"><div class="blk-list" id="lBlocks"></div></div></section>' +
-        (rw ? '<div class="savebar"><span id="lState" class="muted">Chưa có thay đổi</span><button class="btn primary" id="lSave" disabled><span class="ms">check</span>Lưu thay đổi</button></div>' : '');
+        (rw ? '<div class="savebar"><span id="lState" class="muted">Chưa có thay đổi</span><span class="sb-acts"><button class="btn" id="lCancel" type="button" disabled><span class="ms">close</span>Huỷ thay đổi</button><button class="btn primary" id="lSave" disabled><span class="ms">check</span>Lưu thay đổi</button></span></div>' : '');
 
       function mark() {
         if (!rw) {
@@ -2140,6 +2165,7 @@
         }
         var n = (JSON.stringify(nav) !== base.nav ? 1 : 0) + (JSON.stringify(blocks) !== base.blocks ? 1 : 0);
         $('lSave').disabled = !n;
+        $('lCancel').disabled = !n;
         $('lState').textContent = n ? 'Có thay đổi chưa lưu' : 'Chưa có thay đổi';
       }
       function drawPrev() {
@@ -2245,6 +2271,14 @@
             drawBlocks();
           }
         });
+        /* Huỷ thay đổi: hỏi lại rồi nạp lại trang với dữ liệu đã lưu */
+        $('lCancel').onclick = function () {
+          confirmBox('Bỏ mọi thay đổi chưa lưu ở menu và các khối trang chủ?', { title: 'Huỷ thay đổi', ok: 'Bỏ thay đổi', danger: true }).then(function (ok) {
+            if (ok) {
+              renderLayout();
+            }
+          });
+        };
         $('lSave').onclick = function () {
           var btn = this, body = {};
           for (var k = 0; k < nav.length; k++) {
@@ -2728,6 +2762,19 @@
       ]
     },
     {
+      id: 'stats',
+      icon: 'bar_chart',
+      title: 'Số liệu nổi bật (trang chủ)',
+      desc: 'Chỉ hiện số thật. Ở cột Số liệu gõ một con số (ví dụ số hướng dẫn viên của bạn), hoặc auto:trips (đơn thành công), auto:customers (khách đã xác minh email), auto:destinations (điểm đến đang bật), auto:tours (tour đang bật), auto:reviews (đánh giá thật đã duyệt) để lấy số từ hệ thống. Để trống hoặc 0 thì dòng đó được ẩn.',
+      f: [
+        ['stats_items', 'Các số liệu', 'l', {
+            cols: [['icon', 'Biểu tượng', 'i'], ['label', 'Nhãn', 't'], ['value', 'Số liệu', 't']],
+            max: 6,
+            add: 'Thêm số liệu'
+          }]
+      ]
+    },
+    {
       id: 'faq',
       icon: 'help',
       title: 'Câu hỏi thường gặp (trang chủ)',
@@ -2844,7 +2891,7 @@
             '"><div class="card-pad"><h2><span class="ms">' + sec.icon + '</span> ' + esc(sec.title) +
             '</h2><p class="muted">' + esc(sec.desc) + '</p></div><div class="site-grid">' +
             sec.f.map(field).join('') + '</div></section>';
-        }).join('') + (rw ? '<div class="savebar"><span id="sState" class="muted">Chưa có thay đổi</span><button class="btn primary" id="sSave" disabled><span class="ms">check</span>Lưu thay đổi</button></div>' : '');
+        }).join('') + (rw ? '<div class="savebar"><span id="sState" class="muted">Chưa có thay đổi</span><span class="sb-acts"><button class="btn" id="sCancel" type="button" disabled><span class="ms">close</span>Huỷ thay đổi</button><button class="btn primary" id="sSave" disabled><span class="ms">check</span>Lưu thay đổi</button></span></div>' : '');
       if (!rw) {
         return;
       }
@@ -2858,10 +2905,11 @@
         }
         var n = Object.keys(dirty).length;
         $('sSave').disabled = !n;
+        $('sCancel').disabled = !n;
         $('sState').textContent = n ? n + ' mục chưa lưu' : 'Chưa có thay đổi';
       }
       var body = $('sBody');
-      var ICON_OPTS = ['eco', 'handshake', 'favorite', 'verified', 'support_agent', 'star', 'groups', 'mood', 'route', 'map', 'restaurant', 'luggage', 'explore', 'lock', 'schedule', 'sell'];
+      var ICON_OPTS = ['eco', 'handshake', 'favorite', 'verified', 'support_agent', 'star', 'groups', 'mood', 'route', 'map', 'restaurant', 'luggage', 'explore', 'lock', 'schedule', 'sell', 'badge', 'confirmation_number', 'thumb_up', 'location_on', 'call', 'group'];
       var LDEF = {};
       SITE_SECTIONS.forEach(function (sc) {
         sc.f.forEach(function (f) {
@@ -2979,6 +3027,13 @@
           mark(i.dataset.k, i.value);
         };
       });
+      $('sCancel').onclick = function () {
+        confirmBox('Bỏ ' + Object.keys(dirty).length + ' mục chưa lưu và trả về giá trị đã lưu?', { title: 'Huỷ thay đổi', ok: 'Bỏ thay đổi', danger: true }).then(function (ok) {
+          if (ok) {
+            renderSite();
+          }
+        });
+      };
       $('sSave').onclick = function () {
         var btn = this;
         btn.disabled = true;
@@ -5136,7 +5191,7 @@
   function renderInbox() {
     var write = can('chat', true);
     main.innerHTML = '<div class="page-h"><div><h1>Gửi thông báo</h1><p>Thông báo hiện trong hòm thư của khách (kèm ảnh nếu muốn). Thông báo đổi trạng thái đơn, báo lỗi và đánh giá được gửi tự động.</p></div></div>' +
-      (write ? '<form class="card card-pad" id="inForm" style="display:grid;gap:12px;max-width:640px">' +
+      (write ? '<div class="col-narrow"><form class="card card-pad form-stack" id="inForm">' +
       '<label class="field"><span>Gửi tới</span><select id="inTo"><option value="all">Tất cả khách</option><option value="one">Chọn khách (một hoặc nhiều người)</option></select></label>' +
       '<div class="field" id="inMailW" hidden><span>Khách nhận</span><div class="pick" id="inPick"><div class="pick-box" id="inChips"><input id="inQ" type="text" autocomplete="off" spellcheck="false" placeholder="Gõ tên, email hoặc SĐT…  (Tab để chọn)" role="combobox" aria-expanded="false" aria-controls="inOpts" aria-autocomplete="list"></div><ul class="pick-list" id="inOpts" role="listbox" hidden></ul></div><small class="pick-n" id="inPickN"></small></div>' +
       '<label class="field"><span>Dạng</span><select id="inFmt"><option value="text">Thông báo ngắn</option><option value="post">Bài viết (Markdown)</option></select></label>' +
@@ -5144,8 +5199,8 @@
       '<div class="field"><span>Nội dung</span><div class="md-bar" id="inBar" hidden></div><textarea id="inBody" rows="4" maxlength="2000"></textarea><div class="md md-prev" id="inMd" hidden></div></div>' +
       '<div class="field"><span>Ảnh đính kèm (tuỳ chọn)</span><img id="inPrev" alt="" hidden style="max-width:240px;border-radius:12px;margin-bottom:8px">' +
       '<div><input id="inImg" placeholder="https://ik.imagekit.io/…"> <button class="btn" id="inUp" type="button"><span class="ms">add_a_photo</span>Tải ảnh lên</button><input type="file" id="inFile" accept="image/*" hidden></div></div>' +
-      '<div><button class="btn primary" id="inSend"><span class="ms">send</span>Gửi thông báo</button></div></form>' : '') +
-      '<h2 style="margin:24px 0 10px">Đã gửi gần đây</h2><div id="inList"><div class="card"><div class="skel line"></div></div></div>';
+      '<div class="form-acts"><button class="btn primary" id="inSend"><span class="ms">send</span>Gửi thông báo</button></div></form>' : '') +
+      '<h2 class="sec-h">Đã gửi gần đây</h2><div id="inList"><div class="card"><div class="skel line"></div></div></div></div>';
     if (write) {
       setupMdEditor();
       var picker = setupRecipientPicker();
@@ -6235,16 +6290,14 @@
       f();
     }
   }
-  $('scrim').onclick = function () {
-    closeDrawer();
-  };
+  $('scrim').onclick = tryCloseDrawer;
   document.addEventListener('keydown', function (e) {
     var d = $('drawer');
     if (d.hidden) {
       return;
     }
     if (e.key === 'Escape') {
-      closeDrawer();
+      tryCloseDrawer();
       return;
     }
     if (e.key === 'Tab') { // giữ phím Tab trong ngăn chi tiết

@@ -259,6 +259,25 @@
     document.dispatchEvent(new Event('vdk:site'));
   }
 
+  /* Khối số liệu nổi bật: chỉ hiện số thật (máy chủ đếm từ CSDL hoặc do admin nhập); không có số nào thì ẩn cả khối */
+  function stats(list) {
+    var box = document.querySelector('.cnt[data-block="stats"]');
+    if (!box || !Array.isArray(list)) {
+      return;
+    }
+    var g = box.querySelector('.g');
+    box.hidden = !list.length;
+    g.innerHTML = list.map(function (x, i) {
+      return '<div class="rv in" data-d=".' + i + '"><span class="ms">' + esc(x.icon) + '</span><b data-n="' + (x.n | 0) + '">0</b>' + esc(x.label) + '</div>';
+    }).join('');
+    g.querySelectorAll('[data-n]').forEach(function (el) {
+      if (window.vdkCount) {
+        window.vdkCount(el);
+      } else {
+        el.textContent = Number(el.dataset.n).toLocaleString('vi-VN');
+      }
+    });
+  }
   function apply(s) {
     window.VDK_SITE = s;
     applyCss(s);
@@ -377,6 +396,14 @@
         localStorage.setItem(KEY, JSON.stringify(d.site));
       } catch (e) {}
       apply(d.site);
+      var runStats = function () {
+        stats(d.stats);
+      };
+      if (document.body) {
+        runStats();
+      } else {
+        document.addEventListener('DOMContentLoaded', runStats);
+      }
       rules(d.rules);
     }).catch(function () {
       if (S) {

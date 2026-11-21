@@ -522,6 +522,10 @@
   document.querySelectorAll('[data-n]').forEach(function (el) {
     counter.observe(el);
   });
+  /* Số liệu do site.js dựng sau khi tải /api/site */
+  window.vdkCount = function (el) {
+    counter.observe(el);
+  };
 
   /* ---------- Thẻ điểm đến nghiêng theo chuột (chỉ máy có chuột) ---------- */
   if (window.matchMedia('(hover:hover)').matches) {
