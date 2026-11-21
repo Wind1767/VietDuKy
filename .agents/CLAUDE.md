@@ -109,3 +109,8 @@ Kiểm tra ở rộng ~360px: bảng so sánh tour (`.x-table`), thanh `.x-tray`
 
 ## Khi giao việc
 Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) nếu người dùng yêu cầu, không zip cả dự án.
+
+## Markdown & tô màu mã
+- `public/js/md.js` dựng Markdown (escape mọi HTML); `public/js/md-highlight.js` (`window.vdkHl`) tô màu khối ```ngôn-ngữ. Trang nào nạp md.js phải nạp md-highlight.js trước nó và có `content_copy`, `check` trong `icon_names`.
+- Thêm ngôn ngữ: `def('tên bí-danh', 'Nhãn', {...})` trong md-highlight.js (tên đầu tiên là khoá; ngôn ngữ cần bộ quét riêng thì thêm vào `CUSTOM[khoá]`). Lớp token `tk-*` có màu trong md.css.
+- Nút sao chép chỉ chép `textContent` của `<code>` (không dùng innerText vì dính tên icon). Test: tests/unit/markdown.test.mjs.

@@ -109,3 +109,42 @@
 .field [hidden] {
   display: none !important;
 }
+
+/* Khối mã có nhãn ngôn ngữ + nút sao chép */
+.md-code { margin: 12px 0; border-radius: 12px; overflow: hidden; background: #0f1f1b; }
+.md-code pre { margin: 0; border-radius: 0; }
+.md-ch { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px 6px 14px; background: rgba(255,255,255,.07); color: #b9cdc6; font-size: 12px; }
+.md-copy { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 8px; padding: 4px 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.md-copy:hover { background: rgba(255,255,255,.12); }
+.md-copy .ms { font-size: 16px; }
+.md code[class^="lang-"] { color: #e6f0ec; }
+.tk-k { color: #ff7b9c; }
+.tk-t, .tk-tag { color: #6fd3c0; }
+.tk-f { color: #82b1ff; }
+.tk-l, .tk-n { color: #ffb86b; }
+.tk-s { color: #a5e075; }
+.tk-c { color: #7f948d; font-style: italic; }
+.tk-p { color: #d7a8ff; }
+.tk-v { color: #ffd479; }
+.tk-a { color: #a5e075; background: rgba(120,220,120,.12); display: inline-block; width: 100%; }
+.tk-d { color: #ff8a8a; background: rgba(255,100,100,.12); display: inline-block; width: 100%; }
+
+/* Hộp cảnh báo / khối ::: / chi tiết / mục lục */
+.md-box, .md-toc { margin: 12px 0; padding: 10px 14px; border-left: 4px solid #3d8f7c; border-radius: 8px; background: rgba(61,143,124,.1); }
+.md-box-t { font-weight: 700; margin-bottom: 4px; }
+.md-box > :last-child { margin-bottom: 0; }
+.md-tip, .md-success { border-color: #2e9d52; background: rgba(46,157,82,.1); }
+.md-warning, .md-caution { border-color: #d99a1c; background: rgba(217,154,28,.12); }
+.md-danger { border-color: #d64545; background: rgba(214,69,69,.1); }
+.md-important { border-color: #8a5cd6; background: rgba(138,92,214,.1); }
+.md-details { margin: 12px 0; padding: 8px 14px; border: 1px solid var(--line, #d3e0db); border-radius: 8px; }
+.md-details > summary { cursor: pointer; font-weight: 600; }
+.md-toc ul { margin: 0; padding-left: 18px; }
+.md-toc li.l3 { margin-left: 14px; } .md-toc li.l4 { margin-left: 28px; } .md-toc li.l5, .md-toc li.l6 { margin-left: 42px; }
+.md-math { font-family: Georgia, 'Times New Roman', serif; font-style: italic; padding: 0 2px; }
+.md-math-block { display: block; text-align: center; margin: 12px 0; overflow-x: auto; }
+.md dl dt { font-weight: 700; margin-top: 8px; }
+.md dl dd { margin: 2px 0 2px 20px; }
+.md abbr[title] { text-decoration: underline dotted; cursor: help; }
+.md kbd { padding: 1px 6px; border: 1px solid var(--line, #c5d3ce); border-bottom-width: 2px; border-radius: 5px; font: 12px/1.4 ui-monospace, monospace; background: rgba(127,127,127,.12); }
+.md ins { text-decoration: underline; }
