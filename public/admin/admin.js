@@ -4532,8 +4532,15 @@
   }
   /* Avatar của khách: ảnh nếu có, không thì chữ cái đầu */
   function avInner(name, avatar) {
-    return avatar ? '<img src="' + esc(avatar) + '" alt="" loading="lazy">' : initial(name);
+    return avatar ? '<img src="' + esc(avatar) + '" alt="" data-n="' + initial(name) + '">' : initial(name);
   }
+  /* Ảnh đại diện lỗi tải (hết hạn, bị chặn...) thì hiện chữ cái đầu thay vì ô trống */
+  document.addEventListener('error', function (e) {
+    var im = e.target;
+    if (im && im.tagName === 'IMG' && im.dataset && im.dataset.n !== undefined && im.parentNode && im.parentNode.classList.contains('av')) {
+      im.parentNode.textContent = im.dataset.n;
+    }
+  }, true);
   function hm(ms) {
     return vnTime(ms);
   }
@@ -4900,7 +4907,7 @@
       var mine = m.sender === 'admin', cont = prev && prev.sender === m.sender && !gap;
       var nx = chat.items[i + 1], last = !nx || nx.sender !== m.sender || nx.created_at - m.created_at > 3600000;
       html += '<div class="cm ' + (mine ? 'me' : 'them') + (cont ? ' cont' : '') + (last ? ' last' : '') + '">' + (!mine ? '<span class="av sm">' +
-        (last ? avInner(u.name, u.avatar) : '') + '</span>' : '') +
+        avInner(u.name, u.avatar) + '</span>' : '') +
         '<div class="bub' + (m.state === 'sending' ? ' wait' : '') + (m.state === 'fail' ? ' fail' : '') + '">' + esc(m.body) + '</div>' +
         (typeof m.id === 'number' && canW ? '<button type="button" class="cm-del" data-del="' + m.id +
           '" aria-label="Xoá tin nhắn" title="Xoá tin nhắn"><span class="ms">delete</span></button>' : '') + '</div>' + (m.bot && last ? '<div class="bub-auto">Trả lời tự động</div>' : '');

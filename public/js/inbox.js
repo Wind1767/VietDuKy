@@ -18,16 +18,16 @@
     var d = new Date(ms);
     return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
   }
-  /* Chữ ngày: Hôm nay / Hôm qua / Thứ Bảy, 21/11/2026 */
+  /* Chữ ngày: "Hôm nay, 21/11/2026", "Hôm qua, 20/11/2026", còn lại chỉ ghi ngày "19/11/2026" */
   function dayText(ms) {
-    var now = Date.now(), d = new Date(ms);
+    var now = Date.now(), date = new Date(ms).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     if (dayKey(ms) === dayKey(now)) {
-      return 'Hôm nay';
+      return 'Hôm nay, ' + date;
     }
     if (dayKey(ms) === dayKey(now - 86400000)) {
-      return 'Hôm qua';
+      return 'Hôm qua, ' + date;
     }
-    return d.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date;
   }
   function when(ms) {
     return dayText(ms) + ' lúc ' + hm(ms);
