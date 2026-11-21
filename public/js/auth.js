@@ -17,6 +17,22 @@
     });
   }
 
+  /* Đã đăng nhập mà quay lại (nút Back, trang lưu sẵn) trang đăng nhập / đăng ký / quên mật khẩu thì chuyển về tài khoản */
+  if (/^\/(login|register|forgot)(\.html)?\/?$/.test(location.pathname) && window.fetch) {
+    var leave = function () {
+      fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
+        if (r.ok) {
+          location.replace('/account');
+        }
+      }).catch(function () {});
+    };
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) {
+        leave();
+      }
+    });
+  }
+
   function api(path, body) {
     return fetch('/api/auth/' + path, {
       method: 'POST',

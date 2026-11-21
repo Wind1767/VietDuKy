@@ -195,6 +195,13 @@ export default {
         if (await pageOffFlag(env, url.pathname)) {
           return env.ASSETS.fetch(new Request(new URL('/__tinh-nang-da-tat__', url), { method: 'GET', headers: request.headers }));
         }
+        /* Đã đăng nhập thì không vào lại trang đăng nhập / đăng ký / quên mật khẩu: chuyển về tài khoản */
+        if (request.method === 'GET' && /^\/(login|register|forgot)(\.html)?\/?$/.test(url.pathname)) {
+          await ensureSchema(env);
+          if (await currentUser(request, env, { HttpError })) {
+            return new Response(null, { status: 302, headers: { Location: new URL('/account', url).href, 'Cache-Control': 'no-store' } });
+          }
+        }
         // Trang tự tạo: /p/ten-trang dùng chung một khung page.html, nội dung nạp qua /api/pages/ten-trang
         if (/^\/p\/[a-z0-9-]+\/?$/.test(url.pathname)) {
           return env.ASSETS.fetch(new Request(new URL('/page', url), request));

@@ -109,3 +109,21 @@ test('Đăng nhập khách bằng Google đã liên kết với tài khoản qu�
   await assert.rejects(() => googleUser(env, h, { sub: 'g2', email: 'trung@x.vn', name: 'T' }), (e) => /Email này đã có/.test(e.message));
   assert.equal(raw.prepare("SELECT COUNT(*) n FROM mfa_google WHERE sub = 'g2'").get().n, 0);
 });
+
+test('Đã đăng nhập thì /login, /register, /forgot chuyển về /account; chưa đăng nhập vẫn vào được', async () => {
+  const raw = env.DB.raw;
+  raw.exec("DELETE FROM users WHERE email = 'dn@x.vn'");
+  const { createSession } = await import('../../src/customer-auth.js');
+  raw.exec("INSERT INTO users (created_at, email, name, pass_hash, verified_at) VALUES (1, 'dn@x.vn', 'Đã đăng nhập', 'x', 1)");
+  const u = raw.prepare("SELECT * FROM users WHERE email = 'dn@x.vn'").get();
+  const ses = await createSession(env, u, new Request('http://localhost/', { headers: { 'User-Agent': UA.chromeWin, 'CF-IPCountry': 'VN', 'CF-Connecting-IP': '113.161.20.9' } }));
+  const page = (p, ck) => worker.fetch(new Request('http://localhost' + p, { headers: { 'User-Agent': UA.chromeWin, 'CF-IPCountry': 'VN', 'CF-Connecting-IP': '113.161.20.9', ...(ck ? { Cookie: ck } : {}) } }), env, { waitUntil() {} });
+  assert.equal((await page('/login')).status, 200);
+  const ck = 'vdk_user=' + ses;
+  for (const p of ['/login', '/register', '/forgot', '/login.html']) {
+    const r = await page(p, ck);
+    assert.equal(r.status, 302, p);
+    assert.match(r.headers.get('Location'), /\/account$/);
+  }
+  assert.equal((await page('/reset', ck)).status, 200, 'trang đặt lại mật khẩu từ email vẫn mở được');
+});
