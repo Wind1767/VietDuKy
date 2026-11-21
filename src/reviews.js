@@ -33,22 +33,15 @@ const pub = r => ({
 });
 
 /* Phân bố theo 5 mức sao: điểm x,5 làm tròn lên (4,5 tính vào mức 5; 0,5 tính vào mức 1). avg giữ một chữ số thập phân. */
-async function summary(env) {
-  const bucket = 'MIN(5, MAX(1, CAST(rating + 0.5 AS INTEGER)))';
-  const r = await env.DB.prepare("SELECT COUNT(*) AS n, COALESCE(AVG(rating), 0) AS a, " +
-    [1, 2, 3, 4, 5].map(k => `COALESCE(SUM(${bucket} = ${k}), 0) AS s${k}`).join(', ') + " FROM reviews WHERE status = 'approved'").first();
-  return {
-    count: r.n,
-    avg: Math.round(r.a * 10) / 10,
-    dist: {
-      1: r.s1,
-      2: r.s2,
-      3: r.s3,
-      4: r.s4,
-      5: r.s5
-    }
-  };
-}
+const BUCKET = 'MIN(5, MAX(1, CAST(rating + 0.5 AS INTEGER)))';
+const summarySql = "SELECT COUNT(*) AS n, COALESCE(AVG(rating), 0) AS a, " + [1, 2, 3, 4, 5].map(k => `COALESCE(SUM(${BUCKET} = ${k}), 0) AS s${k}`).join(', ') + " FROM reviews WHERE status = 'approved'";
+const summaryOf = r => ({
+  count: r.n,
+  avg: Math.round(r.a * 10) / 10,
+  dist: { 1: r.s1, 2: r.s2, 3: r.s3, 4: r.s4, 5: r.s5 }
+});
+/* Lượt thích hiển thị = số bình chọn thật + số admin chỉnh thêm (helpful_adj, có thể âm), không bao giờ âm */
+const HELPFUL = 'MAX(0, r.helpful_adj + (SELECT COUNT(*) FROM review_votes v WHERE v.review_id = r.id))';
 
 /* Khách chỉ được đánh giá khi có ít nhất một đơn (chưa huỷ) gắn với tài khoản của mình */
 async function myBookings(env, uid) {
@@ -68,12 +61,13 @@ export async function handleReviews(request, env, url, ip, h) {
       me = await currentUser(request, env, h);
     } catch { /* khách chưa đăng nhập vẫn xem được */
     }
-    const { results } = await env.DB.prepare("SELECT r.id, r.user_id, r.rating, r.destination, r.body, r.reply, r.created_at, u.name, u.avatar, " +
-      "(SELECT COUNT(*) FROM review_votes v WHERE v.review_id = r.id) AS helpful, " +
+    /* Danh sách + tổng hợp sao trong một lượt gọi CSDL */
+    const [{ results }, { results: [sum] }] = await env.DB.batch([env.DB.prepare("SELECT r.id, r.user_id, r.rating, r.destination, r.body, r.reply, r.created_at, u.name, u.avatar, " +
+      HELPFUL + " AS helpful, " +
       "EXISTS(SELECT 1 FROM review_votes v WHERE v.review_id = r.id AND v.user_id = ?3) AS voted " +
       "FROM reviews r JOIN users u ON u.id = r.user_id " +
-      "WHERE r.status = 'approved' ORDER BY r.created_at DESC, r.id DESC LIMIT ?1 OFFSET ?2").bind(size, (page - 1) * size, me ? me.id : 0).all();
-    const s = await summary(env);
+      "WHERE r.status = 'approved' ORDER BY r.created_at DESC, r.id DESC LIMIT ?1 OFFSET ?2").bind(size, (page - 1) * size, me ? me.id : 0), env.DB.prepare(summarySql)]);
+    const s = summaryOf(sum);
     return h.json({
       logged_in: !!me,
       items: results.map(r => ({ ...pub(r), helpful: r.helpful, voted: !!r.voted, own: !!me && r.user_id === me.id })),
@@ -113,28 +107,33 @@ export async function handleReviews(request, env, url, ip, h) {
   if (vote && method === 'POST') {
     await h.limit(env, 'rvote:' + user.id, h.LIMITS.rvote);
     const id = Number(vote[1]);
-    const r = await env.DB.prepare("SELECT user_id FROM reviews WHERE id = ?1 AND status = 'approved'").bind(id).first();
+    /* Một lượt đọc: chủ đánh giá, đã bình chọn chưa, số bình chọn thật + số chỉnh của admin */
+    const r = await env.DB.prepare("SELECT r.user_id, r.helpful_adj AS adj, EXISTS(SELECT 1 FROM review_votes v WHERE v.review_id = r.id AND v.user_id = ?2) AS voted, " +
+      "(SELECT COUNT(*) FROM review_votes v WHERE v.review_id = r.id) AS n FROM reviews r WHERE r.id = ?1 AND r.status = 'approved'").bind(id, user.id).first();
     if (!r) {
       throw new h.HttpError(404, 'Không tìm thấy đánh giá này.');
     }
     if (r.user_id === user.id) {
       throw new h.HttpError(400, 'Bạn không thể bình chọn cho đánh giá của chính mình.');
     }
-    const gone = await env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1 AND user_id = ?2').bind(id, user.id).run(); // bấm lần nữa = bỏ bình chọn
-    if (!gone.meta.changes) {
-      await env.DB.prepare('INSERT OR IGNORE INTO review_votes (review_id, user_id, created_at) VALUES (?1, ?2, ?3)').bind(id, user.id, Date.now()).run();
-    }
-    const n = await env.DB.prepare('SELECT COUNT(*) AS n FROM review_votes WHERE review_id = ?1').bind(id).first();
-    return h.json({ helpful: n.n, voted: !gone.meta.changes });
+    const voted = !r.voted; // bấm lần nữa = bỏ bình chọn
+    await (voted
+      ? env.DB.prepare('INSERT OR IGNORE INTO review_votes (review_id, user_id, created_at) VALUES (?1, ?2, ?3)').bind(id, user.id, Date.now())
+      : env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1 AND user_id = ?2').bind(id, user.id)).run();
+    return h.json({ helpful: Math.max(0, r.adj + r.n + (voted ? 1 : -1)), voted });
   }
 
   const del = pathname.match(/^\/api\/reviews\/mine\/(\d+)$/);
   if (del && method === 'DELETE') {
-    const r = await env.DB.prepare('DELETE FROM reviews WHERE id = ?1 AND user_id = ?2').bind(Number(del[1]), user.id).run();
+    const id = Number(del[1]);
+    /* Xoá bình chọn rồi xoá đánh giá trong một lượt; bình chọn chỉ bị xoá khi đánh giá đúng là của khách này */
+    const [, r] = await env.DB.batch([
+      env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1 AND EXISTS (SELECT 1 FROM reviews WHERE id = ?1 AND user_id = ?2)').bind(id, user.id),
+      env.DB.prepare('DELETE FROM reviews WHERE id = ?1 AND user_id = ?2').bind(id, user.id)
+    ]);
     if (!r.meta.changes) {
       throw new h.HttpError(404, 'Không tìm thấy đánh giá này.');
     }
-    await env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1').bind(Number(del[1])).run();
     return h.json({ ok: true });
   }
 
@@ -194,9 +193,13 @@ export async function adminReviews(request, env, url, h) {
     const page = Math.max(parseInt(url.searchParams.get('page')) || 1, 1);
     const where = STATUSES.includes(status) ? 'WHERE r.status = ?1' : 'WHERE ?1 = ?1';
     const arg = STATUSES.includes(status) ? status : '';
-    const total = (await env.DB.prepare(`SELECT COUNT(*) AS n FROM reviews r ${where}`).bind(arg).first()).n;
-    const { results } = await env.DB.prepare(`SELECT r.*, u.name, u.email, u.phone, u.avatar, (u.email LIKE '%@virtual.invalid') AS virtual FROM reviews r JOIN users u ON u.id = r.user_id ${where} ORDER BY r.created_at DESC, r.id DESC LIMIT ?2 OFFSET ?3`).bind(arg, pageSize, (page - 1) * pageSize).all();
-    const c = await env.DB.prepare('SELECT status, COUNT(*) AS n FROM reviews GROUP BY status').all();
+    /* Tổng số, trang hiện tại và số theo trạng thái: một lượt gọi CSDL */
+    const [{ results: [t] }, { results }, c] = await env.DB.batch([
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM reviews r ${where}`).bind(arg),
+      env.DB.prepare(`SELECT r.*, ${HELPFUL} AS helpful, u.name, u.email, u.phone, u.avatar, (u.email LIKE '%@virtual.invalid') AS virtual FROM reviews r JOIN users u ON u.id = r.user_id ${where} ORDER BY r.created_at DESC, r.id DESC LIMIT ?2 OFFSET ?3`).bind(arg, pageSize, (page - 1) * pageSize),
+      env.DB.prepare('SELECT status, COUNT(*) AS n FROM reviews GROUP BY status')
+    ]);
+    const total = t.n;
     const counts = {
       pending: 0,
       approved: 0,
@@ -263,8 +266,21 @@ export async function adminReviews(request, env, url, h) {
       sets.push('reply = ?');
       args.push(h.clean(b.reply, 600) || null);
     }
-    const cur = await env.DB.prepare("SELECT r.user_id, (u.email LIKE '%@virtual.invalid') AS v FROM reviews r JOIN users u ON u.id = r.user_id WHERE r.id = ?1").bind(id).first();
-    if (cur && cur.v && ('rating' in b || 'body' in b || 'destination' in b || 'name' in b || 'created_at' in b)) { // chỉ đánh giá ảo mới sửa được nội dung
+    /* Một lượt đọc đủ thông tin chủ đánh giá và số bình chọn thật (dùng cho cả phản hồi lẫn tính lượt thích) */
+    const cur = await env.DB.prepare("SELECT r.user_id, u.name, u.email, u.phone, (u.email LIKE '%@virtual.invalid') AS v, (SELECT COUNT(*) FROM review_votes x WHERE x.review_id = r.id) AS votes FROM reviews r JOIN users u ON u.id = r.user_id WHERE r.id = ?1").bind(id).first();
+    if (!cur) {
+      throw new h.HttpError(404, 'Không tìm thấy đánh giá này.');
+    }
+    /* Admin chỉnh số lượt thích hiển thị: lưu phần chênh so với bình chọn thật */
+    if ('helpful' in b) {
+      const n = Number(b.helpful);
+      if (!Number.isInteger(n) || n < 0 || n > 1000000) {
+        throw new h.HttpError(400, 'Lượt thích phải là số nguyên từ 0 đến 1.000.000.');
+      }
+      sets.push('helpful_adj = ?');
+      args.push(n - cur.votes);
+    }
+    if (cur.v && ('rating' in b || 'body' in b || 'destination' in b || 'name' in b || 'created_at' in b)) { // chỉ đánh giá ảo mới sửa được nội dung
       if ('rating' in b) {
         sets.push('rating = ?');
         args.push(vRating(h, b.rating));
@@ -294,9 +310,10 @@ export async function adminReviews(request, env, url, h) {
           throw new h.HttpError(400, 'Hãy nhập tên người đánh giá.');
         }
         await env.DB.prepare('UPDATE users SET name = ?1 WHERE id = ?2').bind(n, cur.user_id).run();
+        cur.name = n;
       }
     }
-    if (!sets.length && !(cur && cur.v && 'name' in b)) {
+    if (!sets.length && !(cur.v && 'name' in b)) {
       throw new h.HttpError(400, 'Không có gì để cập nhật.');
     }
     sets.push('updated_at = ?');
@@ -305,26 +322,27 @@ export async function adminReviews(request, env, url, h) {
     if (!hit) {
       throw new h.HttpError(404, 'Không tìm thấy đánh giá này.');
     }
-    const u = await env.DB.prepare('SELECT name, email, phone FROM users WHERE id = ?1').bind(hit.user_id).first();
-    await h.logAct(env, 'status' in b ? `${STATUS_LABEL[b.status]} đánh giá #${id}` : 'Phản hồi đánh giá #' +
-      id, u ? u.name : '');
+    const u = { name: cur.name, email: cur.email, phone: cur.phone };
+    await h.logAct(env, 'status' in b ? `${STATUS_LABEL[b.status]} đánh giá #${id}` : 'helpful' in b && !('reply' in b) ? `Sửa lượt thích đánh giá #${id} thành ${b.helpful}` : 'Phản hồi đánh giá #' +
+      id, u.name);
     if ('status' in b && hit.user_id) {
       await h.notify(hit.user_id, { kind: 'review', title: 'Đánh giá của bạn: ' + STATUS_LABEL[b.status], body: b.status === 'approved' ? 'Cảm ơn bạn! Đánh giá đã được hiển thị trên website.' : 'Đánh giá của bạn chưa được hiển thị công khai.', link: '/reviews' });
     }
-    return h.json({ ...hit, ...(u || {}) });
+    return h.json({ ...hit, ...u, helpful: Math.max(0, hit.helpful_adj + cur.votes) });
   }
 
   if (method === 'DELETE') {
     const old = await env.DB.prepare("SELECT u.id AS uid, u.name, (u.email LIKE '%@virtual.invalid') AS v FROM reviews r JOIN users u ON u.id = r.user_id WHERE r.id = ?1").bind(id).first();
-    const r = await env.DB.prepare('DELETE FROM reviews WHERE id = ?1').bind(id).run();
-    if (!r.meta.changes) {
+    if (!old) {
       throw new h.HttpError(404, 'Không tìm thấy đánh giá này.');
     }
-    await env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1').bind(id).run();
-    if (old && old.v) {
-      await env.DB.prepare('DELETE FROM users WHERE id = ?1').bind(old.uid).run();
-    } // tài khoản ẩn của đánh giá ảo
-    await h.logAct(env, 'Xoá đánh giá #' + id, old ? old.name : '');
+    /* Xoá bình chọn + đánh giá (+ tài khoản ẩn của đánh giá ảo) trong một lượt */
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM review_votes WHERE review_id = ?1').bind(id),
+      env.DB.prepare('DELETE FROM reviews WHERE id = ?1').bind(id),
+      env.DB.prepare("DELETE FROM users WHERE id = ?1 AND email LIKE '%@virtual.invalid'").bind(old.uid)
+    ]);
+    await h.logAct(env, 'Xoá đánh giá #' + id, old.name);
     return h.json({ ok: true });
   }
 

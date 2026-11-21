@@ -46,3 +46,20 @@ test('Khách xoá thông báo riêng (không phải bài viết) thì xoá hẳn
   assert.match(src, /purge\(env, `user_id = \?1 AND kind != 'post'`/);
   assert.match(src, /purge\(env, 'id = \?1', Number\(m\[1\]\)\)/);
 });
+
+import { adminInbox } from '../../src/inbox.js';
+import { createDB, HttpError } from '../helpers/d1.mjs';
+
+test('Admin gửi cho nhiều khách đã chọn: mỗi khách một thông báo; tìm khách theo tên/email', async () => {
+  const env = { DB: createDB() };
+  env.DB.raw.exec("INSERT INTO users (id, created_at, email, name, pass_hash) VALUES (1, 1, 'an@x.vn', 'Nguyễn An', 'x'), (2, 1, 'binh@x.vn', 'Trần Bình', 'x'), (3, 1, 'vr@virtual.invalid', 'Ảo', 'x')");
+  const h = { HttpError, readJson: (r) => r.json(), logAct: async () => {}, json: (d, s = 200) => Response.json(d, { status: s }), clean: (v, n) => String(v ?? '').trim().slice(0, n) };
+  const call = (method, p, body) => adminInbox(new Request('http://x.test' + p, { method, body: body ? JSON.stringify(body) : undefined }), env, new URL('http://x.test' + p), h);
+  const found = await (await call('GET', '/api/admin/inbox/customers?q=bình')).json();
+  assert.deepEqual(found.items.map((u) => u.id), [2]);
+  assert.equal((await (await call('GET', '/api/admin/inbox/customers?q=')).json()).items.length, 2, 'không gồm tài khoản ảo');
+  await call('POST', '/api/admin/inbox', { users: [1, 2, 2, 3], title: 'Chào', body: 'Nội dung', format: 'text' });
+  const rows = env.DB.raw.prepare('SELECT user_id FROM notifications ORDER BY user_id').all().map((r) => r.user_id);
+  assert.deepEqual(rows, [1, 2]);
+  await assert.rejects(() => call('POST', '/api/admin/inbox', { users: [], title: 'x', body: 'y' }), (e) => e.status === 400);
+});

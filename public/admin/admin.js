@@ -5137,8 +5137,8 @@
     var write = can('chat', true);
     main.innerHTML = '<div class="page-h"><div><h1>Gửi thông báo</h1><p>Thông báo hiện trong hòm thư của khách (kèm ảnh nếu muốn). Thông báo đổi trạng thái đơn, báo lỗi và đánh giá được gửi tự động.</p></div></div>' +
       (write ? '<form class="card card-pad" id="inForm" style="display:grid;gap:12px;max-width:640px">' +
-      '<label class="field"><span>Gửi tới</span><select id="inTo"><option value="all">Tất cả khách</option><option value="one">Một khách (theo email)</option></select></label>' +
-      '<label class="field" id="inMailW" hidden><span>Email khách</span><input id="inMail" type="email" maxlength="120" placeholder="khach@gmail.com"></label>' +
+      '<label class="field"><span>Gửi tới</span><select id="inTo"><option value="all">Tất cả khách</option><option value="one">Chọn khách (một hoặc nhiều người)</option></select></label>' +
+      '<div class="field" id="inMailW" hidden><span>Khách nhận</span><div class="pick" id="inPick"><div class="pick-box" id="inChips"><input id="inQ" type="text" autocomplete="off" spellcheck="false" placeholder="Gõ tên, email hoặc SĐT…  (Tab để chọn)" role="combobox" aria-expanded="false" aria-controls="inOpts" aria-autocomplete="list"></div><ul class="pick-list" id="inOpts" role="listbox" hidden></ul></div><small class="pick-n" id="inPickN"></small></div>' +
       '<label class="field"><span>Dạng</span><select id="inFmt"><option value="text">Thông báo ngắn</option><option value="post">Bài viết (Markdown)</option></select></label>' +
       '<label class="field"><span>Tiêu đề</span><input id="inTitle" maxlength="120" required></label>' +
       '<div class="field"><span>Nội dung</span><div class="md-bar" id="inBar" hidden></div><textarea id="inBody" rows="4" maxlength="2000"></textarea><div class="md md-prev" id="inMd" hidden></div></div>' +
@@ -5148,8 +5148,12 @@
       '<h2 style="margin:24px 0 10px">Đã gửi gần đây</h2><div id="inList"><div class="card"><div class="skel line"></div></div></div>';
     if (write) {
       setupMdEditor();
+      var picker = setupRecipientPicker();
       $('inTo').onchange = function () {
         $('inMailW').hidden = this.value !== 'one';
+        if (this.value === 'one') {
+          $('inQ').focus();
+        }
       };
       $('inUp').onclick = function () {
         $('inFile').click();
@@ -5173,10 +5177,16 @@
       $('inForm').onsubmit = function (e) {
         e.preventDefault();
         var btn = $('inSend');
+        if ($('inTo').value === 'one' && !picker.ids().length) {
+          toast('Hãy chọn ít nhất một khách nhận.', true);
+          $('inQ').focus();
+          return;
+        }
         btn.disabled = true;
-        api('/inbox', { method: 'POST', body: { to: $('inTo').value === 'one' ? $('inMail').value : 'all', title: $('inTitle').value, format: $('inFmt').value, body: $('inBody').value, image: $('inImg').value.trim() } }).then(function () {
+        api('/inbox', { method: 'POST', body: Object.assign($('inTo').value === 'one' ? { users: picker.ids() } : { to: 'all' }, { title: $('inTitle').value, format: $('inFmt').value, body: $('inBody').value, image: $('inImg').value.trim() }) }).then(function () {
           toast('Đã gửi thông báo');
           $('inForm').reset();
+          picker.reset();
           $('inFmt').onchange();
           $('inMailW').hidden = true;
           $('inPrev').hidden = true;
@@ -5189,6 +5199,130 @@
       };
     }
     loadInbox();
+  }
+  /* Chọn nhiều khách nhận: tìm kiếm, gợi ý, ↑↓ chọn dòng, Tab / Enter thêm khách, Backspace bỏ khách cuối */
+  function setupRecipientPicker() {
+    var sel = [], opts = [], act = 0, seq = 0, tm, q = $('inQ'), list = $('inOpts'), box = $('inChips');
+    function chips() {
+      box.querySelectorAll('.pick-chip').forEach(function (c) {
+        c.remove();
+      });
+      sel.forEach(function (u) {
+        var c = document.createElement('span');
+        c.className = 'pick-chip';
+        c.innerHTML = '<span class="av sm">' + avInner(u.name, u.avatar) + '</span><span class="pick-nm">' + esc(u.name) + '</span><button type="button" aria-label="Bỏ ' + esc(u.name) + '" data-rm="' + u.id + '">×</button>';
+        box.insertBefore(c, q);
+      });
+      $('inPickN').textContent = sel.length ? 'Đã chọn ' + sel.length + ' khách' : 'Chưa chọn khách nào';
+    }
+    function close() {
+      list.hidden = true;
+      q.setAttribute('aria-expanded', 'false');
+    }
+    function paint() {
+      if (!opts.length) {
+        list.innerHTML = '<li class="pick-empty">Không tìm thấy khách phù hợp.</li>';
+      } else {
+        list.innerHTML = opts.map(function (u, i) {
+          return '<li role="option" data-i="' + i + '" class="' + (i === act ? 'on' : '') + '"><span class="av sm">' + avInner(u.name, u.avatar) + '</span><span class="cb"><b>' + esc(u.name) + '</b><small>' + esc(u.email) + (u.phone ? ' · ' + esc(u.phone) : '') + '</small></span>' + (i === act ? '<kbd>Tab ↹</kbd>' : '') + '</li>';
+        }).join('');
+        var on = list.querySelector('.on');
+        if (on) {
+          on.scrollIntoView({ block: 'nearest' });
+        }
+      }
+      list.hidden = false;
+      q.setAttribute('aria-expanded', 'true');
+    }
+    function search() {
+      var my = ++seq;
+      api('/inbox/customers?q=' + encodeURIComponent(q.value.trim())).then(function (r) {
+        if (my !== seq) {
+          return;
+        }
+        opts = r.items.filter(function (u) {
+          return !sel.some(function (x) {
+            return x.id === u.id;
+          });
+        });
+        act = 0;
+        paint();
+      }).catch(function () {});
+    }
+    function pick(i) {
+      var u = opts[i];
+      if (!u) {
+        return;
+      }
+      sel.push(u);
+      q.value = '';
+      chips();
+      search();
+    }
+    q.addEventListener('input', function () {
+      clearTimeout(tm);
+      tm = setTimeout(search, 150);
+    });
+    q.addEventListener('focus', search);
+    q.addEventListener('blur', function () {
+      setTimeout(close, 150);
+    });
+    q.addEventListener('keydown', function (e) {
+      var open = !list.hidden && opts.length;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (list.hidden) {
+          search();
+        } else if (opts.length) {
+          act = (act + (e.key === 'ArrowDown' ? 1 : opts.length - 1)) % opts.length;
+          paint();
+        }
+      } else if (e.key === 'Enter' && open) {
+        e.preventDefault();
+        pick(act);
+      } else if (e.key === 'Tab' && !e.shiftKey && open && q.value.trim()) {
+        e.preventDefault();
+        pick(act);
+      } else if (e.key === 'Backspace' && !q.value && sel.length) {
+        sel.pop();
+        chips();
+        search();
+      } else if (e.key === 'Escape') {
+        close();
+      }
+    });
+    list.addEventListener('mousedown', function (e) {
+      var li = e.target.closest('[data-i]');
+      if (li) {
+        e.preventDefault();
+        pick(Number(li.dataset.i));
+        q.focus();
+      }
+    });
+    box.addEventListener('click', function (e) {
+      var rm = e.target.closest('[data-rm]');
+      if (rm) {
+        sel = sel.filter(function (u) {
+          return String(u.id) !== rm.dataset.rm;
+        });
+        chips();
+      }
+      q.focus();
+    });
+    chips();
+    return {
+      ids: function () {
+        return sel.map(function (u) {
+          return u.id;
+        });
+      },
+      reset: function () {
+        sel = [];
+        q.value = '';
+        chips();
+        close();
+      }
+    };
   }
   /* Soạn bài viết Markdown: thanh định dạng + nút Soạn / Xem trước */
   function setupMdEditor() {
@@ -5494,6 +5628,7 @@
           '<div class="rv-meta">' + starsHTML(x.rating) + '<span>' + (x.destination ? esc(x.destination) +
           ' · ' : '') + vnDate(x.created_at) + ' ' + vnTime(x.created_at) + '</span></div>' +
           '<p class="rv-body">' + esc(x.body) + '</p>' +
+          '<div class="rv-like"><span class="ms" aria-hidden="true">thumb_up</span><label for="rvh' + x.id + '">Lượt thích</label><input id="rvh' + x.id + '" class="rv-helpful" type="number" min="0" max="1000000" step="1" value="' + (x.helpful | 0) + '" inputmode="numeric"><button class="btn sm" data-act="helpful" type="button">Lưu lượt thích</button></div>' +
           '<label class="field"><span>Phản hồi công khai (tuỳ chọn)</span><textarea class="rv-reply" rows="2" maxlength="600" placeholder="Cảm ơn khách, hoặc giải đáp thắc mắc…">' + esc(x.reply || '') + '</textarea></label>' +
           '<div class="rv-acts">' +
           (x.status !== 'approved' ? '<button class="btn primary" data-act="approved"><span class="ms">check</span>Duyệt</button>' : '') +
@@ -5625,13 +5760,13 @@
       });
       return;
     }
-    var body = { reply: card.querySelector('.rv-reply').value };
-    if (act !== 'reply') {
+    var body = act === 'helpful' ? { helpful: Number(card.querySelector('.rv-helpful').value) } : { reply: card.querySelector('.rv-reply').value };
+    if (act !== 'reply' && act !== 'helpful') {
       body.status = act;
     }
     btn.disabled = true;
     api('/reviews/' + id, { method: 'PATCH', body: body }).then(function () {
-      toast(act === 'approved' ? 'Đã duyệt, đánh giá đã hiện trên website' : act === 'rejected' ? 'Đã chuyển sang không duyệt' : 'Đã lưu phản hồi');
+      toast(act === 'approved' ? 'Đã duyệt, đánh giá đã hiện trên website' : act === 'rejected' ? 'Đã chuyển sang không duyệt' : act === 'helpful' ? 'Đã lưu lượt thích' : 'Đã lưu phản hồi');
       loadReviews();
     }).catch(function (ex) {
       btn.disabled = false;

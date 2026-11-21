@@ -33,7 +33,7 @@ export function createDB() {
       try {
         const out = [];
         for (const s of stmts) {
-          out.push(await s.run());
+          out.push(/^\s*(select|with)\b/i.test(s.sql) ? await s.all() : await s.run());
         }
         db.exec('COMMIT');
         return out;
@@ -55,6 +55,7 @@ export function createDB() {
     'ALTER TABLE bookings ADD COLUMN amount INTEGER',
     'ALTER TABLE tours ADD COLUMN image TEXT',
     'ALTER TABLE tours ADD COLUMN summary TEXT',
+    'ALTER TABLE reviews ADD COLUMN helpful_adj INTEGER NOT NULL DEFAULT 0',
     'ALTER TABLE messages ADD COLUMN session_id INTEGER'
   ]) {
     try {

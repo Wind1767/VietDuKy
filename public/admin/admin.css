@@ -6426,3 +6426,157 @@ body:has(#app[hidden]) .adm-dock {
   transform: rotate(180deg);
 }
 
+
+/* Chọn nhiều khách nhận thông báo */
+.pick {
+  position: relative;
+}
+
+.pick-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: text;
+}
+
+.pick-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 90, 80, .15);
+}
+
+.pick-box input {
+  flex: 1 1 180px;
+  min-width: 140px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 6px 4px;
+}
+
+.pick-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 6px 3px 4px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.pick-chip .av.sm {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  font-size: 11px;
+}
+
+.pick-nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick-chip button {
+  border: 0;
+  padding: 0 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pick-list {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .35);
+}
+
+.pick-list[hidden] {
+  display: none;
+}
+
+.pick-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pick-list li.on,
+.pick-list li:hover {
+  background: var(--surface2);
+}
+
+.pick-list .cb {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+
+.pick-list .cb small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--mut);
+}
+
+.pick-list kbd {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--mut);
+}
+
+.pick-empty {
+  color: var(--mut);
+  cursor: default !important;
+}
+
+.pick-n {
+  display: block;
+  margin-top: 4px;
+  color: var(--mut);
+}
+
+/* Chỉnh lượt thích của đánh giá */
+.rv-like {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.rv-like .ms {
+  font-size: 18px;
+  color: var(--mut);
+}
+
+.rv-like input {
+  width: 96px;
+}

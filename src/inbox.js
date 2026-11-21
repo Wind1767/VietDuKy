@@ -98,6 +98,13 @@ export async function adminInbox(request, env, url, h) {
     const { results } = await env.DB.prepare('SELECT n.*, u.name AS user_name, u.email AS user_email FROM notifications n LEFT JOIN users u ON u.id = n.user_id WHERE n.kind IN (\'admin\', \'post\') ORDER BY n.id DESC LIMIT 50').all();
     return h.json({ items: results });
   }
+  /* Tìm khách để chọn người nhận (tên / email / SĐT), không gồm tài khoản ảo và tài khoản bị khoá */
+  if (pathname === '/api/admin/inbox/customers' && method === 'GET') {
+    const q = h.clean(url.searchParams.get('q'), 80);
+    const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
+    const { results } = await env.DB.prepare("SELECT u.id, u.name, u.email, u.phone, u.avatar FROM users u WHERE u.email NOT LIKE '%@virtual.invalid' AND u.blocked_at IS NULL AND (?1 = '' OR u.name LIKE ?2 ESCAPE '\\' OR u.email LIKE ?2 ESCAPE '\\' OR u.phone LIKE ?2 ESCAPE '\\') ORDER BY (lower(u.name) LIKE lower(?1) || '%') DESC, u.name COLLATE NOCASE LIMIT 20").bind(q, like).all();
+    return h.json({ items: results });
+  }
   if (pathname === '/api/admin/inbox' && method === 'POST') {
     const b = await h.readJson(request);
     const post = b.format === 'post';
@@ -108,21 +115,35 @@ export async function adminInbox(request, env, url, h) {
     if (title.length < 2) {
       throw new h.HttpError(400, 'Hãy nhập tiêu đề thông báo.');
     }
-    let uid = null, who = 'tất cả khách';
-    if (b.to && b.to !== 'all') {
+    /* Người nhận: 'all', hoặc danh sách id khách (users: [..]), hoặc một email (cách cũ) */
+    let targets = [null], who = 'tất cả khách';
+    if (Array.isArray(b.users)) {
+      const ids = [...new Set(b.users.map(Number).filter(n => Number.isInteger(n) && n > 0))].slice(0, 500);
+      if (!ids.length) {
+        throw new h.HttpError(400, 'Hãy chọn ít nhất một khách.');
+      }
+      const { results } = await env.DB.prepare(`SELECT id, name FROM users WHERE id IN (${ids.map(() => '?').join(',')}) AND email NOT LIKE '%@virtual.invalid'`).bind(...ids).all();
+      if (!results.length) {
+        throw new h.HttpError(404, 'Không tìm thấy khách đã chọn.');
+      }
+      targets = results.map(r => r.id);
+      who = results.length === 1 ? results[0].name : results.length + ' khách (' + results.slice(0, 3).map(r => r.name).join(', ') + (results.length > 3 ? '…' : '') + ')';
+    } else if (b.to && b.to !== 'all') {
       const email = h.clean(b.to, 120).toLowerCase();
       const u = await env.DB.prepare('SELECT id, name FROM users WHERE lower(email) = ?1').bind(email).first();
       if (!u) {
         throw new h.HttpError(404, 'Không tìm thấy khách có email này.');
       }
-      uid = u.id;
+      targets = [u.id];
       who = u.name;
     }
     const image = b.image ? okImage(b.image) : null;
     if (b.image && !image) {
       throw new h.HttpError(400, 'Ảnh phải là đường dẫn https.');
     }
-    await notify(env, uid, { kind: post ? 'post' : 'admin', title, body, image, link: b.link });
+    for (const uid of targets) {
+      await notify(env, uid, { kind: post ? 'post' : 'admin', title, body, image, link: b.link });
+    }
     await h.logAct(env, 'Gửi thông báo', title + ' → ' + who);
     return h.json({ ok: true }, 201);
   }

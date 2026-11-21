@@ -82,7 +82,7 @@ export const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS chat_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, title TEXT NOT NULL DEFAULT \'\', topic TEXT NOT NULL DEFAULT \'other\', status TEXT NOT NULL DEFAULT \'open\', created_by TEXT NOT NULL DEFAULT \'user\', closed_by TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, closed_at INTEGER)',
   'CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id, id)',
   'CREATE INDEX IF NOT EXISTS idx_chat_sessions_status ON chat_sessions(status, updated_at)',
-  'CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, rating INTEGER NOT NULL, destination TEXT, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT \'pending\', reply TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)',
+  'CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, rating INTEGER NOT NULL, destination TEXT, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT \'pending\', reply TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, helpful_adj INTEGER NOT NULL DEFAULT 0)',
   'CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status, created_at)',
   'CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id)',
   "CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_user_tour ON reviews(user_id, COALESCE(destination, ''))",
@@ -103,6 +103,23 @@ export const SCHEMA = [
   ...CONTENT_SCHEMA,
   'CREATE TABLE IF NOT EXISTS favorites (user_id INTEGER NOT NULL, item TEXT NOT NULL, created_at INTEGER NOT NULL, PRIMARY KEY (user_id, item))'
 ];
+/* Cột thêm sau cho CSDL cũ ("đã có cột" thì bỏ qua). Mỗi dòng: bảng → danh sách "tên kiểu" */
+const COLUMNS = {
+  bookings: ['user_id INTEGER', 'amount INTEGER', 'coupon TEXT', 'discount INTEGER'],
+  users: ['blocked_at INTEGER', 'reset_hash TEXT', 'reset_exp INTEGER', 'reset_sent_at INTEGER', 'avatar TEXT', 'delete_requested_at INTEGER'],
+  admins: ['avatar TEXT', 'perms TEXT', 'sess_at INTEGER', 'access TEXT'],
+  messages: ['bot INTEGER NOT NULL DEFAULT 0', 'session_id INTEGER'],
+  tours: ['image TEXT', 'summary TEXT']
+};
+/* Bảng reviews có thể vừa được dựng lại ở migrateReviewsPerTour nên thêm cột sau bước đó */
+const LATE_COLUMNS = { reviews: ['helpful_adj INTEGER NOT NULL DEFAULT 0'] };
+async function addColumns(env, spec) {
+  for (const [table, cols] of Object.entries(spec)) {
+    for (const col of cols) {
+      await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${col}`).run().catch(() => {});
+    }
+  }
+}
 let schemaReady = null;
 
 // Tự tạo bảng ở lần gọi đầu tiên, nên không cần chạy migration thủ công.
@@ -113,27 +130,11 @@ function ensureSchema(env) {
   if (!schemaReady) {
     schemaReady = env.DB.batch(SCHEMA.map(sql => env.DB.prepare(sql)))
       // CSDL cũ chưa có cột user_id (đơn gắn với tài khoản): thêm vào, lỗi "đã có cột" thì bỏ qua
-      .then(() => env.DB.prepare('ALTER TABLE bookings ADD COLUMN user_id INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN blocked_at INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN reset_hash TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN reset_exp INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN reset_sent_at INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE bookings ADD COLUMN amount INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN avatar TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE admins ADD COLUMN avatar TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE users ADD COLUMN delete_requested_at INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE bookings ADD COLUMN coupon TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE bookings ADD COLUMN discount INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE admins ADD COLUMN perms TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE admins ADD COLUMN sess_at INTEGER').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE admins ADD COLUMN access TEXT').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE messages ADD COLUMN bot INTEGER NOT NULL DEFAULT 0').run().catch(() => {}))
-      .then(() => env.DB.prepare('ALTER TABLE messages ADD COLUMN session_id INTEGER').run().catch(() => {}))
+      .then(() => addColumns(env, COLUMNS))
       .then(() => env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id, id)').run())
       .then(() => migrateChatSessions(env))
       .then(() => migrateReviewsPerTour(env))
-      .then(() => env.DB.prepare("ALTER TABLE tours ADD COLUMN image TEXT").run().catch(() => {}))
-      .then(() => env.DB.prepare("ALTER TABLE tours ADD COLUMN summary TEXT").run().catch(() => {}))
+      .then(() => addColumns(env, LATE_COLUMNS))
       .then(() => env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)').run())
       .then(() => seedTours(env))
       .then(() => seedDestinations(env))

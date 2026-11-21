@@ -120,3 +120,8 @@ Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) n�
 - Khách xoá = ghi `notif_hidden` (DELETE `/api/inbox/:id` hoặc `/api/inbox`), không xoá thật; admin xoá thật thì dọn cả `notif_hidden`.
 - Công thức `$..$` / `$$..$$` dựng bằng `public/js/md-math.js` (`window.vdkTex`, tự viết, không KaTeX vì CSP); nạp trước md.js. Lệnh lạ hiện đỏ `.tx-unk`.
 - Xoá thông báo: khách xoá thông báo riêng (không phải bài viết) = xoá hẳn khỏi DB + notif_reads/notif_hidden (`purge`); bài viết và thông báo chung chỉ ẩn. Admin xoá = purge. Bài viết trong hòm thư bấm cả thẻ để mở.
+
+## Đánh giá & SQL
+- Lượt thích đánh giá = `MAX(0, reviews.helpful_adj + số review_votes)`; admin đặt số mong muốn qua `PATCH /api/admin/reviews/:id {helpful}` (lưu phần chênh vào `helpful_adj`).
+- Cột thêm sau cho CSDL cũ khai báo trong `COLUMNS` / `LATE_COLUMNS` (src/worker.js) thay vì một chuỗi `.then(ALTER...)`. Truy vấn đọc liên quan nên gộp bằng `env.DB.batch([...])` (một lượt gọi D1); helper test `batch` trả `{results}` cho SELECT.
+- Gửi thông báo cho nhiều khách: `POST /api/admin/inbox {users:[id…]}`; tìm khách `GET /api/admin/inbox/customers?q=`.
