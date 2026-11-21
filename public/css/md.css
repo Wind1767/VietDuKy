@@ -126,8 +126,8 @@
 .tk-c { color: #7f948d; font-style: italic; }
 .tk-p { color: #d7a8ff; }
 .tk-v { color: #ffd479; }
-.tk-a { color: #a5e075; background: rgba(120,220,120,.12); display: inline-block; width: 100%; }
-.tk-d { color: #ff8a8a; background: rgba(255,100,100,.12); display: inline-block; width: 100%; }
+.tk-a { color: #a5e075; background: rgba(120,220,120,.12); }
+.tk-d { color: #ff8a8a; background: rgba(255,100,100,.12); }
 
 /* Hộp cảnh báo / khối ::: / chi tiết / mục lục */
 .md-box, .md-toc { margin: 12px 0; padding: 10px 14px; border-left: 4px solid #3d8f7c; border-radius: 8px; background: rgba(61,143,124,.1); }
