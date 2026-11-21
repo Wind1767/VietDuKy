@@ -93,3 +93,19 @@ test('Tắt passkey: không bị đòi passkey làm lớp hai; còn Authenticato
   r = await mfaGate(env, { json }, 'user', 7);
   assert.deepEqual((await r.json()).methods, ['totp', 'passkey'], 'tắt của quản trị không ảnh hưởng khách');
 });
+
+import { googleUser } from '../../src/customer-auth.js';
+import { HttpError } from '../helpers/d1.mjs';
+
+test('Đăng nhập khách bằng Google đã liên kết với tài khoản quản trị: báo đúng lý do, không nói "email đã có tài khoản"', async () => {
+  const h = { HttpError, clean: (v, n) => String(v ?? '').trim().slice(0, n) };
+  const raw = env.DB.raw;
+  raw.exec("DELETE FROM mfa_google; DELETE FROM users WHERE email = 'trung@x.vn'");
+  raw.exec("INSERT INTO users (created_at, email, name, pass_hash) VALUES (1, 'trung@x.vn', 'Trùng', 'x')");
+  raw.exec("INSERT INTO mfa_google (sub, kind, uid, email, created_at) VALUES ('g1', 'admin', 1, 'trung@x.vn', 1)");
+  await assert.rejects(() => googleUser(env, h, { sub: 'g1', email: 'trung@x.vn', name: 'T' }), (e) => e.status === 409 && /quản trị/.test(e.message) && !/Email này đã có/.test(e.message));
+  // liên kết mồ côi (khách đã bị xoá) thì bỏ đi, rồi mới xét email như thường
+  raw.exec("DELETE FROM mfa_google; INSERT INTO mfa_google (sub, kind, uid, email, created_at) VALUES ('g2', 'user', 99999, 'trung@x.vn', 1)");
+  await assert.rejects(() => googleUser(env, h, { sub: 'g2', email: 'trung@x.vn', name: 'T' }), (e) => /Email này đã có/.test(e.message));
+  assert.equal(raw.prepare("SELECT COUNT(*) n FROM mfa_google WHERE sub = 'g2'").get().n, 0);
+});

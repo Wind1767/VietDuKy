@@ -215,9 +215,15 @@ export async function mfaSettings(sub, request, env, url, ip, h, ctx, user) {
     if (await ctx.googleLinked(user)) {
       throw new h.HttpError(409, 'Tài khoản đã liên kết Google. Hãy gỡ liên kết cũ trước.');
     }
-    const taken = await env.DB.prepare('SELECT 1 FROM mfa_google WHERE sub = ?1').bind(profile.sub).first();
+    const taken = await env.DB.prepare('SELECT kind, uid FROM mfa_google WHERE sub = ?1').bind(profile.sub).first();
     if (taken) {
-      throw new h.HttpError(409, 'Tài khoản Google này đã liên kết với một tài khoản khác.');
+      const alive = await env.DB.prepare(`SELECT 1 FROM ${taken.kind === 'admin' ? 'admins' : 'users'} WHERE id = ?1`).bind(taken.uid).first();
+      if (!alive) { // tài khoản cũ đã bị xoá: bỏ liên kết mồ côi
+        await env.DB.prepare('DELETE FROM mfa_google WHERE sub = ?1').bind(profile.sub).run();
+      } else {
+        const who = taken.kind === kind ? (kind === 'admin' ? 'một tài khoản quản trị khác' : 'một tài khoản khách khác') : (taken.kind === 'admin' ? 'một tài khoản quản trị' : 'một tài khoản khách');
+        throw new h.HttpError(409, `Tài khoản Google này đã liên kết với ${who}. Hãy gỡ liên kết ở tài khoản đó trước, hoặc dùng tài khoản Google khác.`);
+      }
     }
     await env.DB.prepare('INSERT INTO mfa_google (sub, kind, uid, email, created_at) VALUES (?1, ?2, ?3, ?4, ?5)').bind(profile.sub, kind, uid, profile.email, Date.now()).run();
     await h.logAct(env, 'Liên kết Google', `${kind} #${uid}`);

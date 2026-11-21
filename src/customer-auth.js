@@ -459,9 +459,18 @@ export async function reauthUser(env, u, input) {
 const GOOGLE_PASS = '!google'; // tài khoản tạo bằng Google chưa có mật khẩu: không mật khẩu nào khớp được
 const hasPassword = u => !!u.pass_hash && !String(u.pass_hash).startsWith('!');
 
-async function googleUser(env, h, p) {
-  const link = await env.DB.prepare("SELECT uid FROM mfa_google WHERE sub = ?1 AND kind = 'user'").bind(p.sub).first();
-  let u = link ? await env.DB.prepare('SELECT * FROM users WHERE id = ?1').bind(link.uid).first() : null;
+export async function googleUser(env, h, p) {
+  /* Google này đã liên kết ở đâu? (một tài khoản Google chỉ gắn được với MỘT tài khoản, khách hoặc quản trị) */
+  const link = await env.DB.prepare('SELECT kind, uid FROM mfa_google WHERE sub = ?1').bind(p.sub).first();
+  let u = null;
+  if (link && link.kind === 'user') {
+    u = await env.DB.prepare('SELECT * FROM users WHERE id = ?1').bind(link.uid).first();
+    if (!u) { // tài khoản cũ đã bị xoá: bỏ liên kết mồ côi để Google này dùng lại được
+      await env.DB.prepare("DELETE FROM mfa_google WHERE sub = ?1 AND kind = 'user'").bind(p.sub).run();
+    }
+  } else if (link) {
+    throw new h.HttpError(409, 'Tài khoản Google này đã được liên kết với một tài khoản quản trị nên không dùng để đăng nhập khách được. Hãy gỡ liên kết ở tài khoản quản trị, hoặc đăng nhập bằng Google khác / email và mật khẩu.', undefined, 'google_linked_other');
+  }
   const now = Date.now();
   if (!u) {
     // Email này đã có tài khoản (đăng ký bằng email): không tự gộp. Phải đăng nhập bằng email rồi chủ động liên kết Google,
