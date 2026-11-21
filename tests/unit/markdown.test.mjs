@@ -81,3 +81,13 @@ test('Vẫn an toàn: HTML thô và javascript: bị chặn', () => {
   assert.doesNotMatch(h, /href="javascript/);
   assert.match(h, /<kbd>k<\/kbd>/);
 });
+
+test('Hộp cảnh báo > [!TIP]: nội dung cùng dòng hoặc dòng sau đều render, không phân biệt hoa thường', () => {
+  for (const src of ['> [!TIP]\n> hello', '> [!TIP] hello', '>[!tip]\n>hello', '> [!TIP]  \n> hello']) {
+    const h = md(src);
+    assert.match(h, /md-box md-tip/, src);
+    assert.match(h, /hello/, src);
+    assert.doesNotMatch(h, /\[!TIP\]/i, src);
+  }
+  assert.match(md('> [!DANGER]\n> x'), /md-box md-danger/);
+});

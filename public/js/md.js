@@ -238,10 +238,10 @@ code thụt 4 ô, khối ```ngôn-ngữ có tô màu (md-highlight.js) và nút 
         while (i < lines.length && lines[i].trim() && /^ {0,3}>/.test(lines[i])) {
           q.push(lines[i++].replace(/^ {0,3}> ?/, ''));
         }
-        var al = q[0] && q[0].match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i);
+        var al = q[0] && q[0].match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|INFO|SUCCESS|DANGER)\][ \t]*(.*)$/i);
         if (al) {
           var ak = al[1].toLowerCase();
-          out.push('<div class="md-box md-' + ak + '"><div class="md-box-t">' + BOX[ak] + '</div>' + blocks(q.slice(1), fn) + '</div>');
+          out.push('<div class="md-box md-' + ak + '"><div class="md-box-t">' + BOX[ak] + '</div>' + blocks((al[2] ? [al[2]] : []).concat(q.slice(1)), fn) + '</div>');
         } else {
           out.push('<blockquote>' + blocks(q, fn) + '</blockquote>');
         }
