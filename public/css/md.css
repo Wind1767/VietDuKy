@@ -187,3 +187,14 @@
 .tx-unk { color: #c0392b; }
 .tx-err { color: #c0392b; }
 .md-math-block .tx { white-space: normal; }
+
+/* Chống tràn ngang trên màn hình hẹp */
+.md { min-width: 0; overflow-wrap: anywhere; }
+.md pre { overflow-x: auto; max-width: 100%; }
+.md pre code { white-space: pre; overflow-wrap: normal; }
+.md-code { max-width: 100%; }
+.md-tw { max-width: 100%; overflow-x: auto; }
+.md img { max-width: 100%; height: auto; }
+.md-math-block { max-width: 100%; }
+.md-math-block .tx { white-space: nowrap; }
+.md-box, .md-toc { overflow-x: auto; }

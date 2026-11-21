@@ -2995,3 +2995,23 @@ footer .soc a:hover {
 .inbox-item.post:hover {
   border-color: var(--jade2, #145a50);
 }
+
+/* Điện thoại: nội dung bài dài (bảng, code, công thức) cuộn ngang trong khung, không làm cả trang tràn ra ngoài */
+.inbox {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.inbox-full {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .inbox-full {
+    padding: 14px;
+  }
+
+  .inbox-top .btn {
+    flex: none;
+  }
+}
