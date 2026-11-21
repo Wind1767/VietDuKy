@@ -114,3 +114,7 @@ Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) n�
 - `public/js/md.js` dựng Markdown (escape mọi HTML); `public/js/md-highlight.js` (`window.vdkHl`) tô màu khối ```ngôn-ngữ. Trang nào nạp md.js phải nạp md-highlight.js trước nó và có `content_copy`, `check` trong `icon_names`.
 - Thêm ngôn ngữ: `def('tên bí-danh', 'Nhãn', {...})` trong md-highlight.js (tên đầu tiên là khoá; ngôn ngữ cần bộ quét riêng thì thêm vào `CUSTOM[khoá]`). Lớp token `tk-*` có màu trong md.css.
 - Nút sao chép chỉ chép `textContent` của `<code>` (không dùng innerText vì dính tên icon). Test: tests/unit/markdown.test.mjs.
+
+## Hòm thư khách
+- `/api/inbox` trả TẤT CẢ thông báo (không LIMIT); bài viết (`kind=post`) chỉ có tiêu đề, nội dung đầy đủ ở `GET /api/inbox/:id` (trang đọc `/inbox?id=N`, tự đánh dấu đã đọc).
+- Khách xoá = ghi `notif_hidden` (DELETE `/api/inbox/:id` hoặc `/api/inbox`), không xoá thật; admin xoá thật thì dọn cả `notif_hidden`.

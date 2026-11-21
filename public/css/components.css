@@ -2824,7 +2824,75 @@ footer .soc a:hover {
 
 .inbox-top {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px;
+}
+
+.inbox-count {
+  margin-right: auto;
+  color: var(--mut, #5b6e68);
+  font-size: 14px;
+}
+
+.inbox-day {
+  margin: 8px 0 0;
+  font-size: 14px;
+  text-transform: capitalize;
+  color: var(--mut, #5b6e68);
+}
+
+.inbox-del {
+  flex: none;
+  align-self: flex-start;
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mut, #5b6e68);
+  cursor: pointer;
+}
+
+.inbox-del:hover {
+  background: rgba(214, 69, 69, .12);
+  color: #d64545;
+}
+
+.inbox-bd h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.inbox-bd h3 a:hover {
+  text-decoration: underline;
+}
+
+.inbox-full {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper, #fff);
+}
+
+.inbox-full h2 {
+  margin: 0 0 4px;
+}
+
+.inbox-full time {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--mut, #5b6e68);
+  font-size: 13px;
+}
+
+.inbox-full > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 14px;
+  border-radius: 12px;
 }
 
 .inbox-empty {
