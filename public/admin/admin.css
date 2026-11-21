@@ -6375,3 +6375,54 @@ body:has(#app[hidden]) .adm-dock {
 .tt-bar {
   z-index: 5;
 }
+
+/* Bài / thông báo dài trong danh sách tự thu gọn */
+.clip {
+  max-height: 150px;
+  overflow: hidden;
+  position: relative;
+}
+
+.clip:not(.open)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  background: linear-gradient(transparent, var(--surface, #fff));
+  pointer-events: none;
+}
+
+.clip.open {
+  max-height: none;
+}
+
+.clip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line, #d3e0db);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clip-btn[hidden] {
+  display: none;
+}
+
+.clip-btn .ms {
+  font-size: 18px;
+  transition: transform .2s;
+}
+
+.clip-btn.on .ms {
+  transform: rotate(180deg);
+}
+

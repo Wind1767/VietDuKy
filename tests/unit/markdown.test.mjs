@@ -91,3 +91,11 @@ test('Hộp cảnh báo > [!TIP]: nội dung cùng dòng hoặc dòng sau đều
   }
   assert.match(md('> [!DANGER]\n> x'), /md-box md-danger/);
 });
+
+test('Admin: danh sách "Đã gửi gần đây" thu gọn bài dài và có nút mở ra', () => {
+  const js = readFileSync(new URL('../../public/admin/admin.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../../public/admin/admin.css', import.meta.url), 'utf8');
+  assert.match(js, /class="clip"/);
+  assert.match(js, /clip-btn/);
+  assert.match(css, /\.clip \{\s+max-height/);
+});

@@ -5296,9 +5296,23 @@
       box.innerHTML = r.items.map(function (x) {
         return '<article class="card rv-card" data-id="' + x.id + '"><header><div class="who"><b>' + esc(x.title) + (x.kind === 'post' ? ' <span class="st won">Bài viết</span>' : '') + '</b><small>' + vnDate(x.created_at) + ' ' + vnTime(x.created_at) +
           ' · Gửi tới: ' + (x.user_id ? esc(x.user_name || '') + ' (' + esc(x.user_email || '') + ')' : 'tất cả khách') + '</small></div></header>' +
-          (x.body ? (x.kind === 'post' ? '<div class="md">' + window.vdkMd.render(x.body) + '</div>' : '<p class="rv-body">' + esc(x.body) + '</p>') : '') + (x.image ? '<img src="' + esc(x.image) + '" alt="" style="max-width:240px;border-radius:12px">' : '') +
+          (x.body ? '<div class="clip">' + (x.kind === 'post' ? '<div class="md">' + window.vdkMd.render(x.body) + '</div>' : '<p class="rv-body">' + esc(x.body) + '</p>') + '</div><button type="button" class="clip-btn" hidden><span class="ms">expand_more</span><span class="clip-t">Xem toàn bộ</span></button>' : '') + (x.image ? '<img src="' + esc(x.image) + '" alt="" style="max-width:240px;border-radius:12px">' : '') +
           (can('chat', true) ? '<div class="rv-acts"><button class="btn danger" data-del="' + x.id + '"><span class="ms">delete</span>Xoá</button></div>' : '') + '</article>';
       }).join('');
+      /* Bài dài tự thu gọn, có nút mở ra / thu lại */
+      box.querySelectorAll('.clip').forEach(function (c) {
+        var btn = c.nextElementSibling;
+        if (!btn || !btn.classList.contains('clip-btn') || c.scrollHeight <= c.clientHeight + 4) {
+          c.classList.add('open');
+          return;
+        }
+        btn.hidden = false;
+        btn.onclick = function () {
+          var open = c.classList.toggle('open');
+          btn.classList.toggle('on', open);
+          btn.querySelector('.clip-t').textContent = open ? 'Thu gọn' : 'Xem toàn bộ';
+        };
+      });
       box.querySelectorAll('[data-del]').forEach(function (b) {
         b.onclick = function () {
           confirmBox('Xoá thông báo này khỏi hòm thư của khách?', { title: 'Xoá thông báo', ok: 'Xoá', danger: true }).then(function (ok) {
