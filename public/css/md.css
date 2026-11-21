@@ -148,3 +148,42 @@
 .md abbr[title] { text-decoration: underline dotted; cursor: help; }
 .md kbd { padding: 1px 6px; border: 1px solid var(--line, #c5d3ce); border-bottom-width: 2px; border-radius: 5px; font: 12px/1.4 ui-monospace, monospace; background: rgba(127,127,127,.12); }
 .md ins { text-decoration: underline; }
+
+/* Công thức TeX */
+.md-math { font-style: normal; }
+.tx { font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', Georgia, 'Times New Roman', serif; font-size: 1.08em; line-height: 1.2; white-space: nowrap; }
+.tx i { font-style: italic; }
+.tx sup, .tx sub { font-size: .7em; line-height: 0; }
+.tx-ss { display: inline-flex; flex-direction: column; vertical-align: middle; line-height: 1.1; }
+.tx-ss sup, .tx-ss sub { position: static; vertical-align: baseline; line-height: 1.1; }
+.tx-o { margin: 0 .22em; }
+.tx-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 .15em; text-align: center; }
+.tx-num { padding: 0 .2em; border-bottom: 1px solid currentColor; }
+.tx-den { padding: 0 .2em; }
+.tx-bin .tx-num { border-bottom: 0; }
+.tx-sqrt { display: inline-block; white-space: nowrap; }
+.tx-rad { display: inline-block; font-family: Georgia, serif; font-size: 1em; line-height: 1; margin-right: -.02em; transform: translateY(.02em); }
+.tx-rb { display: inline-block; border-top: 1px solid currentColor; padding: 0 .15em; }
+.tx-idx { margin-right: -.3em; }
+.tx-big { font-size: 1.5em; line-height: 1; vertical-align: -.1em; padding: 0 .08em; }
+.tx-op { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.1; }
+.tx-op .tx-lim { font-size: .7em; }
+.tx-op .tx-opb { font-size: 1.5em; line-height: 1; }
+.tx-fn, .tx-r, .tx-t { font-style: normal; }
+.tx-fn { margin-right: .15em; }
+.tx-b { font-weight: 700; } .tx-b i { font-style: normal; }
+.tx-bb, .tx-cal, .tx-fr, .tx-sf, .tx-tt { font-style: normal; }
+.tx-sf { font-family: sans-serif; } .tx-tt { font-family: monospace; }
+.tx-r i, .tx-i i { font-style: normal; }
+.tx-acc { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; vertical-align: bottom; }
+.tx-ac { font-size: .75em; line-height: .6; }
+.tx-ul { text-decoration: underline; }
+.tx-d { font-size: 1.25em; vertical-align: -.05em; }
+.tx-big-d { font-size: 2.2em; vertical-align: middle; font-weight: 200; }
+.tx-mat { display: inline-flex; flex-direction: column; vertical-align: middle; gap: .25em; margin: 0 .2em; }
+.tx-row { display: flex; gap: 1em; justify-content: center; }
+.tx-cell { min-width: 1em; text-align: center; }
+.tx-cases .tx-row, .tx-aligned .tx-row { justify-content: flex-start; }
+.tx-unk { color: #c0392b; }
+.tx-err { color: #c0392b; }
+.md-math-block .tx { white-space: normal; }

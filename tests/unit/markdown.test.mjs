@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const ctx = { window: {} };
 ctx.window = ctx;
 vm.createContext(ctx);
-for (const f of ['md-highlight.js', 'md.js']) {
+for (const f of ['md-math.js', 'md-highlight.js', 'md.js']) {
   vm.runInContext(readFileSync(new URL('../../public/js/' + f, import.meta.url), 'utf8'), ctx);
 }
 const md = (s) => ctx.vdkMd.render(s);
@@ -98,4 +98,17 @@ test('Admin: danh sách "Đã gửi gần đây" thu gọn bài dài và có nú
   assert.match(js, /class="clip"/);
   assert.match(js, /clip-btn/);
   assert.match(css, /\.clip \{\s+max-height/);
+});
+
+test('Công thức TeX được dựng thật (phân số, căn, tích phân, ma trận), không còn hiện mã thô', () => {
+  const h = md('$$\\int_0^1 x\\,dx = \\frac12$$');
+  assert.match(h, /tx-op/);
+  assert.match(h, /tx-frac/);
+  assert.doesNotMatch(h, /\\frac|\\int/);
+  assert.match(md('$\\sqrt{a^2+b^2}$'), /tx-sqrt/);
+  assert.match(md('$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$$'), /tx-mat/);
+  assert.match(md('$\\alpha \\leq \\beta$'), /α.*≤.*β/);
+  assert.match(md('$\\foo$'), /tx-unk/);
+  assert.doesNotMatch(md('$<img src=x onerror=1>$'), /<img/);
+  assert.doesNotMatch(md('Giá $5 và $6'), /md-math/);
 });

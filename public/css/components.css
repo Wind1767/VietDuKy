@@ -2987,3 +2987,11 @@ footer .soc a:hover {
     animation: none;
   }
 }
+
+.inbox-item.post {
+  cursor: pointer;
+}
+
+.inbox-item.post:hover {
+  border-color: var(--jade2, #145a50);
+}

@@ -18,6 +18,12 @@ code thụt 4 ô, khối ```ngôn-ngữ có tô màu (md-highlight.js) và nút 
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function unesc(s) {
+    return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, '\'').replace(/&amp;/g, '&');
+  }
+  function tex(src, block) {
+    return window.vdkTex ? window.vdkTex.render(src, block) : esc(src);
+  }
   function okUrl(u, img) {
     u = u.replace(/&amp;/g, '&').trim();
     if (img) {
@@ -36,11 +42,11 @@ code thụt 4 ô, khối ```ngôn-ngữ có tô màu (md-highlight.js) và nút 
     t = t.replace(/(`+)([\s\S]*?[^`])\1(?!`)/g, function (m, a, c) {
       return keep('<code>' + c.trim() + '</code>');
     });
+    t = t.replace(/\$\$([^$\n]+?)\$\$|\$([^\s$](?:[^$\n]*?[^\s$])?)\$(?!\d)/g, function (m, a, b) {
+      return keep('<span class="md-math">' + tex(unesc(a || b), false) + '</span>');
+    });
     t = t.replace(/\\([\\`*_{}\[\]()#+\-.!~^=|>])/g, function (m, c) {
       return keep(c);
-    });
-    t = t.replace(/\$\$([^$\n]+?)\$\$|\$([^\s$](?:[^$\n]*?[^\s$])?)\$(?!\d)/g, function (m, a, b) {
-      return keep('<span class="md-math">' + (a || b) + '</span>');
     });
     t = t.replace(/!\[([^\]]*)\]\(\s*([^\s)]+)(?:\s+=(\d{1,4})?x(\d{1,4})?)?(?:\s+&quot;([^)]*?)&quot;)?\s*\)/g, function (m, alt, u, w, hh, ttl) {
       var s = okUrl(u, true);
@@ -186,7 +192,7 @@ code thụt 4 ô, khối ```ngôn-ngữ có tô màu (md-highlight.js) và nút 
           mt.push(lines[i++]);
         }
         i++;
-        out.push('<div class="md-math md-math-block">' + esc(mt.join('\n')) + '</div>');
+        out.push('<div class="md-math md-math-block">' + tex(mt.join('\n'), true) + '</div>');
         continue;
       }
       if (RE_TOC.test(l)) {

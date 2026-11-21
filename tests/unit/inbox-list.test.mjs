@@ -39,3 +39,10 @@ test('Bài viết chỉ trả tiêu đề ở danh sách, nội dung đầy đ�
   assert.match(src, /\/api\\\/inbox\\\/\(\\d\+\)/);
   assert.match(src, /method === 'DELETE'/);
 });
+
+test('Khách xoá thông báo riêng (không phải bài viết) thì xoá hẳn, bài viết và thông báo chung chỉ ẩn', () => {
+  const src = readFileSync(new URL('../../src/inbox.js', import.meta.url), 'utf8');
+  assert.match(src, /n\.user_id === user\.id && n\.kind !== 'post'/);
+  assert.match(src, /purge\(env, `user_id = \?1 AND kind != 'post'`/);
+  assert.match(src, /purge\(env, 'id = \?1', Number\(m\[1\]\)\)/);
+});

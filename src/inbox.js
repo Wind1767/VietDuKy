@@ -27,6 +27,13 @@ export async function notify(env, userId, { kind = 'system', title, body = '', i
 /* Khách xoá thông báo = ẩn riêng với họ (thông báo gửi cho tất cả vẫn còn với người khác) */
 export const VISIBLE = '((n.user_id = ?1 OR (n.user_id IS NULL AND n.created_at >= ?2)) AND NOT EXISTS (SELECT 1 FROM notif_hidden x WHERE x.user_id = ?1 AND x.notif_id = n.id))';
 
+/* Xoá hẳn thông báo (theo điều kiện) cùng dấu đã đọc / đã ẩn của chúng */
+async function purge(env, where, arg) {
+  await env.DB.prepare(`DELETE FROM notif_reads WHERE notif_id IN (SELECT id FROM notifications WHERE ${where})`).bind(arg).run();
+  await env.DB.prepare(`DELETE FROM notif_hidden WHERE notif_id IN (SELECT id FROM notifications WHERE ${where})`).bind(arg).run();
+  await env.DB.prepare(`DELETE FROM notifications WHERE ${where}`).bind(arg).run();
+}
+
 /* GET /api/inbox, GET /api/inbox/count, POST /api/inbox/read */
 export async function handleInbox(request, env, url, h) {
   const user = await currentUser(request, env, { HttpError: h.HttpError });
@@ -64,11 +71,20 @@ export async function handleInbox(request, env, url, h) {
     await env.DB.prepare('INSERT OR IGNORE INTO notif_reads (user_id, notif_id) VALUES (?1, ?2)').bind(user.id, n.id).run();
     return h.json({ item: n });
   }
+  /* Khách xoá: thông báo riêng của họ (không phải bài viết) xoá hẳn khỏi DB cùng mọi dấu vết theo id;
+     bài viết và thông báo gửi chung chỉ ẩn riêng với họ */
   if (one && method === 'DELETE') {
-    await env.DB.prepare(`INSERT OR IGNORE INTO notif_hidden (user_id, notif_id) SELECT ?1, n.id FROM notifications n WHERE n.id = ?3 AND ${VISIBLE}`).bind(user.id, since, Number(one[1])).run();
+    const id = Number(one[1]);
+    const n = await env.DB.prepare(`SELECT n.id, n.user_id, n.kind FROM notifications n WHERE n.id = ?3 AND ${VISIBLE}`).bind(user.id, since, id).first();
+    if (n && n.user_id === user.id && n.kind !== 'post') {
+      await purge(env, `id = ?1`, id);
+    } else if (n) {
+      await env.DB.prepare('INSERT OR IGNORE INTO notif_hidden (user_id, notif_id) VALUES (?1, ?2)').bind(user.id, id).run();
+    }
     return h.json({ ok: true });
   }
   if (pathname === '/api/inbox' && method === 'DELETE') {
+    await purge(env, `user_id = ?1 AND kind != 'post'`, user.id);
     await env.DB.prepare(`INSERT OR IGNORE INTO notif_hidden (user_id, notif_id) SELECT ?1, n.id FROM notifications n WHERE ${VISIBLE}`).bind(user.id, since).run();
     return h.json({ ok: true });
   }
@@ -112,9 +128,7 @@ export async function adminInbox(request, env, url, h) {
   }
   const m = pathname.match(/^\/api\/admin\/inbox\/(\d+)$/);
   if (m && method === 'DELETE') {
-    await env.DB.prepare('DELETE FROM notifications WHERE id = ?1').bind(Number(m[1])).run();
-    await env.DB.prepare('DELETE FROM notif_reads WHERE notif_id = ?1').bind(Number(m[1])).run();
-    await env.DB.prepare('DELETE FROM notif_hidden WHERE notif_id = ?1').bind(Number(m[1])).run();
+    await purge(env, 'id = ?1', Number(m[1]));
     await h.logAct(env, 'Xoá thông báo', '#' + m[1]);
     return h.json({ ok: true });
   }

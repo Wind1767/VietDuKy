@@ -73,7 +73,7 @@
           '<time datetime="' + new Date(n.created_at).toISOString() + '" title="' + esc(when(n.created_at)) + '">' + esc(dayText(n.created_at)) + ' · ' + hm(n.created_at) + '</time>' +
           (!isPost && n.body ? '<p>' + esc(n.body) + '</p>' : '') +
           (!isPost && n.image && /^https:\/\//.test(n.image) ? '<img src="' + esc(n.image) + '" alt="" loading="lazy">' : '') +
-          (isPost ? '<a class="btn line sm" href="/inbox?id=' + n.id + '">Đọc bài viết</a>' : l ? '<a class="btn line sm" href="' + esc(l) + '">Xem chi tiết</a>' : '') + '</div>' +
+          (!isPost && l ? '<a class="btn line sm" href="' + esc(l) + '">Xem chi tiết</a>' : '') + '</div>' +
           '<button class="inbox-del" type="button" aria-label="Xoá thông báo" title="Xoá"><span class="ms">delete</span></button></article>';
       }).join('');
     var all = document.getElementById('readAll');
@@ -92,6 +92,14 @@
         e.stopPropagation();
         var el = b.closest('.inbox-item');
         send('DELETE', '/api/inbox/' + el.dataset.id).then(load);
+      });
+    });
+    /* Bài viết: bấm vào bất kỳ đâu trên thẻ là mở trang đọc */
+    box.querySelectorAll('.inbox-item.post').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        if (!e.target.closest('.inbox-del, a')) {
+          location.href = '/inbox?id=' + el.dataset.id;
+        }
       });
     });
     box.querySelectorAll('.inbox-item.unread').forEach(function (el) {

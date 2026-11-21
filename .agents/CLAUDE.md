@@ -118,3 +118,5 @@ Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) n�
 ## Hòm thư khách
 - `/api/inbox` trả TẤT CẢ thông báo (không LIMIT); bài viết (`kind=post`) chỉ có tiêu đề, nội dung đầy đủ ở `GET /api/inbox/:id` (trang đọc `/inbox?id=N`, tự đánh dấu đã đọc).
 - Khách xoá = ghi `notif_hidden` (DELETE `/api/inbox/:id` hoặc `/api/inbox`), không xoá thật; admin xoá thật thì dọn cả `notif_hidden`.
+- Công thức `$..$` / `$$..$$` dựng bằng `public/js/md-math.js` (`window.vdkTex`, tự viết, không KaTeX vì CSP); nạp trước md.js. Lệnh lạ hiện đỏ `.tx-unk`.
+- Xoá thông báo: khách xoá thông báo riêng (không phải bài viết) = xoá hẳn khỏi DB + notif_reads/notif_hidden (`purge`); bài viết và thông báo chung chỉ ẩn. Admin xoá = purge. Bài viết trong hòm thư bấm cả thẻ để mở.
