@@ -3015,3 +3015,21 @@ footer .soc a:hover {
     flex: none;
   }
 }
+
+/* Component co giãn đúng trên mobile: vừa khung chứa, không tràn nền, ô nhập nhiều dòng dài ra theo nội dung */
+textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  resize: vertical;
+}
+
+input,
+select {
+  max-width: 100%;
+}
+
+.card,
+.card-pad,
+.field {
+  min-width: 0;
+}

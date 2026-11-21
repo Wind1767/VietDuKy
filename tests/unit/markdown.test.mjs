@@ -112,3 +112,11 @@ test('Công thức TeX được dựng thật (phân số, căn, tích phân, ma
   assert.doesNotMatch(md('$<img src=x onerror=1>$'), /<img/);
   assert.doesNotMatch(md('Giá $5 và $6'), /md-math/);
 });
+
+test('Ô nhập nhiều dòng tự dài theo nội dung ở trang khách và admin', () => {
+  for (const f of ['public/js/site.js', 'public/admin/admin-plus.js']) {
+    const js = readFileSync(new URL('../../' + f, import.meta.url), 'utf8');
+    assert.match(js, /tự dài ra theo nội dung/, f);
+    assert.match(js, /scrollHeight/, f);
+  }
+});

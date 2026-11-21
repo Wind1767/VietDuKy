@@ -414,3 +414,42 @@
     apply(S);
   }
 })();
+
+/* Ô nhập nhiều dòng tự dài ra theo nội dung (tối đa ~70% chiều cao màn hình, quá thì mới cuộn), luôn vừa chiều rộng khung chứa */
+(function () {
+  'use strict';
+  function grow(t) {
+    if (!t || t.tagName !== 'TEXTAREA' || t.hasAttribute('data-no-grow') || t.offsetParent === null) {
+      return;
+    }
+    var cs = getComputedStyle(t);
+    if (cs.maxHeight !== 'none') {
+      return; // ô đã có giới hạn riêng (ví dụ khung chat)
+    }
+    var max = Math.max(160, window.innerHeight * 0.7);
+    t.style.height = 'auto';
+    var h = t.scrollHeight + (t.offsetHeight - t.clientHeight);
+    t.style.height = Math.min(h, max) + 'px';
+    t.style.overflowY = h > max ? 'auto' : 'hidden';
+  }
+  function all(root) {
+    (root || document).querySelectorAll('textarea').forEach(grow);
+  }
+  document.addEventListener('input', function (e) {
+    grow(e.target);
+  });
+  document.addEventListener('focusin', function (e) {
+    grow(e.target);
+  });
+  window.addEventListener('resize', function () {
+    all();
+  });
+  var t;
+  new MutationObserver(function () {
+    clearTimeout(t);
+    t = setTimeout(all, 80);
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', function () {
+    all();
+  });
+})();
