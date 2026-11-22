@@ -144,6 +144,16 @@
 
   /* ---------- Biểu mẫu đăng ký / đăng nhập ---------- */
   var form = $('form[data-auth]');
+  if (form && form.getAttribute('data-auth') === 'reset') {
+    fetch('/api/auth/reset?token=' + encodeURIComponent(new URLSearchParams(location.search).get('token') || ''), { credentials: 'same-origin' }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (d) {
+        if (!res.ok) {
+          card.innerHTML = stateHTML('error', '', 'Liên kết không dùng được', (d.error || 'Liên kết không hợp lệ.') + '') +
+            '<a class="btn gold" href="/forgot">Yêu cầu liên kết mới</a></div>';
+        }
+      });
+    }, function () {});
+  }
   if (form) {
     var mode = form.dataset.auth;
     var err = $('.auth-err', form);

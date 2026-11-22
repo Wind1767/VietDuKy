@@ -546,6 +546,17 @@ async function forgot(request, env, url, ip, h) {
 
 async function reset(request, env, ip, h) {
   await h.limit(env, 'verify:' + ip, h.LIMITS.verify);
+  if (request.method === 'GET') { // trang đặt lại mật khẩu kiểm tra liên kết trước khi hiện form
+    const t = h.clean(new URL(request.url).searchParams.get('token'), 100);
+    const r = /^[A-Za-z0-9_-]{20,80}$/.test(t) ? await env.DB.prepare('SELECT reset_exp FROM users WHERE reset_hash = ?1').bind(await sha256Hex(t)).first() : null;
+    if (!r) {
+      throw new h.HttpError(400, 'Liên kết không hợp lệ hoặc đã được dùng.', undefined, 'invalid');
+    }
+    if (r.reset_exp < Date.now()) {
+      throw new h.HttpError(400, 'Liên kết đã hết hạn. Hãy yêu cầu đặt lại mật khẩu lần nữa.', undefined, 'expired');
+    }
+    return h.json({ ok: true });
+  }
   const b = await h.readJson(request);
   const token = h.clean(b.token, 100);
   const password = vPassword(h, b.password);

@@ -619,3 +619,14 @@ label.chk.tgl input[type="checkbox"]:active:not(:disabled) {
   overflow-wrap: anywhere;
   text-align: left;
 }
+
+/* Trình duyệt tự thêm nút hiện mật khẩu riêng: ẩn đi vì trang đã có nút của mình */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
