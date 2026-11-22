@@ -687,10 +687,12 @@ async function createBooking(request, env, ip, h) {
     quote: message || '',
     link: h.site + '/admin/#/bookings'
   }));
-  if (email) { // khách không đăng nhập và không để email thì không có thư xác nhận
+  /* Khách không đăng nhập tự điền email: không để người lạ dùng website gửi thư rác tới địa chỉ tuỳ ý (giới hạn theo email, không kèm lời nhắn tự do) */
+  const mailOk = email && (!guest || await limit(env, 'bookmail:' + email, { max: 2, windowS: 3600 }).then(() => true, () => false));
+  if (mailOk) { // khách không đăng nhập và không để email thì không có thư xác nhận
     h.mail(email, h.tpl('booking_user', tv, {
       rows: [['Điểm đến', destination || 'Chưa chọn'], ['Ngày đi', date ? date.split('-').reverse().join('/') : ''], ['Số người', people ? String(people) : ''], ['SĐT liên hệ', phone], ...cpRow],
-      quote: message || '',
+      quote: guest ? '' : message || '',
       link: h.site + (user ? '/account' : '')
     }));
   }
