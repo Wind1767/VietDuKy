@@ -3033,3 +3033,19 @@ select {
 .field {
   min-width: 0;
 }
+
+/* Nhãn địa điểm + ngày: cùng một hàng, tự xuống dòng gọn, căn trái */
+.rv-item header small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  justify-self: start;
+}
+.rv-item header small .rv-tour {
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.rv-item header > div:nth-child(2) b {
+  overflow-wrap: anywhere;
+}
