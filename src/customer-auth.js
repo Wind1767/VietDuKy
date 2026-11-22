@@ -342,6 +342,12 @@ async function register(request, env, url, ip, h) {
   const passHash = await hashPassword(password);
 
   const old = await env.DB.prepare('SELECT id, verified_at FROM users WHERE email = ?1').bind(email).first();
+  if (old && old.verified_at && !(await skipVerify(env))) {
+    /* Không lộ email đã đăng ký: trả như đăng ký mới, còn chủ tài khoản nhận liên kết đặt lại mật khẩu */
+    const full = await env.DB.prepare('SELECT id, email, name, verified_at, blocked_at, reset_sent_at FROM users WHERE id = ?1').bind(old.id).first();
+    await sendReset(env, h, full);
+    return h.json({ ok: true }, 201);
+  }
   if (old && old.verified_at) {
     throw new h.HttpError(409, 'Email này đã có tài khoản. Hãy đăng nhập.', undefined, 'exists');
   }
@@ -523,6 +529,20 @@ async function myBookings(request, env, h) {
 }
 
 /* ---------- Quên mật khẩu / đặt lại / đổi mật khẩu ---------- */
+/* Gửi liên kết đặt lại mật khẩu (nếu tài khoản đủ điều kiện và không bị gửi dồn) */
+async function sendReset(env, h, u) {
+  if (u && u.verified_at && !u.blocked_at && Date.now() - (u.reset_sent_at || 0) > RESEND_COOLDOWN_MS) {
+    const raw = toB64Url(crypto.getRandomValues(new Uint8Array(32)));
+    const now = Date.now();
+    await env.DB.prepare('UPDATE users SET reset_hash = ?1, reset_exp = ?2, reset_sent_at = ?3 WHERE id = ?4').bind(await sha256Hex(raw), now + RESET_TTL_MS, now, u.id).run();
+    h.mail(u.email, h.tpl('reset', {
+      ten: u.name.trim().split(/\s+/).pop(),
+      ho_ten: u.name,
+      email: u.email
+    }, { link: `${h.site}/reset?token=${raw}` }));
+  }
+}
+
 async function forgot(request, env, url, ip, h) {
   await h.limit(env, 'forgot:' + ip, h.LIMITS.forgot);
   const b = await h.readJson(request);
@@ -530,17 +550,7 @@ async function forgot(request, env, url, ip, h) {
   const email = vEmail(h, b.email);
   await h.limit(env, 'forgot-email:' + email, h.LIMITS.forgot);
   const u = await env.DB.prepare('SELECT id, email, name, verified_at, blocked_at, reset_sent_at FROM users WHERE email = ?1').bind(email).first();
-  if (u && u.verified_at && !u.blocked_at && Date.now() - (u.reset_sent_at || 0) > RESEND_COOLDOWN_MS) {
-    const raw = toB64Url(crypto.getRandomValues(new Uint8Array(32)));
-    const now = Date.now();
-    await env.DB.prepare('UPDATE users SET reset_hash = ?1, reset_exp = ?2, reset_sent_at = ?3 WHERE id = ?4').bind(await sha256Hex(raw), now +
-      RESET_TTL_MS, now, u.id).run();
-    h.mail(u.email, h.tpl('reset', {
-      ten: u.name.trim().split(/\s+/).pop(),
-      ho_ten: u.name,
-      email: u.email
-    }, { link: `${h.site}/reset?token=${raw}` }));
-  }
+  await sendReset(env, h, u);
   return h.json({ ok: true }); // luôn trả như nhau để không lộ email nào có tài khoản
 }
 
