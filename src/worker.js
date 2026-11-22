@@ -302,6 +302,13 @@ async function route(request, env, url, ctx) {
       await requireFlag(env, 'feat_bugreport', helpers, 'Tạm ngừng nhận báo lỗi. Vui lòng liên hệ hotline.');
     }
   }
+  /* Chống CSRF cho mọi thao tác ghi của API: trình duyệt luôn gửi Origin / Sec-Fetch-Site, nơi khác nguồn thì từ chối */
+  if (pathname.startsWith('/api/') && !['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+    const o = request.headers.get('Origin'), sf = request.headers.get('Sec-Fetch-Site');
+    if ((o && o !== url.origin) || sf === 'cross-site') {
+      return json({ error: 'Yêu cầu không hợp lệ.' }, 403);
+    }
+  }
   /* Công tắc ẩn tính năng: khi tắt, máy chủ từ chối luôn (giao diện đã ẩn nút tương ứng) */
   if (pathname === '/api/auth/forgot' || pathname === '/api/auth/reset') {
     await requireFlag(env, 'feat_forgot', helpers, 'Tính năng quên mật khẩu đang tạm tắt.');
