@@ -1222,6 +1222,7 @@ a.kpi:hover {
   .tbl td {
     display: block;
     width: 100%;
+    min-width: 0;
   }
   .tbl thead {
     display: none;
@@ -1229,13 +1230,39 @@ a.kpi:hover {
   .tbl tr {
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
   }
   .tbl td {
     border: 0;
     padding: 0;
+    width: auto;
+    flex: 1 1 100%;
+    overflow-wrap: anywhere;
+  }
+  .tbl td.sel,
+  .tbl td.stc,
+  .tbl td.ord,
+  .tbl td.sw,
+  .tbl td:has(.switch),
+  .tbl td:has(> .btn),
+  .tbl td:has(> .icon-btn) {
+    flex: 0 0 auto;
+  }
+  .tbl td:has(.icon-btn) {
+    display: flex;
+    gap: 6px;
+  }
+  .tbl td.stc {
+    order: 2;
+    margin-left: auto;
+  }
+  .tbl td.name {
+    flex: 1 1 0;
+    min-width: 60%;
+    font-weight: 600;
   }
   .tbl td.num,
   .tbl th.num {
@@ -1245,21 +1272,25 @@ a.kpi:hover {
     content: attr(data-l) ": ";
     color: var(--mut);
   }
-  .tbl td.name {
-    grid-column: 1;
-  }
-  .tbl td.stc {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
-  }
   .tbl td.meta {
-    grid-column: 1 / -1;
+    flex: 1 1 100%;
+    order: 3;
     color: var(--mut);
     font-size: 14px;
   }
   .tbl td.hide-m {
     display: none;
+  }
+  .tbl td .btn {
+    white-space: nowrap;
+  }
+  .tbl tr.aacts td,
+  .tbl td.acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1 1 100%;
+    order: 4;
   }
   .tbl tr.is-new {
     box-shadow: inset 3px 0 0 var(--red);
@@ -1275,32 +1306,6 @@ a.kpi:hover {
   }
   .seg {
     grid-template-columns: 1fr 1fr;
-  }
-  .tbl tr {
-    grid-template-columns: 26px 1fr auto;
-  }
-  .tbl td.sel {
-    grid-column: 1;
-    grid-row: 1;
-    padding-top: 3px;
-  }
-  .tbl td.name {
-    grid-column: 2;
-  }
-  .tbl td.stc {
-    grid-column: 3;
-  }
-  .tbl td.meta {
-    grid-column: 2 / -1;
-  }
-  .tbl.cust tr {
-    grid-template-columns: 1fr auto;
-  }
-  .tbl.cust td.name {
-    grid-column: 1;
-  }
-  .tbl.cust td.meta {
-    grid-column: 1 / -1;
   }
   .form-grid {
     grid-template-columns: 1fr;
@@ -5473,9 +5478,6 @@ main p + p,
   .card {
     padding: 18px 16px;
   }
-  .tbl td {
-    padding: 12px 12px;
-  }
   .drawer .body {
     padding: 18px 16px;
   }
@@ -6637,4 +6639,66 @@ select {
 .card-pad,
 .field {
   min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .card,
+  .toolbar > *,
+  .main select,
+  .main input:not([type='checkbox']):not([type='radio']),
+  .main textarea,
+  .main .btn {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .toolbar,
+  .form-acts,
+  .sb-acts {
+    flex-wrap: wrap;
+  }
+  .toolbar .btn,
+  .main .btn {
+    white-space: normal;
+  }
+  .toolbar select,
+  .toolbar input {
+    width: 100%;
+  }
+}
+
+/* Mobile: bảng thành thẻ (đặt cuối để thắng mọi quy tắc cùng độ ưu tiên) */
+@media (max-width: 760px) {
+  .main .tbl tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 14px 16px;
+  }
+  .main .tbl td,
+  .main .tbl td.sel {
+    padding: 0;
+    width: auto;
+    border: 0;
+    flex: 1 1 100%;
+  }
+  .main .tbl td.sel,
+  .main .tbl td.stc,
+  .main .tbl td.ord,
+  .main .tbl td:has(.switch) {
+    flex: 0 0 auto;
+  }
+  .main .tbl td.name {
+    flex: 1 1 0;
+    min-width: 55%;
+  }
+  .main .tbl td.ord {
+    display: flex;
+    gap: 6px;
+  }
+  .main .tbl td .icon-btn {
+    position: static;
+    margin: 0;
+  }
 }
