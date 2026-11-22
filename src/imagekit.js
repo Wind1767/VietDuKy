@@ -41,6 +41,20 @@ export function ikUrlOk(env, url) {
   return typeof url === 'string' && url.length < 500 && ep && url.startsWith(ep + '/') && !/[\s"'<>]/.test(url);
 }
 
+/* fileId do trình duyệt gửi lên: chỉ tin khi chính ImageKit xác nhận tệp đó có đúng địa chỉ ảnh này,
+   nếu không người dùng có thể điền mã tệp của người khác để xoá ảnh của họ về sau. */
+async function ikOwns(env, fileId, url) {
+  if (!fileId || !/^[A-Za-z0-9_-]{8,40}$/.test(fileId) || !env.IMAGEKIT_PRIVATE_KEY) {
+    return false;
+  }
+  try {
+    const r = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId) + '/details', { headers: { Authorization: 'Basic ' + btoa(env.IMAGEKIT_PRIVATE_KEY + ':') } });
+    return r.ok && (await r.json()).url === url;
+  } catch {
+    return false;
+  }
+}
+
 async function ikDelete(env, fileId) {
   if (!fileId || !env.IMAGEKIT_PRIVATE_KEY) {
     return;
@@ -76,7 +90,7 @@ export async function avatarApi(request, env, url, h, user) {
     if (!ikUrlOk(env, b.url)) {
       throw new h.HttpError(400, 'Địa chỉ ảnh không hợp lệ.');
     }
-    const fileId = typeof b.fileId === 'string' ? b.fileId.slice(0, 80) : null;
+    const fileId = typeof b.fileId === 'string' && await ikOwns(env, b.fileId, b.url) ? b.fileId : null;
     const { results: olds } = await db.prepare('SELECT id, url, file_id FROM user_avatars WHERE user_id = ?1').bind(user.id).all();
     await db.batch([
       db.prepare('DELETE FROM user_avatars WHERE user_id = ?1').bind(user.id),
