@@ -679,6 +679,10 @@ export async function adminApi(request, env, url, h, actor) {
     if (old.role === 'owner' && !isOwner) {
       throw new h.HttpError(403, 'Chỉ Chủ mới sửa được tài khoản Chủ.');
     }
+    /* Không đụng được vào tài khoản có quyền cao hơn mình (nếu không: đặt lại mật khẩu của họ rồi đăng nhập là leo quyền) */
+    if (!isOwner && id !== actor.id && !withinActor(actor, await resolvePerms(env, old))) {
+      throw new h.HttpError(403, 'Tài khoản này có quyền cao hơn quyền của bạn nên bạn không sửa được.');
+    }
     if (request.method === 'DELETE') {
       if (id === actor.id) {
         throw new h.HttpError(400, 'Bạn không thể tự xoá tài khoản của mình.');
