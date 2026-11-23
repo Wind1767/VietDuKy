@@ -174,6 +174,10 @@ export async function adminAccounts(request, env, url, h) {
   }
   if (method === 'PATCH' && !act) { // sửa mọi thông tin của tài khoản
     const b = await h.readJson(request), sets = [], args = [];
+    /* Đổi email hoặc mật khẩu của khách = chiếm được tài khoản đó (thấy đủ SĐT, email, đơn, tin nhắn): chỉ người có quyền "pii" */
+    if (url.noPii && (b.password || ('email' in b && !isMasked(b.email)))) {
+      throw new h.HttpError(403, 'Bạn cần quyền xem đầy đủ thông tin khách để đổi email hoặc mật khẩu của khách.');
+    }
     if ('name' in b) {
       sets.push('name = ?');
       args.push(h.vName(b.name));
