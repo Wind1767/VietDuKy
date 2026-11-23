@@ -442,9 +442,9 @@ export function maskPII(x) {
   if (x && typeof x === 'object') {
     const o = {};
     for (const [k, v] of Object.entries(x)) {
-      if (typeof v === 'string' && v && k === 'phone') {
+      if (typeof v === 'string' && v && /(^|_)phone$/.test(k)) {
         o[k] = maskPhone(v);
-      } else if (typeof v === 'string' && v && k === 'email') {
+      } else if (typeof v === 'string' && v && /(^|_)email$/.test(k)) {
         o[k] = maskEmail(v);
       } else {
         o[k] = maskPII(v);

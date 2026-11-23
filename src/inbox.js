@@ -102,7 +102,7 @@ export async function adminInbox(request, env, url, h) {
   if (pathname === '/api/admin/inbox/customers' && method === 'GET') {
     const q = h.clean(url.searchParams.get('q'), 80);
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
-    const { results } = await env.DB.prepare("SELECT u.id, u.name, u.email, u.phone, u.avatar FROM users u WHERE u.email NOT LIKE '%@virtual.invalid' AND u.blocked_at IS NULL AND (?1 = '' OR u.name LIKE ?2 ESCAPE '\\' OR u.email LIKE ?2 ESCAPE '\\' OR u.phone LIKE ?2 ESCAPE '\\') ORDER BY (lower(u.name) LIKE lower(?1) || '%') DESC, u.name COLLATE NOCASE LIMIT 20").bind(q, like).all();
+    const { results } = await env.DB.prepare("SELECT u.id, u.name, u.email, u.phone, u.avatar FROM users u WHERE u.email NOT LIKE '%@virtual.invalid' AND u.blocked_at IS NULL AND (?1 = '' OR u.name LIKE ?2 ESCAPE '\\' OR (?3 = 0 AND (u.email LIKE ?2 ESCAPE '\\' OR u.phone LIKE ?2 ESCAPE '\\'))) ORDER BY (lower(u.name) LIKE lower(?1) || '%') DESC, u.name COLLATE NOCASE LIMIT 20").bind(q, like, url.noPii ? 1 : 0).all();
     return h.json({ items: results });
   }
   if (pathname === '/api/admin/inbox' && method === 'POST') {

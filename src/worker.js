@@ -391,6 +391,7 @@ async function route(request, env, url, ctx) {
   }
   if (actor.perms.pii !== 'rw' && pathname !== '/api/admin/me') {
     MASKED.add(request);
+    url.noPii = true; // ô tìm kiếm cũng không được dò SĐT / email
   }
 
   if (pathname === '/api/admin/accounts.csv' || pathname.startsWith('/api/admin/accounts')) {
@@ -901,9 +902,14 @@ function buildFilter(url) {
   const where = [], args = [];
   const q = clean(p.get('q'), 80);
   if (q) {
-    where.push("(name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\' OR message LIKE ? ESCAPE '\\')");
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
-    args.push(like, like, like);
+    if (url.noPii) {
+      where.push("(name LIKE ? ESCAPE '\\' OR message LIKE ? ESCAPE '\\')");
+      args.push(like, like);
+    } else {
+      where.push("(name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\' OR message LIKE ? ESCAPE '\\')");
+      args.push(like, like, like);
+    }
   }
   const status = p.get('status');
   if (STATUSES.includes(status)) {
@@ -1352,9 +1358,9 @@ async function listCustomers(env, url) {
   const page = Math.max(parseInt(url.searchParams.get('page')) || 1, 1);
   let where = '', args = [];
   if (q) {
-    where = "WHERE (name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\')";
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
-    args = [like, like];
+    where = url.noPii ? "WHERE name LIKE ? ESCAPE '\\'" : "WHERE (name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\')";
+    args = url.noPii ? [like] : [like, like];
   }
   const total = (await env.DB.prepare(`SELECT COUNT(DISTINCT phone) AS n FROM bookings ${where}`).bind(...args).first()).n;
   const { results } = await env.DB.prepare('SELECT phone, (SELECT b2.name FROM bookings b2 WHERE b2.phone = bookings.phone ORDER BY b2.created_at DESC LIMIT 1) AS name, ' +
@@ -1373,9 +1379,9 @@ async function customersXlsx(env, url) {
   const q = clean(url.searchParams.get('q'), 80);
   let where = '', args = [];
   if (q) {
-    where = "WHERE (name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\')";
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
-    args = [like, like];
+    where = url.noPii ? "WHERE name LIKE ? ESCAPE '\\'" : "WHERE (name LIKE ? ESCAPE '\\' OR phone LIKE ? ESCAPE '\\')";
+    args = url.noPii ? [like] : [like, like];
   }
   const { results } = await env.DB.prepare('SELECT phone, (SELECT b2.name FROM bookings b2 WHERE b2.phone = bookings.phone ORDER BY b2.created_at DESC LIMIT 1) AS name, '
     + "COUNT(*) AS bookings, SUM(status = 'won') AS won, SUM(status = 'cancelled') AS cancelled, MAX(created_at) AS last_at, "

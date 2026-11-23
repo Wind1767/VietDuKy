@@ -14,9 +14,14 @@ function filterClause(url, h) {
   const p = url.searchParams, where = [], args = [];
   const q = h.clean(p.get('q'), 80);
   if (q) {
-    where.push("(u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.phone LIKE ? ESCAPE '\\')");
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
-    args.push(like, like, like);
+    if (url.noPii) {
+      where.push("u.name LIKE ? ESCAPE '\\'");
+      args.push(like);
+    } else {
+      where.push("(u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.phone LIKE ? ESCAPE '\\')");
+      args.push(like, like, like);
+    }
   }
   const s = p.get('status');
   if (s === 'verified') {

@@ -352,7 +352,7 @@ export async function adminChat(request, env, url, h) {
     const like = '%' + q.replace(/[\\%_]/g, '\\$&') + '%';
     const { results } = await env.DB.prepare("SELECT u.id, u.name, u.email, u.phone, u.avatar, EXISTS(SELECT 1 FROM chat_sessions x WHERE x.user_id = u.id) AS has_chat, " +
       "(SELECT id FROM chat_sessions x WHERE x.user_id = u.id AND x.status = 'open' ORDER BY id DESC LIMIT 1) AS open_session FROM users u " +
-      "WHERE u.email NOT LIKE '%@virtual.invalid' AND u.blocked_at IS NULL AND (?1 = '' OR u.name LIKE ?2 ESCAPE '\\' OR u.email LIKE ?2 ESCAPE '\\' OR u.phone LIKE ?2 ESCAPE '\\') ORDER BY u.created_at DESC, u.id DESC LIMIT 30").bind(q, like).all();
+      "WHERE u.email NOT LIKE '%@virtual.invalid' AND u.blocked_at IS NULL AND (?1 = '' OR u.name LIKE ?2 ESCAPE '\\' OR (?3 = 0 AND (u.email LIKE ?2 ESCAPE '\\' OR u.phone LIKE ?2 ESCAPE '\\'))) ORDER BY u.created_at DESC, u.id DESC LIMIT 30").bind(q, like, url.noPii ? 1 : 0).all();
     return h.json({ items: results });
   }
 
