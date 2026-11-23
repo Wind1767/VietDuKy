@@ -382,6 +382,7 @@ const NEEDS = [
   [/^\/api\/admin\/export\.(csv|xlsx)$/, ['export', 'pii']],
   [/^\/api\/admin\/accounts\.(csv|xlsx)$/, ['export', 'pii']],
   [/^\/api\/admin\/customers\.xlsx$/, ['export', 'pii']],
+  [/^\/api\/admin\/backup\.json$/, ['export', 'pii']], // chứa SĐT, email và toàn bộ tin nhắn
   [/^\/api\/admin\/activity\.xlsx$/, ['export']],
   [/^\/api\/admin\/data\/export$/, ['export']],
   [/^\/api\/admin\/data\/import$/, ['import']],
