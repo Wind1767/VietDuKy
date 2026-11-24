@@ -323,10 +323,15 @@
         return;
       }
       i.dataset.pwDone = '1';
+      var own = i.parentNode && i.parentNode.querySelector('.pw-toggle, .pw-eye');
       var wrap = document.createElement('span');
       wrap.className = 'pw-wrap';
-      i.parentNode.insertBefore(wrap, i);
-      wrap.appendChild(i);
+      if (own) { // trang đã có nút hiện/ẩn riêng (đăng nhập, đăng ký…): không thêm nút thứ hai, chỉ giữ gợi ý
+        wrap = i.parentNode;
+      } else {
+        i.parentNode.insertBefore(wrap, i);
+        wrap.appendChild(i);
+      }
       var eye = document.createElement('button');
       eye.type = 'button';
       eye.className = 'pw-eye';
@@ -340,7 +345,9 @@
         eye.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
         eye.firstChild.textContent = show ? 'visibility_off' : 'visibility';
       };
-      wrap.appendChild(eye);
+      if (!own) {
+        wrap.appendChild(eye);
+      }
       if (i.hasAttribute('data-pass-new')) {
         var hint = document.createElement('small');
         hint.className = 'pw-hint';
