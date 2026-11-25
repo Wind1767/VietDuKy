@@ -369,6 +369,10 @@
       window.VDK_RULES = cached;
     }
   } catch (e) {}
+  /* Hiệu ứng xuất hiện chỉ chạy lúc mới vào trang: sau đó danh sách dựng lại (bấm, xoá, lọc, bình chọn…) không được chạy lại từ đầu */
+  setTimeout(function () {
+    document.documentElement.classList.add('vdk-ready');
+  }, 1600);
   document.addEventListener('DOMContentLoaded', function () {
     rules();
   });

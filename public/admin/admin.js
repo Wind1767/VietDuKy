@@ -679,6 +679,12 @@
       name = 'overview';
     }
     setWriteFlags(name);
+    /* Hiệu ứng vào trang chỉ chạy lúc chuyển mục; bấm lọc / lưu / đổi tab trong cùng mục thì không chạy lại từ đầu */
+    document.body.classList.add('v-enter');
+    clearTimeout(route.enterT);
+    route.enterT = setTimeout(function () {
+      document.body.classList.remove('v-enter');
+    }, 1100);
     // quyền có thể vừa được đổi: đọc lại để menu và nút khớp ngay, không cần tải lại trang
     if (ME) {
       api('/me').then(function (r) {

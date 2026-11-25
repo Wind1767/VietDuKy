@@ -6702,3 +6702,15 @@ select {
     margin: 0;
   }
 }
+
+/* Hiệu ứng vào trang chỉ trong lúc chuyển mục (class v-enter do admin.js đặt); dựng lại danh sách thì hiện luôn */
+body:not(.v-enter) .tbl tbody tr,
+body:not(.v-enter) .pill,
+body:not(.v-enter) .rv-card,
+body:not(.v-enter) .kpi,
+body:not(.v-enter) .kpis > *,
+body:not(.v-enter) main > *,
+body:not(.v-enter) .main > *,
+body:not(.v-enter) #main > .page-h {
+  animation: none !important;
+}

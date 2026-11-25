@@ -3076,3 +3076,15 @@ select {
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* Đã qua giai đoạn vào trang: danh sách dựng lại thì hiện luôn, không chạy lại hiệu ứng xuất hiện */
+.vdk-ready .inbox-item,
+.vdk-ready .acct li,
+.vdk-ready .order-list li,
+.vdk-ready .fav-list li,
+.vdk-ready .rv-item,
+.vdk-ready .rv-reply,
+.vdk-ready .tours > .tour,
+.vdk-ready .auth-card {
+  animation: none !important;
+}
