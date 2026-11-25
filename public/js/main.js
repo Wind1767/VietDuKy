@@ -346,7 +346,9 @@
     bar.style.setProperty('--p', max > 0 ? y / max : 0);
     syncNav();
 
-    if (heroBg && !isMobile && y < window.innerHeight) {
+    if (heroBg && document.documentElement.classList.contains('no-parallax')) {
+      heroBg.style.translate = '';
+    } else if (heroBg && !isMobile && y < window.innerHeight) {
       heroBg.style.translate = '0 ' + y * 0.25 + 'px';
     }
   }

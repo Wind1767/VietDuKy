@@ -102,6 +102,13 @@ export const DEFS = {
   feat_votes: ['b', 0, true],
   feat_share: ['b', 0, true],
   feat_filter: ['b', 0, true],
+  feat_motion: ['b', 0, true],
+  feat_reveal: ['b', 0, true],
+  feat_progress: ['b', 0, true],
+  feat_top_btn: ['b', 0, true],
+  feat_lanterns: ['b', 0, true],
+  feat_ripple: ['b', 0, true],
+  feat_parallax: ['b', 0, true],
   maint_on: ['b', 0, false], maint_text: ['s', 240, 'Website đang được bảo trì, vui lòng quay lại sau ít phút.'],
   // SEO
   meta_title: ['s', 70, ''], meta_desc: ['s', 200, ''],

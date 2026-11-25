@@ -3049,3 +3049,30 @@ select {
 .rv-item header > div:nth-child(2) b {
   overflow-wrap: anywhere;
 }
+
+/* Công tắc hiệu ứng (admin: Bật / tắt tính năng): tắt thì bỏ hẳn phần hiệu ứng tương ứng */
+.no-top_btn #top,
+.no-progress #bar,
+.no-progress #scrollbar,
+.no-lanterns .lantern,
+.no-ripple .ripple {
+  display: none !important;
+}
+.no-reveal .rv {
+  opacity: 1 !important;
+  transform: none !important;
+  translate: none !important;
+  filter: none !important;
+  transition: none !important;
+}
+.no-motion *,
+.no-motion *::before,
+.no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+.no-motion .rv {
+  opacity: 1 !important;
+  transform: none !important;
+}
