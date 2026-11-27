@@ -40,6 +40,9 @@
     S = JSON.parse(localStorage.getItem(KEY) || 'null');
   } catch (e) {}
   window.VDK_SITE = S || {};
+  setTimeout(function () { /* mạng lỗi / chậm: đừng ẩn mãi */
+    document.documentElement.classList.add('vdk-site');
+  }, 3000);
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -275,9 +278,10 @@
   }
 
   /* Công tắc tính năng phía khách: tắt thì ẩn phần giao diện liên quan (class trên <html>, luật CSS ở components.css) */
-  var FEATS = ['upload', 'login', 'register', 'chat', 'reviews', 'booking', 'bugreport', 'favorites', 'compare', 'coupons', 'inbox', 'email_verify', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter', 'motion', 'reveal', 'progress', 'top_btn', 'lanterns', 'ripple', 'parallax'];
+  var FEATS = ['upload', 'login', 'register', 'chat', 'reviews', 'booking', 'bugreport', 'favorites', 'compare', 'coupons', 'inbox', 'email_verify', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter', 'motion', 'reveal', 'progress', 'top_btn', 'lanterns', 'ripple', 'parallax', 'replay_anim', 'hover_fx'];
   function features(s) {
     var root = document.documentElement;
+    root.classList.add('vdk-site');
     FEATS.forEach(function (k) {
       root.classList.toggle('no-' + k, s['feat_' + k] === false);
     });

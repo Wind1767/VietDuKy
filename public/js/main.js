@@ -442,6 +442,9 @@
   if (!isMobile && window.matchMedia('(hover:hover)').matches) {
     document.querySelectorAll('.btn').forEach(function (b) {
       b.addEventListener('mousemove', function (e) {
+        if (document.documentElement.classList.contains('no-hover_fx')) {
+          return;
+        }
         var r = b.getBoundingClientRect();
         b.style.translate = ((e.clientX - r.left - r.width / 2) * 0.18) + 'px ' +
           ((e.clientY - r.top - r.height / 2) * 0.3) + 'px';
@@ -533,6 +536,9 @@
   if (window.matchMedia('(hover:hover)').matches) {
     document.querySelectorAll('.card').forEach(function (card) {
       card.addEventListener('mousemove', function (e) {
+        if (document.documentElement.classList.contains('no-hover_fx')) {
+          return;
+        }
         var r = card.getBoundingClientRect();
         var x = (e.clientX - r.left) / r.width - 0.5;
         var y = (e.clientY - r.top) / r.height - 0.5;

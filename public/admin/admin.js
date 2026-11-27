@@ -397,6 +397,12 @@
     $('login').hidden = true;
     $('app').hidden = false;
     route();
+    /* Công tắc "kiểu animation cũ" (Cài đặt website ▸ Bật / tắt tính năng) */
+    fetch('/api/site').then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (d) {
+      document.body.classList.toggle('anim-replay', !!(d && d.site && d.site.feat_replay_anim));
+    }).catch(function () {});
   }
 
   $('loginForm').onsubmit = function (e) {
@@ -2822,6 +2828,8 @@
         ['feat_top_btn', 'Nút "lên đầu trang"', 'b'],
         ['feat_lanterns', 'Đèn lồng bay ở banner', 'b'],
         ['feat_ripple', 'Hiệu ứng sóng nước khi bấm nút', 'b'],
+        ['feat_replay_anim', 'Kiểu animation cũ: chạy lại hiệu ứng xuất hiện mỗi khi danh sách / bảng được dựng lại (mặc định tắt, vì khó chịu khi bấm)', 'b'],
+        ['feat_hover_fx', 'Thẻ nghiêng và nút trôi theo chuột (chỉ máy tính, mặc định tắt)', 'b'],
         ['feat_parallax', 'Hiệu ứng ảnh nền chuyển động chậm ở banner', 'b'],
         ['feat_google', 'Đăng nhập / liên kết bằng Google (khách)', 'b'],
         ['feat_google_admin', 'Đăng nhập / liên kết bằng Google (quản trị)', 'b'],

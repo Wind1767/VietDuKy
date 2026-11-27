@@ -109,6 +109,8 @@ export const DEFS = {
   feat_lanterns: ['b', 0, true],
   feat_ripple: ['b', 0, true],
   feat_parallax: ['b', 0, true],
+  feat_replay_anim: ['b', 0, false],
+  feat_hover_fx: ['b', 0, false],
   maint_on: ['b', 0, false], maint_text: ['s', 240, 'Website đang được bảo trì, vui lòng quay lại sau ít phút.'],
   // SEO
   meta_title: ['s', 70, ''], meta_desc: ['s', 200, ''],
