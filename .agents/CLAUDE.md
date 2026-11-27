@@ -131,3 +131,4 @@ Chỉ đóng gói các file đã sửa/thêm (giữ nguyên đường dẫn) n�
 - Không được bịa số trên trang khách. Khối số liệu trang chủ lấy từ `stats_items` (admin: Cài đặt website → Số liệu nổi bật): số tự nhập hoặc `auto:trips|customers|destinations|tours|reviews` (đếm thật trong `siteStats`); rỗng/0 thì ẩn, không có dòng nào thì ẩn cả khối. `hero_trust` mặc định rỗng (dòng tin cậy ở banner lấy từ đánh giá thật).
 - Panel trượt (`openPanel`) tự thêm nút Huỷ trước nút chính và hỏi lại khi đóng bằng X / nền mờ / Esc nếu đã sửa; thanh lưu của Cài đặt website và Menu & trang chủ có nút "Huỷ thay đổi". Dùng chữ "Huỷ" thống nhất.
 - Form admin dùng `.col-narrow` + `.form-stack` + `.form-acts` (khoảng cách 20px, nút tách khỏi ô nhập), không dùng style nội tuyến.
+- Thụt lề bằng Tab (xem .editorconfig), không dùng dấu cách.

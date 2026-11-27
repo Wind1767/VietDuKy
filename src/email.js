@@ -3,11 +3,11 @@ Cần: GMAIL_USER (địa chỉ Gmail) và secret GMAIL_APP_PASSWORD (mật kh�
 import { TEMPLATES, fill } from './email-templates.js';
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#39;'
 }[c]));
 
 const te = new TextEncoder();
@@ -18,172 +18,172 @@ const SMTP_TIMEOUT_MS = 20000;
 
 const oneLine = v => String(v == null ? '' : v).replace(/[\r\n]+/g, ' ').trim(); // chặn chèn thêm dòng tiêu đề
 const b64 = bytes => {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) {
-    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  }
-  return btoa(s);
+	let s = '';
+	for (let i = 0; i < bytes.length; i += 0x8000) {
+		s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+	}
+	return btoa(s);
 };
 const b64Lines = str => b64(te.encode(str)).replace(/.{1,76}/g, '$&\r\n').trimEnd();
 const encWord = str => /^[\x20-\x7E]*$/.test(str) ? str : '=?UTF-8?B?' + b64(te.encode(str)) + '?=';
 const quoteName = name => encWord(oneLine(name)).replace(/(["\\])/g, '\\$1');
 const addrOnly = v => {
-  const m = String(v).match(/<([^<>\s]+)>\s*$/);
-  return (m ? m[1] : String(v)).trim();
+	const m = String(v).match(/<([^<>\s]+)>\s*$/);
+	return (m ? m[1] : String(v)).trim();
 };
 
 /* Email liên hệ hiện ở chân thư: lấy từ biến EMAIL_FROM hoặc GMAIL_USER (worker.js gọi setContactEmail mỗi yêu cầu) */
 let contactEmail = '';
 export function setContactEmail(v) {
-  contactEmail = String(v || '').replace(/[\s<>"]/g, '');
+	contactEmail = String(v || '').replace(/[\s<>"]/g, '');
 }
 
 export function mailConfig(env) {
-  const user = oneLine(env.GMAIL_USER);
-  const pass = String(env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''); // mật khẩu ứng dụng hay được dán kèm dấu cách
-  return {
-    user,
-    pass,
-    name: oneLine(env.EMAIL_NAME) || 'Việt Du Ký',
-    from: oneLine(env.EMAIL_FROM) || user,
-    replyTo: oneLine(env.EMAIL_REPLY_TO) || oneLine(env.EMAIL_FROM) || user,
-    ready: !!(user && pass)
-  };
+	const user = oneLine(env.GMAIL_USER);
+	const pass = String(env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, ''); // mật khẩu ứng dụng hay được dán kèm dấu cách
+	return {
+		user,
+		pass,
+		name: oneLine(env.EMAIL_NAME) || 'Việt Du Ký',
+		from: oneLine(env.EMAIL_FROM) || user,
+		replyTo: oneLine(env.EMAIL_REPLY_TO) || oneLine(env.EMAIL_FROM) || user,
+		ready: !!(user && pass)
+	};
 }
 
 /* Dựng thư MIME: multipart/alternative (chữ thường + HTML), mọi phần mã hoá base64 UTF-8 */
 export function buildMessage({ from, fromName, to, replyTo, subject, html, text, host }) {
-  const boundary = '=_vdk_' + crypto.randomUUID().replace(/-/g, '');
-  const domain = (from.split('@')[1] || host || 'vietduky.local');
-  const head = [
-    'From: ' + '"' + quoteName(fromName) + '" <' + from + '>',
-    'To: <' + oneLine(to) + '>',
-    replyTo ? 'Reply-To: <' + oneLine(replyTo) + '>' : null,
-    'Subject: ' + encWord(oneLine(subject)),
-    'Date: ' + new Date().toUTCString().replace('GMT', '+0000'),
-    'Message-ID: <' + crypto.randomUUID() + '@' + domain + '>',
-    'MIME-Version: 1.0',
-    'Auto-Submitted: auto-generated',
-    'Content-Type: multipart/alternative; boundary="' + boundary + '"'
-  ].filter(Boolean).join('\r\n');
-  const part = (type, body) => '--' + boundary + '\r\nContent-Type: ' + type +
-    '; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n' + b64Lines(body) + '\r\n';
-  return head + '\r\n\r\n' + part('text/plain', text || '') + part('text/html', html || '') + '--' + boundary +
-    '--\r\n';
+	const boundary = '=_vdk_' + crypto.randomUUID().replace(/-/g, '');
+	const domain = (from.split('@')[1] || host || 'vietduky.local');
+	const head = [
+		'From: ' + '"' + quoteName(fromName) + '" <' + from + '>',
+		'To: <' + oneLine(to) + '>',
+		replyTo ? 'Reply-To: <' + oneLine(replyTo) + '>' : null,
+		'Subject: ' + encWord(oneLine(subject)),
+		'Date: ' + new Date().toUTCString().replace('GMT', '+0000'),
+		'Message-ID: <' + crypto.randomUUID() + '@' + domain + '>',
+		'MIME-Version: 1.0',
+		'Auto-Submitted: auto-generated',
+		'Content-Type: multipart/alternative; boundary="' + boundary + '"'
+	].filter(Boolean).join('\r\n');
+	const part = (type, body) => '--' + boundary + '\r\nContent-Type: ' + type +
+		'; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n' + b64Lines(body) + '\r\n';
+	return head + '\r\n\r\n' + part('text/plain', text || '') + part('text/html', html || '') + '--' + boundary +
+		'--\r\n';
 }
 
 /* Đọc phản hồi SMTP (có thể nhiều dòng "250-..." rồi "250 ...") */
 function makeReader(readable) {
-  const reader = readable.getReader();
-  let buf = '';
-  const fill = async () => {
-    const { value, done } = await reader.read();
-    if (done) {
-      throw new Error('Máy chủ SMTP đóng kết nối đột ngột.');
-    }
-    buf += td.decode(value, { stream: true });
-  };
-  return async function reply() {
-    const lines = [];
-    for (;;) {
-      let i;
-      while ((i = buf.indexOf('\n')) < 0) {
-        await fill();
-      }
-      const line = buf.slice(0, i).replace(/\r$/, '');
-      buf = buf.slice(i + 1);
-      lines.push(line);
-      if (/^\d{3} /.test(line) || !/^\d{3}-/.test(line)) {
-        return { code: Number(line.slice(0, 3)), text: lines.join('\n') };
-      }
-    }
-  };
+	const reader = readable.getReader();
+	let buf = '';
+	const fill = async () => {
+		const { value, done } = await reader.read();
+		if (done) {
+			throw new Error('Máy chủ SMTP đóng kết nối đột ngột.');
+		}
+		buf += td.decode(value, { stream: true });
+	};
+	return async function reply() {
+		const lines = [];
+		for (;;) {
+			let i;
+			while ((i = buf.indexOf('\n')) < 0) {
+				await fill();
+			}
+			const line = buf.slice(0, i).replace(/\r$/, '');
+			buf = buf.slice(i + 1);
+			lines.push(line);
+			if (/^\d{3} /.test(line) || !/^\d{3}-/.test(line)) {
+				return { code: Number(line.slice(0, 3)), text: lines.join('\n') };
+			}
+		}
+	};
 }
 
 async function openSocket(env) {
-  if (env.__connect) {
-    return env.__connect(SMTP_HOST, SMTP_PORT);
-  }
-  const { connect } = await import('cloudflare:sockets');
-  return connect({ hostname: SMTP_HOST, port: SMTP_PORT }, { secureTransport: 'on', allowHalfOpen: false });
+	if (env.__connect) {
+		return env.__connect(SMTP_HOST, SMTP_PORT);
+	}
+	const { connect } = await import('cloudflare:sockets');
+	return connect({ hostname: SMTP_HOST, port: SMTP_PORT }, { secureTransport: 'on', allowHalfOpen: false });
 }
 
 async function smtpSend(env, cfg, to, message) {
-  const socket = await openSocket(env);
-  const writer = socket.writable.getWriter();
-  const read = makeReader(socket.readable);
-  const send = line => writer.write(te.encode(line + '\r\n'));
-  const expect = async (codes, what) => {
-    const r = await read();
-    if (!codes.includes(r.code)) {
-      throw new Error(`SMTP ${what}: ${r.text.replace(/\s+/g, ' ').slice(0, 200)}`);
-    }
-    return r;
-  };
-  try {
-    await expect([220], 'kết nối');
-    await send('EHLO vietduky.local');
-    await expect([250], 'EHLO');
-    await send('AUTH PLAIN ' + b64(te.encode('\0' + cfg.user + '\0' + cfg.pass)));
-    const auth = await read();
-    if (auth.code !== 235) {
-      throw new Error(auth.code === 534 || auth.code === 535
-        ? 'Gmail từ chối đăng nhập (' + auth.code +
-          '). Kiểm tra GMAIL_USER và GMAIL_APP_PASSWORD (phải là mật khẩu ứng dụng, không phải mật khẩu Gmail).'
-        : 'SMTP đăng nhập: ' + auth.text.slice(0, 200));
-    }
-    await send('MAIL FROM:<' + cfg.user + '>');
-    await expect([250], 'MAIL FROM');
-    await send('RCPT TO:<' + to + '>');
-    await expect([250, 251], 'RCPT TO');
-    await send('DATA');
-    await expect([354], 'DATA');
-    // dot-stuffing: dòng bắt đầu bằng "." phải thêm một dấu "." nữa
-    await writer.write(te.encode(message.replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..') + '.\r\n'));
-    await expect([250], 'gửi thư');
-    try {
-      await send('QUIT');
-    } catch { /* đã gửi xong, bỏ qua */
-    }
-  } finally {
-    try {
-      writer.releaseLock();
-    } catch { /* bỏ qua */
-    }
-    try {
-      await socket.close();
-    } catch { /* bỏ qua */
-    }
-  }
+	const socket = await openSocket(env);
+	const writer = socket.writable.getWriter();
+	const read = makeReader(socket.readable);
+	const send = line => writer.write(te.encode(line + '\r\n'));
+	const expect = async (codes, what) => {
+		const r = await read();
+		if (!codes.includes(r.code)) {
+			throw new Error(`SMTP ${what}: ${r.text.replace(/\s+/g, ' ').slice(0, 200)}`);
+		}
+		return r;
+	};
+	try {
+		await expect([220], 'kết nối');
+		await send('EHLO vietduky.local');
+		await expect([250], 'EHLO');
+		await send('AUTH PLAIN ' + b64(te.encode('\0' + cfg.user + '\0' + cfg.pass)));
+		const auth = await read();
+		if (auth.code !== 235) {
+			throw new Error(auth.code === 534 || auth.code === 535
+				? 'Gmail từ chối đăng nhập (' + auth.code +
+					'). Kiểm tra GMAIL_USER và GMAIL_APP_PASSWORD (phải là mật khẩu ứng dụng, không phải mật khẩu Gmail).'
+				: 'SMTP đăng nhập: ' + auth.text.slice(0, 200));
+		}
+		await send('MAIL FROM:<' + cfg.user + '>');
+		await expect([250], 'MAIL FROM');
+		await send('RCPT TO:<' + to + '>');
+		await expect([250, 251], 'RCPT TO');
+		await send('DATA');
+		await expect([354], 'DATA');
+		// dot-stuffing: dòng bắt đầu bằng "." phải thêm một dấu "." nữa
+		await writer.write(te.encode(message.replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..') + '.\r\n'));
+		await expect([250], 'gửi thư');
+		try {
+			await send('QUIT');
+		} catch { /* đã gửi xong, bỏ qua */
+		}
+	} finally {
+		try {
+			writer.releaseLock();
+		} catch { /* bỏ qua */
+		}
+		try {
+			await socket.close();
+		} catch { /* bỏ qua */
+		}
+	}
 }
 
 export async function sendEmail(env, { to, subject, html, text }) {
-  const cfg = mailConfig(env);
-  if (!cfg.ready) {
-    throw new Error('Chưa cấu hình Gmail: cần GMAIL_USER và secret GMAIL_APP_PASSWORD.');
-  }
-  const rcpt = addrOnly(oneLine(to));
-  if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(rcpt)) {
-    throw new Error('Địa chỉ người nhận không hợp lệ.');
-  }
-  const message = buildMessage({
-    from: cfg.from,
-    fromName: cfg.name,
-    to: rcpt,
-    replyTo: cfg.replyTo,
-    subject,
-    html,
-    text
-  });
-  let timer;
-  const timeout = new Promise((_, rej) => {
-    timer = setTimeout(() => rej(new Error('Gửi email quá thời gian chờ.')), SMTP_TIMEOUT_MS);
-  });
-  try {
-    await Promise.race([smtpSend(env, cfg, rcpt, message), timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
+	const cfg = mailConfig(env);
+	if (!cfg.ready) {
+		throw new Error('Chưa cấu hình Gmail: cần GMAIL_USER và secret GMAIL_APP_PASSWORD.');
+	}
+	const rcpt = addrOnly(oneLine(to));
+	if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(rcpt)) {
+		throw new Error('Địa chỉ người nhận không hợp lệ.');
+	}
+	const message = buildMessage({
+		from: cfg.from,
+		fromName: cfg.name,
+		to: rcpt,
+		replyTo: cfg.replyTo,
+		subject,
+		html,
+		text
+	});
+	let timer;
+	const timeout = new Promise((_, rej) => {
+		timer = setTimeout(() => rej(new Error('Gửi email quá thời gian chờ.')), SMTP_TIMEOUT_MS);
+	});
+	try {
+		await Promise.race([smtpSend(env, cfg, rcpt, message), timeout]);
+	} finally {
+		clearTimeout(timer);
+	}
 }
 
 const DESTS = ['Vịnh Hạ Long', 'Sa Pa', 'Hội An', 'Huế', 'Đà Lạt', 'Phú Quốc'];
@@ -191,35 +191,35 @@ const SERIF = "Georgia,'Times New Roman',serif";
 const DEFAULT_SITE = 'https://vietduky.indevs.in';
 /* Logo trong thư: cùng logo /icon-192.png (bản 192px, nhẹ mà vẫn nét khi hiện 40px) với header website (nón lá), lấy theo địa chỉ website */
 const siteOf = link => {
-  try {
-    return new URL(link).origin;
-  } catch {
-    return DEFAULT_SITE;
-  }
+	try {
+		return new URL(link).origin;
+	} catch {
+		return DEFAULT_SITE;
+	}
 };
 const logoSrc = site => esc((site && /^https?:/.test(site) ? site : DEFAULT_SITE) + '/icon-192.png');
 const SANS = "'Be Vietnam Pro','Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
 /* Email xác minh địa chỉ: bố cục bảng + CSS nội tuyến để hiển thị đúng ở Gmail, Outlook, Apple Mail */
 export function verifyEmail({ name, email, link, site }, tpl, vars) {
-  const first = String(name).trim().split(/\s+/).pop(); // tên gọi là từ cuối: "Nguyễn Văn An" → "An"
-  const year = new Date().getFullYear();
-  // Chữ có thể sửa trong trang quản trị; không truyền thì dùng chữ mặc định
-  const v = {
-    ten: first,
-    ho_ten: String(name).trim(),
-    email,
-    hotline: '1900 1234',
-    ten_web: 'Việt Du Ký',
-    ...(vars || {})
-  };
-  const T = Object.fromEntries(Object.entries({ ...TEMPLATES.verify.def, ...(tpl || {}) }).map(([k, s]) => [k, fill(s, v)]));
-  const subject = T.subject;
-  const introHtml = esc(T.intro).replace(esc(email), `<b style="color:#0c3b36;">${esc(email)}</b>`);
+	const first = String(name).trim().split(/\s+/).pop(); // tên gọi là từ cuối: "Nguyễn Văn An" → "An"
+	const year = new Date().getFullYear();
+	// Chữ có thể sửa trong trang quản trị; không truyền thì dùng chữ mặc định
+	const v = {
+		ten: first,
+		ho_ten: String(name).trim(),
+		email,
+		hotline: '1900 1234',
+		ten_web: 'Việt Du Ký',
+		...(vars || {})
+	};
+	const T = Object.fromEntries(Object.entries({ ...TEMPLATES.verify.def, ...(tpl || {}) }).map(([k, s]) => [k, fill(s, v)]));
+	const subject = T.subject;
+	const introHtml = esc(T.intro).replace(esc(email), `<b style="color:#0c3b36;">${esc(email)}</b>`);
 
-  const pills = DESTS.map(d => `<span style="display:inline-block;margin:0 6px 8px 0;padding:6px 14px;border-radius:999px;background:#eef4f1;border:1px solid #d3e0db;color:#145a50;font-family:${SANS};font-size:13px;font-weight:600;">${esc(d)}</span>`).join('');
+	const pills = DESTS.map(d => `<span style="display:inline-block;margin:0 6px 8px 0;padding:6px 14px;border-radius:999px;background:#eef4f1;border:1px solid #d3e0db;color:#145a50;font-family:${SANS};font-size:13px;font-weight:600;">${esc(d)}</span>`).join('');
 
-  const html = `<!DOCTYPE html>
+	const html = `<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
@@ -284,23 +284,23 @@ export function verifyEmail({ name, email, link, site }, tpl, vars) {
 </body>
 </html>`;
 
-  const text = [T.heading, '', T.intro, '', link, '', T.note, T.footer, '', 'Việt Du Ký · Hotline 1900 1234 · ' +
-      contactEmail].join('\n');
+	const text = [T.heading, '', T.intro, '', link, '', T.note, T.footer, '', 'Việt Du Ký · Hotline 1900 1234 · ' +
+			contactEmail].join('\n');
 
-  return {
-    subject,
-    html,
-    text
-  };
+	return {
+		subject,
+		html,
+		text
+	};
 }
 
 /* Email thông báo ngắn gọn (tin nhắn mới, đơn mới, đánh giá mới, admin trả lời): cùng phong cách với email xác minh.
 rows: [[nhãn, giá trị], ...] hiện dạng bảng; quote: đoạn trích có vạch vàng bên trái. */
 export function noticeEmail({ subject, eyebrow, heading, intro, rows, quote, button, link, footer }) {
-  const year = new Date().getFullYear();
-  const rowHtml = (rows || []).filter(r => r[1]).map(r => `<tr><td style="padding:6px 14px 6px 0;font-family:${SANS};font-size:13px;color:#6b7d77;white-space:nowrap;vertical-align:top;">${esc(r[0])}</td>` +
-    `<td style="padding:6px 0;font-family:${SANS};font-size:15px;color:#14231f;font-weight:600;">${esc(r[1])}</td></tr>`).join('');
-  const html = `<!DOCTYPE html>
+	const year = new Date().getFullYear();
+	const rowHtml = (rows || []).filter(r => r[1]).map(r => `<tr><td style="padding:6px 14px 6px 0;font-family:${SANS};font-size:13px;color:#6b7d77;white-space:nowrap;vertical-align:top;">${esc(r[0])}</td>` +
+		`<td style="padding:6px 0;font-family:${SANS};font-size:15px;color:#14231f;font-weight:600;">${esc(r[1])}</td></tr>`).join('');
+	const html = `<!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(subject)}</title></head>
 <body style="margin:0;padding:0;background:#eef4f1;-webkit-text-size-adjust:100%;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef4f1;"><tr><td align="center" style="padding:28px 12px;">
@@ -329,14 +329,14 @@ export function noticeEmail({ subject, eyebrow, heading, intro, rows, quote, but
     </td></tr>
   </table>
 </td></tr></table></body></html>`;
-  const text = [heading, '', intro || '', ...(rows || []).filter(r => r[1]).map(r => r[0] + ': ' + r[1]), quote ? '\n' +
-      quote : '', link ? '\n' +
-      (button || 'Mở') + ': ' + link : '', footer ? '\n' +
-      footer : '']
-    .filter(x => x !== undefined).join('\n');
-  return {
-    subject,
-    html,
-    text
-  };
+	const text = [heading, '', intro || '', ...(rows || []).filter(r => r[1]).map(r => r[0] + ': ' + r[1]), quote ? '\n' +
+			quote : '', link ? '\n' +
+			(button || 'Mở') + ': ' + link : '', footer ? '\n' +
+			footer : '']
+		.filter(x => x !== undefined).join('\n');
+	return {
+		subject,
+		html,
+		text
+	};
 }

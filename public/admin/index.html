@@ -1,99 +1,99 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#0a3732">
-  <title>Quản trị – Việt Du Ký</title>
-  <link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
-  <link href="/favicon.png" rel="icon" type="image/png" sizes="256x256"/>
-  <link href="/favicon.ico" rel="icon" sizes="48x48"/>
-  <link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
-  <link href="/manifest.webmanifest" rel="manifest"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap&subset=vietnamese" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=account_circle,add,add_a_photo,add_location,admin_panel_settings,arrow_back,arrow_downward,arrow_forward,arrow_right_alt,arrow_upward,autorenew,badge,bar_chart,block,calendar_month,call,campaign,check,check_circle,checklist,chevron_left,chevron_right,close,code,colorize,confirmation_number,construction,content_copy,dark_mode,dashboard,data_object,delete,density_medium,density_small,description,devices,done_all,download,eco,edit,error,event,expand_more,explore,favorite,filter_alt,format_bold,format_italic,format_list_bulleted,format_list_numbered,format_quote,format_size,format_strikethrough,forum,forward_to_inbox,fullscreen,fullscreen_exit,group,groups,handshake,help,history,horizontal_rule,image,inbox,ink_highlighter,keyboard,light_mode,link,location_on,lock,lock_open,logout,luggage,mail,manage_accounts,map,menu,menu_open,mood,north_east,notes,person,person_add,print,quickreply,refresh,remove,restaurant,route,save,schedule,search,sell,send,shield_lock,smart_toy,star,subscript,superscript,support_agent,swap_vert,table,table_view,thumb_up,title,trending_down,trending_up,upload,verified,vertical_align_top,view_column,visibility,visibility_off,warning,wifi_off&display=block" rel="stylesheet">
-  <link href="admin.css" rel="stylesheet">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="robots" content="noindex,nofollow">
+	<meta name="theme-color" content="#0a3732">
+	<title>Quản trị – Việt Du Ký</title>
+	<link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
+	<link href="/favicon.png" rel="icon" type="image/png" sizes="256x256"/>
+	<link href="/favicon.ico" rel="icon" sizes="48x48"/>
+	<link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
+	<link href="/manifest.webmanifest" rel="manifest"/>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap&subset=vietnamese" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=account_circle,add,add_a_photo,add_location,admin_panel_settings,arrow_back,arrow_downward,arrow_forward,arrow_right_alt,arrow_upward,autorenew,badge,bar_chart,block,calendar_month,call,campaign,check,check_circle,checklist,chevron_left,chevron_right,close,code,colorize,confirmation_number,construction,content_copy,dark_mode,dashboard,data_object,delete,density_medium,density_small,description,devices,done_all,download,eco,edit,error,event,expand_more,explore,favorite,filter_alt,format_bold,format_italic,format_list_bulleted,format_list_numbered,format_quote,format_size,format_strikethrough,forum,forward_to_inbox,fullscreen,fullscreen_exit,group,groups,handshake,help,history,horizontal_rule,image,inbox,ink_highlighter,keyboard,light_mode,link,location_on,lock,lock_open,logout,luggage,mail,manage_accounts,map,menu,menu_open,mood,north_east,notes,person,person_add,print,quickreply,refresh,remove,restaurant,route,save,schedule,search,sell,send,shield_lock,smart_toy,star,subscript,superscript,support_agent,swap_vert,table,table_view,thumb_up,title,trending_down,trending_up,upload,verified,vertical_align_top,view_column,visibility,visibility_off,warning,wifi_off&display=block" rel="stylesheet">
+	<link href="admin.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/mfa.css">
-  <link href="/css/form-controls.css" rel="stylesheet">
-  <link href="/css/controls-plus.css" rel="stylesheet">
-  <link href="/css/md.css" rel="stylesheet">
-  <script defer src="/js/dropzone.js"></script>
-  <script src="/admin/theme-init.js"></script>
+	<link href="/css/form-controls.css" rel="stylesheet">
+	<link href="/css/controls-plus.css" rel="stylesheet">
+	<link href="/css/md.css" rel="stylesheet">
+	<script defer src="/js/dropzone.js"></script>
+	<script src="/admin/theme-init.js"></script>
 </head>
 <body data-vui-past>
 
 <!-- Đăng nhập -->
 <main class="login" id="login" hidden>
-  <form class="login-card" id="loginForm" autocomplete="on">
-    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Việt Du Ký</span></div>
-    <h1>Đăng nhập quản trị</h1>
-    <p class="muted">Xem và xử lý các yêu cầu đặt tour của khách.</p>
-    <label class="field">
-      <span>Email quản trị</span>
-      <input type="email" name="email" id="adminEmail" autocomplete="username" maxlength="254">
-    </label>
-    <label class="field">
-      <span>Mật khẩu</span>
-      <input type="password" name="password" id="password" autocomplete="current-password" required>
-    </label>
-    <p class="form-err" id="loginErr" role="alert" hidden></p>
-    <div class="ts-box" id="adminTs"></div>
-    <button class="btn primary" type="submit" id="loginBtn">Đăng nhập</button>
-    <div class="mfa-alt" id="loginAlt" hidden><p class="mfa-or"><span>hoặc</span></p><div class="mfa-google" id="loginGoogle"></div><button class="mfa-btn block" id="loginPasskey" type="button" hidden>Đăng nhập bằng passkey</button></div>
-  </form>
-  <div class="login-card" id="loginMfa" hidden></div>
+	<form class="login-card" id="loginForm" autocomplete="on">
+		<div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Việt Du Ký</span></div>
+		<h1>Đăng nhập quản trị</h1>
+		<p class="muted">Xem và xử lý các yêu cầu đặt tour của khách.</p>
+		<label class="field">
+			<span>Email quản trị</span>
+			<input type="email" name="email" id="adminEmail" autocomplete="username" maxlength="254">
+		</label>
+		<label class="field">
+			<span>Mật khẩu</span>
+			<input type="password" name="password" id="password" autocomplete="current-password" required>
+		</label>
+		<p class="form-err" id="loginErr" role="alert" hidden></p>
+		<div class="ts-box" id="adminTs"></div>
+		<button class="btn primary" type="submit" id="loginBtn">Đăng nhập</button>
+		<div class="mfa-alt" id="loginAlt" hidden><p class="mfa-or"><span>hoặc</span></p><div class="mfa-google" id="loginGoogle"></div><button class="mfa-btn block" id="loginPasskey" type="button" hidden>Đăng nhập bằng passkey</button></div>
+	</form>
+	<div class="login-card" id="loginMfa" hidden></div>
 </main>
 
 <!-- Ứng dụng -->
 <div class="app" id="app" hidden>
-  <header class="topbar">
-    <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="side"><span class="ms">menu</span></button>
-    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Việt Du Ký</span></div>
-  </header>
+	<header class="topbar">
+		<button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="side"><span class="ms">menu</span></button>
+		<div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Việt Du Ký</span></div>
+	</header>
 
-  <aside class="side" id="side">
-    <div class="side-head">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span class="t">Việt Du Ký</span></div>
-      <button class="side-toggle" id="sideToggle" type="button" aria-label="Thu gọn thanh bên" aria-expanded="true" title="Thu gọn / mở rộng ( [ )"><span class="ms">menu_open</span></button>
-    </div>
-    <nav class="nav" aria-label="Chính">
-      <a href="#/" data-view="overview" title="Tổng quan"><span class="ms">dashboard</span><span class="t">Tổng quan</span></a>
-      <a href="#/bookings" data-view="bookings" title="Đơn đặt"><span class="ms">inbox</span><span class="t">Đơn đặt</span><b class="pill" id="navNew" hidden></b></a>
-      <a href="#/messages" data-view="messages" title="Tin nhắn"><span class="ms">forum</span><span class="t">Tin nhắn</span><b class="pill" id="navMsg" hidden></b></a>
-      <a href="#/inbox" data-view="inbox" title="Gửi thông báo"><span class="ms">campaign</span><span class="t">Gửi thông báo</span></a>
-      <a href="#/faq" data-view="faq" title="Trả lời tự động"><span class="ms">smart_toy</span><span class="t">Trả lời tự động</span></a>
-      <a href="#/reviews" data-view="reviews" title="Đánh giá"><span class="ms">star</span><span class="t">Đánh giá</span><b class="pill" id="navRev" hidden></b></a>
-      <a href="#/bugs" data-view="bugs" title="Báo lỗi"><span class="ms">warning</span><span class="t">Báo lỗi</span><b class="pill" id="navBug" hidden></b></a>
-      <a href="#/accounts" data-view="accounts" title="Tài khoản"><span class="ms">manage_accounts</span><span class="t">Tài khoản</span></a>
-      <a href="#/customers" data-view="customers" title="Khách hàng"><span class="ms">groups</span><span class="t">Khách hàng</span></a>
-      <a href="#/departures" data-view="departures" title="Lịch khởi hành"><span class="ms">event</span><span class="t">Lịch khởi hành</span></a>
-      <a href="#/destinations" data-view="destinations" title="Điểm đến" hidden><span class="ms">map</span><span class="t">Điểm đến</span></a>
-      <a href="#/tours" data-view="tours" title="Tour &amp; giá"><span class="ms">sell</span><span class="t">Tour &amp; giá</span></a>
-      <a href="#/templates" data-view="templates" title="Mẫu trả lời"><span class="ms">quickreply</span><span class="t">Mẫu trả lời</span></a>
-      <a href="#/reports" data-view="reports" title="Báo cáo"><span class="ms">bar_chart</span><span class="t">Báo cáo</span></a>
-      <a href="#/activity" data-view="activity" title="Nhật ký"><span class="ms">history</span><span class="t">Nhật ký</span></a>
-      <a href="#/layout" data-view="layout" title="Menu &amp; trang chủ" hidden><span class="ms">route</span><span class="t">Menu &amp; trang chủ</span></a>
-      <a href="#/content" data-view="content" title="Khối &amp; trang mới" hidden><span class="ms">edit</span><span class="t">Khối &amp; trang mới</span></a>
-      <a href="#/site" data-view="site" title="Cài đặt website" hidden><span class="ms">eco</span><span class="t">Cài đặt website</span></a>
-      <a href="#/coupons" data-view="coupons" title="Mã giảm giá" hidden><span class="ms">confirmation_number</span><span class="t">Mã giảm giá</span></a>
-      <a href="#/data" data-view="data" title="Nhập / xuất dữ liệu" hidden><span class="ms">swap_vert</span><span class="t">Nhập / xuất</span></a>
-      <a href="#/emails" data-view="emails" title="Email mẫu" hidden><span class="ms">mail</span><span class="t">Email mẫu</span></a>
-      <a href="#/access" data-view="access" title="Giới hạn truy cập" hidden><span class="ms">shield_lock</span><span class="t">Giới hạn truy cập</span></a>
-      <a href="#/admins" data-view="admins" title="Quản trị viên" hidden><span class="ms">admin_panel_settings</span><span class="t">Quản trị viên</span></a>
-    </nav>
-    <div class="side-foot">
-      <div class="whoami" id="whoami" hidden><span class="av sm" id="whoAv" aria-hidden="true"></span><span class="t"><b id="whoName"></b><small id="whoRole"></small></span></div>
-      <button class="ghost" id="palBtn" type="button" title="Tìm nhanh (Ctrl + K hoặc /)"><span class="ms">search</span><span class="t">Tìm nhanh</span><kbd class="t">Ctrl K</kbd></button>
-      <button class="ghost" id="themeBtn" type="button" title="Đổi giao diện"><span class="ms" id="themeIcon">dark_mode</span><span class="t" id="themeLabel">Giao diện tối</span></button>
-      <button class="ghost" id="secBtn" type="button" title="Bảo mật tài khoản"><span class="ms">shield_lock</span><span class="t">Bảo mật</span></button>
-      <button class="ghost" id="logoutBtn" type="button" title="Đăng xuất"><span class="ms">logout</span><span class="t">Đăng xuất</span></button>
-    </div>
-  </aside>
+	<aside class="side" id="side">
+		<div class="side-head">
+			<div class="brand"><span class="brand-mark" aria-hidden="true"></span><span class="t">Việt Du Ký</span></div>
+			<button class="side-toggle" id="sideToggle" type="button" aria-label="Thu gọn thanh bên" aria-expanded="true" title="Thu gọn / mở rộng ( [ )"><span class="ms">menu_open</span></button>
+		</div>
+		<nav class="nav" aria-label="Chính">
+			<a href="#/" data-view="overview" title="Tổng quan"><span class="ms">dashboard</span><span class="t">Tổng quan</span></a>
+			<a href="#/bookings" data-view="bookings" title="Đơn đặt"><span class="ms">inbox</span><span class="t">Đơn đặt</span><b class="pill" id="navNew" hidden></b></a>
+			<a href="#/messages" data-view="messages" title="Tin nhắn"><span class="ms">forum</span><span class="t">Tin nhắn</span><b class="pill" id="navMsg" hidden></b></a>
+			<a href="#/inbox" data-view="inbox" title="Gửi thông báo"><span class="ms">campaign</span><span class="t">Gửi thông báo</span></a>
+			<a href="#/faq" data-view="faq" title="Trả lời tự động"><span class="ms">smart_toy</span><span class="t">Trả lời tự động</span></a>
+			<a href="#/reviews" data-view="reviews" title="Đánh giá"><span class="ms">star</span><span class="t">Đánh giá</span><b class="pill" id="navRev" hidden></b></a>
+			<a href="#/bugs" data-view="bugs" title="Báo lỗi"><span class="ms">warning</span><span class="t">Báo lỗi</span><b class="pill" id="navBug" hidden></b></a>
+			<a href="#/accounts" data-view="accounts" title="Tài khoản"><span class="ms">manage_accounts</span><span class="t">Tài khoản</span></a>
+			<a href="#/customers" data-view="customers" title="Khách hàng"><span class="ms">groups</span><span class="t">Khách hàng</span></a>
+			<a href="#/departures" data-view="departures" title="Lịch khởi hành"><span class="ms">event</span><span class="t">Lịch khởi hành</span></a>
+			<a href="#/destinations" data-view="destinations" title="Điểm đến" hidden><span class="ms">map</span><span class="t">Điểm đến</span></a>
+			<a href="#/tours" data-view="tours" title="Tour &amp; giá"><span class="ms">sell</span><span class="t">Tour &amp; giá</span></a>
+			<a href="#/templates" data-view="templates" title="Mẫu trả lời"><span class="ms">quickreply</span><span class="t">Mẫu trả lời</span></a>
+			<a href="#/reports" data-view="reports" title="Báo cáo"><span class="ms">bar_chart</span><span class="t">Báo cáo</span></a>
+			<a href="#/activity" data-view="activity" title="Nhật ký"><span class="ms">history</span><span class="t">Nhật ký</span></a>
+			<a href="#/layout" data-view="layout" title="Menu &amp; trang chủ" hidden><span class="ms">route</span><span class="t">Menu &amp; trang chủ</span></a>
+			<a href="#/content" data-view="content" title="Khối &amp; trang mới" hidden><span class="ms">edit</span><span class="t">Khối &amp; trang mới</span></a>
+			<a href="#/site" data-view="site" title="Cài đặt website" hidden><span class="ms">eco</span><span class="t">Cài đặt website</span></a>
+			<a href="#/coupons" data-view="coupons" title="Mã giảm giá" hidden><span class="ms">confirmation_number</span><span class="t">Mã giảm giá</span></a>
+			<a href="#/data" data-view="data" title="Nhập / xuất dữ liệu" hidden><span class="ms">swap_vert</span><span class="t">Nhập / xuất</span></a>
+			<a href="#/emails" data-view="emails" title="Email mẫu" hidden><span class="ms">mail</span><span class="t">Email mẫu</span></a>
+			<a href="#/access" data-view="access" title="Giới hạn truy cập" hidden><span class="ms">shield_lock</span><span class="t">Giới hạn truy cập</span></a>
+			<a href="#/admins" data-view="admins" title="Quản trị viên" hidden><span class="ms">admin_panel_settings</span><span class="t">Quản trị viên</span></a>
+		</nav>
+		<div class="side-foot">
+			<div class="whoami" id="whoami" hidden><span class="av sm" id="whoAv" aria-hidden="true"></span><span class="t"><b id="whoName"></b><small id="whoRole"></small></span></div>
+			<button class="ghost" id="palBtn" type="button" title="Tìm nhanh (Ctrl + K hoặc /)"><span class="ms">search</span><span class="t">Tìm nhanh</span><kbd class="t">Ctrl K</kbd></button>
+			<button class="ghost" id="themeBtn" type="button" title="Đổi giao diện"><span class="ms" id="themeIcon">dark_mode</span><span class="t" id="themeLabel">Giao diện tối</span></button>
+			<button class="ghost" id="secBtn" type="button" title="Bảo mật tài khoản"><span class="ms">shield_lock</span><span class="t">Bảo mật</span></button>
+			<button class="ghost" id="logoutBtn" type="button" title="Đăng xuất"><span class="ms">logout</span><span class="t">Đăng xuất</span></button>
+		</div>
+	</aside>
 
-  <main class="main" id="main" tabindex="-1"></main>
+	<main class="main" id="main" tabindex="-1"></main>
 </div>
 <div class="side-scrim" id="sideScrim" hidden></div>
 
@@ -113,7 +113,7 @@
 <script src="/js/md.js"></script>
 <script src="/js/mfa-ui.js"></script>
 <script defer src="/js/focus-fix.js"></script>
-  <script src="admin.js"></script>
+	<script src="admin.js"></script>
 <script src="admin-plus.js"></script>
 </body>
 </html>

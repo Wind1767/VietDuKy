@@ -10,147 +10,147 @@ let env;
 const hh = { ...h };
 
 function setFlag(key, value) {
-  env.DB.raw.prepare('INSERT OR REPLACE INTO site_settings (key, value, updated_at) VALUES (?1, ?2, 0)').run(key, JSON.stringify(value));
-  dropSiteCache();
+	env.DB.raw.prepare('INSERT OR REPLACE INTO site_settings (key, value, updated_at) VALUES (?1, ?2, 0)').run(key, JSON.stringify(value));
+	dropSiteCache();
 }
 
 beforeEach(() => {
-  env = { DB: createDB() };
-  for (const sql of SITE_SCHEMA) {
-    env.DB.raw.exec(sql);
-  }
-  dropSiteCache();
+	env = { DB: createDB() };
+	for (const sql of SITE_SCHEMA) {
+		env.DB.raw.exec(sql);
+	}
+	dropSiteCache();
 });
 
 test('Các công tắc mới đều bật sẵn theo mặc định', () => {
-  for (const k of ['feat_login', 'feat_bugreport', 'feat_upload', 'feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify', 'feat_favorites', 'feat_compare', 'feat_coupons', 'feat_inbox', 'feat_about', 'feat_tours', 'feat_pages', 'feat_forgot', 'feat_cancel', 'feat_votes', 'feat_share', 'feat_filter']) {
-    assert.deepEqual(DEFS[k], ['b', 0, true], k);
-  }
+	for (const k of ['feat_login', 'feat_bugreport', 'feat_upload', 'feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify', 'feat_favorites', 'feat_compare', 'feat_coupons', 'feat_inbox', 'feat_about', 'feat_tours', 'feat_pages', 'feat_forgot', 'feat_cancel', 'feat_votes', 'feat_share', 'feat_filter']) {
+		assert.deepEqual(DEFS[k], ['b', 0, true], k);
+	}
 });
 
 test('Tắt lớp bảo vệ (Turnstile, xác minh email) chỉ cho người có quyền bảo trì chỉnh', () => {
-  for (const k of ['feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify']) {
-    assert.equal(RESTRICTED[k], 'maint', k);
-  }
+	for (const k of ['feat_turnstile', 'feat_turnstile_admin', 'feat_email_verify']) {
+		assert.equal(RESTRICTED[k], 'maint', k);
+	}
 });
 
 test('Turnstile bật mà chưa cấu hình thì vẫn báo lỗi như cũ', async () => {
-  const body = { 'cf-turnstile-response': 'x' };
-  await assert.rejects(() => verifyTurnstile(new Request('https://x.test'), env, body, 'booking', HttpError), (e) => e.status === 503);
+	const body = { 'cf-turnstile-response': 'x' };
+	await assert.rejects(() => verifyTurnstile(new Request('https://x.test'), env, body, 'booking', HttpError), (e) => e.status === 503);
 });
 
 test('Tắt Turnstile thì form khách không cần xác minh và token bị bỏ khỏi dữ liệu', async () => {
-  setFlag('feat_turnstile', false);
-  const body = { name: 'A', 'cf-turnstile-response': 'x' };
-  await verifyTurnstile(new Request('https://x.test'), env, body, 'booking', HttpError);
-  assert.equal('cf-turnstile-response' in body, false);
-  assert.equal(body.name, 'A');
+	setFlag('feat_turnstile', false);
+	const body = { name: 'A', 'cf-turnstile-response': 'x' };
+	await verifyTurnstile(new Request('https://x.test'), env, body, 'booking', HttpError);
+	assert.equal('cf-turnstile-response' in body, false);
+	assert.equal(body.name, 'A');
 });
 
 test('Đăng nhập quản trị theo công tắc riêng: tắt form khách không làm lỏng đăng nhập quản trị', async () => {
-  setFlag('feat_turnstile', false);
-  await assert.rejects(() => verifyTurnstile(new Request('https://x.test'), env, { 'cf-turnstile-response': 'x' }, 'admin_login', HttpError), (e) => e.status === 503);
-  setFlag('feat_turnstile_admin', false);
-  const body = { 'cf-turnstile-response': 'x', password: 'p' };
-  await verifyTurnstile(new Request('https://x.test'), env, body, 'admin_login', HttpError);
-  assert.equal('cf-turnstile-response' in body, false);
+	setFlag('feat_turnstile', false);
+	await assert.rejects(() => verifyTurnstile(new Request('https://x.test'), env, { 'cf-turnstile-response': 'x' }, 'admin_login', HttpError), (e) => e.status === 503);
+	setFlag('feat_turnstile_admin', false);
+	const body = { 'cf-turnstile-response': 'x', password: 'p' };
+	await verifyTurnstile(new Request('https://x.test'), env, body, 'admin_login', HttpError);
+	assert.equal('cf-turnstile-response' in body, false);
 });
 
 test('requireFlag chặn khi công tắc tắt, cho qua khi bật', async () => {
-  await requireFlag(env, 'feat_upload', hh, 'tắt');
-  setFlag('feat_upload', false);
-  await assert.rejects(() => requireFlag(env, 'feat_upload', hh, 'Tải ảnh đang tắt'), (e) => e.status === 503 && e.message === 'Tải ảnh đang tắt');
+	await requireFlag(env, 'feat_upload', hh, 'tắt');
+	setFlag('feat_upload', false);
+	await assert.rejects(() => requireFlag(env, 'feat_upload', hh, 'Tải ảnh đang tắt'), (e) => e.status === 503 && e.message === 'Tải ảnh đang tắt');
 });
 
 test('requireFlag không bị ảnh hưởng bởi chế độ bảo trì (bảo trì vẫn như cũ)', async () => {
-  setFlag('maint_on', true);
-  await requireFlag(env, 'feat_login', hh);
-  await requireFlag(env, 'feat_bugreport', hh);
-  await requireFlag(env, 'feat_upload', hh);
+	setFlag('maint_on', true);
+	await requireFlag(env, 'feat_login', hh);
+	await requireFlag(env, 'feat_bugreport', hh);
+	await requireFlag(env, 'feat_upload', hh);
 });
 
 test('Trang của tính năng đã tắt bị 404, bật lại thì hiện bình thường', async () => {
-  assert.equal(await pageOffFlag(env, '/reviews'), '');
-  setFlag('feat_reviews', false);
-  assert.equal(await pageOffFlag(env, '/reviews'), 'feat_reviews');
-  assert.equal(await pageOffFlag(env, '/reviews.html'), 'feat_reviews');
-  assert.equal(await pageOffFlag(env, '/reviews/'), 'feat_reviews');
-  assert.equal(await pageOffFlag(env, '/tours'), '', 'trang không có công tắc không bị ảnh hưởng');
-  setFlag('feat_reviews', true);
-  assert.equal(await pageOffFlag(env, '/reviews'), '');
+	assert.equal(await pageOffFlag(env, '/reviews'), '');
+	setFlag('feat_reviews', false);
+	assert.equal(await pageOffFlag(env, '/reviews'), 'feat_reviews');
+	assert.equal(await pageOffFlag(env, '/reviews.html'), 'feat_reviews');
+	assert.equal(await pageOffFlag(env, '/reviews/'), 'feat_reviews');
+	assert.equal(await pageOffFlag(env, '/tours'), '', 'trang không có công tắc không bị ảnh hưởng');
+	setFlag('feat_reviews', true);
+	assert.equal(await pageOffFlag(env, '/reviews'), '');
 });
 
 test('Mỗi trang có công tắc đều tồn tại và được Worker chạy trước (run_worker_first)', () => {
-  const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
-  const first = toml.match(/run_worker_first\s*=\s*\[([^\]]*)\]/)[1];
-  for (const [path, flags] of Object.entries(PAGE_FLAG)) {
-    for (const flag of [].concat(flags)) {
-      assert.ok(DEFS[flag], flag + ' phải có trong DEFS');
-    }
-    assert.ok(existsSync(new URL('../../public' + path + '.html', import.meta.url)), path + '.html');
-    assert.ok(first.includes('"' + path + '*"'), path + ' thiếu trong run_worker_first');
-  }
+	const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
+	const first = toml.match(/run_worker_first\s*=\s*\[([^\]]*)\]/)[1];
+	for (const [path, flags] of Object.entries(PAGE_FLAG)) {
+		for (const flag of [].concat(flags)) {
+			assert.ok(DEFS[flag], flag + ' phải có trong DEFS');
+		}
+		assert.ok(existsSync(new URL('../../public' + path + '.html', import.meta.url)), path + '.html');
+		assert.ok(first.includes('"' + path + '*"'), path + ' thiếu trong run_worker_first');
+	}
 });
 
 test('Mỗi công tắc phía khách đều có luật ẩn trong CSS và có tên trong site.js', () => {
-  const css = readFileSync(new URL('../../public/css/components.css', import.meta.url), 'utf8');
-  const js = readFileSync(new URL('../../public/js/site.js', import.meta.url), 'utf8');
-  for (const k of ['upload', 'login', 'register', 'email_verify', 'chat', 'reviews', 'inbox', 'bugreport', 'favorites', 'compare', 'coupons', 'booking', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter']) {
-    assert.ok(css.includes('.no-' + k + ' '), 'thiếu luật .no-' + k);
-    assert.ok(js.includes("'" + k + "'"), 'site.js thiếu ' + k);
-  }
+	const css = readFileSync(new URL('../../public/css/components.css', import.meta.url), 'utf8');
+	const js = readFileSync(new URL('../../public/js/site.js', import.meta.url), 'utf8');
+	for (const k of ['upload', 'login', 'register', 'email_verify', 'chat', 'reviews', 'inbox', 'bugreport', 'favorites', 'compare', 'coupons', 'booking', 'about', 'tours', 'pages', 'forgot', 'cancel', 'votes', 'share', 'filter']) {
+		assert.ok(css.includes('.no-' + k + ' '), 'thiếu luật .no-' + k);
+		assert.ok(js.includes("'" + k + "'"), 'site.js thiếu ' + k);
+	}
 });
 
 test('Worker: trang của tính năng đã tắt trả 404, các trang khác vẫn phục vụ bình thường', async () => {
-  const { default: worker } = await import('../../src/worker.js');
-  const served = [];
-  const ASSETS = {
-    fetch: async (req) => {
-      const p = new URL(req.url).pathname;
-      served.push(p);
-      return p === '/__tinh-nang-da-tat__' ? new Response('nf', { status: 404 }) : new Response('ok', { status: 200 });
-    }
-  };
-  const e = { ...env, ASSETS };
-  const get = (path) => worker.fetch(new Request('https://x.test' + path), e, { waitUntil() {} });
-  assert.equal((await get('/reviews')).status, 200);
-  setFlag('feat_reviews', false);
-  setFlag('feat_login', false);
-  for (const path of ['/reviews', '/reviews.html', '/login', '/account']) {
-    assert.equal((await get(path)).status, 404, path);
-  }
-  assert.equal((await get('/tours')).status, 200, 'trang không gắn công tắc vẫn hiện');
-  assert.equal((await get('/register')).status, 404, 'đăng ký cần tài khoản nên tắt theo đăng nhập');
-  assert.equal((await get('/about')).status, 200, 'công tắc khác vẫn bật');
+	const { default: worker } = await import('../../src/worker.js');
+	const served = [];
+	const ASSETS = {
+		fetch: async (req) => {
+			const p = new URL(req.url).pathname;
+			served.push(p);
+			return p === '/__tinh-nang-da-tat__' ? new Response('nf', { status: 404 }) : new Response('ok', { status: 200 });
+		}
+	};
+	const e = { ...env, ASSETS };
+	const get = (path) => worker.fetch(new Request('https://x.test' + path), e, { waitUntil() {} });
+	assert.equal((await get('/reviews')).status, 200);
+	setFlag('feat_reviews', false);
+	setFlag('feat_login', false);
+	for (const path of ['/reviews', '/reviews.html', '/login', '/account']) {
+		assert.equal((await get(path)).status, 404, path);
+	}
+	assert.equal((await get('/tours')).status, 200, 'trang không gắn công tắc vẫn hiện');
+	assert.equal((await get('/register')).status, 404, 'đăng ký cần tài khoản nên tắt theo đăng nhập');
+	assert.equal((await get('/about')).status, 200, 'công tắc khác vẫn bật');
 });
 
 test('Công tắc .sw không co lại khi nhãn dài (núm rộng cố định nên sẽ tràn ra ngoài)', () => {
-  const css = readFileSync(new URL('../../public/admin/admin.css', import.meta.url), 'utf8');
-  const rule = css.match(/\n\.sw \{([^}]*)\}/)[1];
-  assert.match(rule, /flex:\s*none/);
+	const css = readFileSync(new URL('../../public/admin/admin.css', import.meta.url), 'utf8');
+	const rule = css.match(/\n\.sw \{([^}]*)\}/)[1];
+	assert.match(rule, /flex:\s*none/);
 });
 
 test('Trang cần nhiều công tắc: tắt một trong số đó là 404; trang tự tạo /p/ có công tắc riêng', async () => {
-  assert.equal(await pageOffFlag(env, '/inbox'), '');
-  setFlag('feat_login', false);
-  assert.equal(await pageOffFlag(env, '/inbox'), 'feat_login', 'hòm thư cần tài khoản nên tắt theo đăng nhập');
-  assert.equal(await pageOffFlag(env, '/forgot'), 'feat_login');
-  assert.equal(await pageOffFlag(env, '/register'), 'feat_login');
-  setFlag('feat_login', true);
-  setFlag('feat_forgot', false);
-  assert.equal(await pageOffFlag(env, '/reset'), 'feat_forgot');
-  assert.equal(await pageOffFlag(env, '/login'), '');
-  assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), '');
-  setFlag('feat_pages', false);
-  assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), 'feat_pages');
-  assert.equal(await pageOffFlag(env, '/p/gioi-thieu/'), 'feat_pages');
+	assert.equal(await pageOffFlag(env, '/inbox'), '');
+	setFlag('feat_login', false);
+	assert.equal(await pageOffFlag(env, '/inbox'), 'feat_login', 'hòm thư cần tài khoản nên tắt theo đăng nhập');
+	assert.equal(await pageOffFlag(env, '/forgot'), 'feat_login');
+	assert.equal(await pageOffFlag(env, '/register'), 'feat_login');
+	setFlag('feat_login', true);
+	setFlag('feat_forgot', false);
+	assert.equal(await pageOffFlag(env, '/reset'), 'feat_forgot');
+	assert.equal(await pageOffFlag(env, '/login'), '');
+	assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), '');
+	setFlag('feat_pages', false);
+	assert.equal(await pageOffFlag(env, '/p/gioi-thieu'), 'feat_pages');
+	assert.equal(await pageOffFlag(env, '/p/gioi-thieu/'), 'feat_pages');
 });
 
 test('Trang 404 riêng: có noindex, dùng đường dẫn tuyệt đối và được cấu hình làm trang không tìm thấy', () => {
-  const html = readFileSync(new URL('../../public/404.html', import.meta.url), 'utf8');
-  const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
-  assert.match(html, /name="robots"/);
-  assert.match(html, /noindex/);
-  assert.doesNotMatch(html, /(?:href|src)="(?!\/|https?:|#|data:)[^"]+"/, 'trang này hiện ở mọi URL nên không dùng đường dẫn tương đối');
-  assert.match(toml, /not_found_handling\s*=\s*"404-page"/);
+	const html = readFileSync(new URL('../../public/404.html', import.meta.url), 'utf8');
+	const toml = readFileSync(new URL('../../wrangler.toml', import.meta.url), 'utf8');
+	assert.match(html, /name="robots"/);
+	assert.match(html, /noindex/);
+	assert.doesNotMatch(html, /(?:href|src)="(?!\/|https?:|#|data:)[^"]+"/, 'trang này hiện ở mọi URL nên không dùng đường dẫn tương đối');
+	assert.match(toml, /not_found_handling\s*=\s*"404-page"/);
 });
