@@ -22,6 +22,6 @@
 - Built with HTML, CSS, and JavaScript, powered by Cloudflare Workers, Cloudflare D1 for backend processing and database storage and ImageKit for storing medias.
 
 ## Credits
-- Made by [Wind1767](https://github.com/Wind1767) using [Claude](https://claude.ai).
+- Made by [Wind1767](https://github.com/Wind1767).
 ### License
 - Licensed under MIT license. See `LICENSE` for more details.
