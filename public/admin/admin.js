@@ -502,9 +502,40 @@
 			mfaApi.settingsUI($('mfaBox'));
 		}
 	}
-	$('secBtn').onclick = function () {
-		location.hash = '#/mymfa';
-	};
+	/* Cài đặt tài khoản: ảnh đại diện, cỡ chữ, mật độ, bảo mật, quản trị viên gom về một chỗ */
+	function openAccountSettings() {
+		var P = window.vdkPrefs || null;
+		function row(act, icon, title, val) {
+			return '<button class="set-row" type="button" data-a="' + act + '"><span class="ms">' + icon + '</span><span class="set-t"><b>' + title +
+				'</b>' + (val ? '<small>' + val + '</small>' : '') + '</span><span class="ms set-go">chevron_right</span></button>';
+		}
+		var html = '<div class="set-list">' +
+			(ME && ME.email ? row('avatar', 'account_circle', 'Ảnh đại diện', 'Đổi ảnh hiển thị cạnh tên bạn') : '') +
+			(P ? row('fs', 'format_size', 'Cỡ chữ', 'Đang dùng: <span id="setFs">' + esc(P.fs()) + '</span>. Bấm để đổi') : '') +
+			(P ? row('density', 'density_medium', 'Mật độ hiển thị', 'Đang dùng: <span id="setDen">' + esc(P.density()) + '</span>. Bấm để đổi') : '') +
+			(ME && ME.email ? row('mfa', 'shield_lock', 'Bảo mật', 'Google Authenticator và passkey') : '') +
+			(can('admins') ? row('admins', 'admin_panel_settings', 'Quản trị viên', 'Thêm, sửa, phân quyền tài khoản quản trị') : '') +
+			'</div>';
+		openPanel('Cài đặt tài khoản', ME ? ME.name : '', html, '', null);
+		$('drawer').querySelectorAll('.set-row').forEach(function (b) {
+			b.onclick = function () {
+				var a = b.dataset.a;
+				if (a === 'fs') {
+					P.cycleFs();
+					$('setFs').textContent = P.fs();
+				} else if (a === 'density') {
+					P.cycleDensity();
+					$('setDen').textContent = P.density();
+				} else if (a === 'avatar') {
+					openMyAvatar();
+				} else {
+					closeDrawer();
+					location.hash = a === 'mfa' ? '#/mymfa' : '#/admins';
+				}
+			};
+		});
+	}
+	$('acctBtn').onclick = openAccountSettings;
 
 	$('logoutBtn').onclick = function () {
 		api('/logout', { method: 'POST' }).catch(function () {}).then(showLogin);
@@ -573,12 +604,12 @@
 		/* Avatar kế bên tên: ảnh của tài khoản; chưa có thì chữ cái đầu; tài khoản chủ gốc dùng logo web */
 		$('whoAv').innerHTML = ME.avatar ? '<img src="' + esc(ME.avatar) + '" alt="">' : ME.email ? initial(ME.name) : '<img src="/icon-192.png" alt="">';
 		$('whoami').classList.toggle('can-edit', !!ME.email);
-		$('whoami').title = ME.email ? 'Đổi ảnh đại diện' : '';
-		$('whoami').onclick = openMyAvatar;
+		$('whoami').title = ME.email ? 'Cài đặt tài khoản' : '';
+		$('whoami').onclick = openAccountSettings;
 		$('whoami').onkeydown = function (e) {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
-				openMyAvatar();
+				openAccountSettings();
 			}
 		};
 		if (ME.email) {
@@ -586,7 +617,7 @@
 			$('whoami').tabIndex = 0;
 		}
 		$('whoRole').textContent = ME.roleLabel + (can('pii', true) ? '' : ' · ẩn SĐT/email');
-		$('whoami').hidden = false;
+		$('whoami').hidden = !ME.email; /* tài khoản dùng mật khẩu chung không hiện thẻ tên */
 	}
 	/* Nút Thêm/Lưu/Xoá hiện theo quyền thật của tài khoản ở mục đang xem (kể cả quyền tuỳ chỉnh) */
 	var DEL_EXEMPT = ['templates', 'bot', 'admins'];

@@ -520,7 +520,6 @@ export async function adminApi(request, env, url, h, actor) {
 	const isOwner = actor.role === 'owner';
 	const roleOk = async (r) => ROLES[r] ? true : isCustomRole(r) && !!(await db.prepare('SELECT 1 FROM custom_roles WHERE id = ?1').bind(Number(r.slice(1))).first());
 	const roleCustomPerms = async (r) => isCustomRole(r) ? ((await customRoles(env)).find(x => x.key === r) || { perms: {} }).perms : null;
-	const ownerCount = async () => (await db.prepare("SELECT COUNT(*) AS n FROM admins WHERE role = 'owner' AND active = 1").first()).n;
 	if (p === '/api/admin/admins' && request.method === 'GET') {
 		const { results } = await db.prepare('SELECT * FROM admins ORDER BY id ASC').all(), cr = await customRoles(env);
 		const defaults = roleDefaults();
@@ -685,11 +684,9 @@ export async function adminApi(request, env, url, h, actor) {
 			throw new h.HttpError(403, 'Tài khoản này có quyền cao hơn quyền của bạn nên bạn không sửa được.');
 		}
 		if (request.method === 'DELETE') {
-			if (id === actor.id) {
+			/* Xoá được cả quản trị viên cuối cùng: vẫn đăng nhập được bằng mật khẩu chung (ADMIN_PASSWORD) */
+			if (id === actor.id && (await db.prepare('SELECT COUNT(*) AS n FROM admins').first()).n > 1) {
 				throw new h.HttpError(400, 'Bạn không thể tự xoá tài khoản của mình.');
-			}
-			if (old.role === 'owner' && old.active && (await ownerCount()) <= 1) {
-				throw new h.HttpError(400, 'Phải còn ít nhất một tài khoản Chủ.');
 			}
 			await db.prepare('DELETE FROM admins WHERE id = ?1').bind(id).run();
 			await db.batch(mfaWipe(env, 'admin', id));
@@ -727,9 +724,6 @@ export async function adminApi(request, env, url, h, actor) {
 				if (b.role === 'owner' && !isOwner) {
 					throw new h.HttpError(403, 'Chỉ Chủ mới cấp được vai trò Chủ.');
 				}
-				if (old.role === 'owner' && old.active && (await ownerCount()) <= 1) {
-					throw new h.HttpError(400, 'Phải còn ít nhất một tài khoản Chủ.');
-				}
 				sets.push('role = ?');
 				args.push(b.role);
 			}
@@ -754,9 +748,6 @@ export async function adminApi(request, env, url, h, actor) {
 			if ('active' in b) {
 				if (self && !b.active) {
 					bad('Bạn không thể tự khoá tài khoản của mình.');
-				}
-				if (!b.active && old.role === 'owner' && old.active && (await ownerCount()) <= 1) {
-					throw new h.HttpError(400, 'Phải còn ít nhất một tài khoản Chủ đang hoạt động.');
 				}
 				sets.push('active = ?');
 				args.push(b.active ? 1 : 0);

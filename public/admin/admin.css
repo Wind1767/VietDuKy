@@ -6714,3 +6714,63 @@ body:not(.v-enter):not(.anim-replay) .main > *,
 body:not(.v-enter):not(.anim-replay) #main > .page-h {
 	animation: none !important;
 }
+
+/* Ô tìm kiếm có biểu tượng: chữ gợi ý luôn cách biểu tượng một khoảng cố định, biểu tượng giữa theo chiều dọc */
+.search-wrap .ms {
+	top: 50%;
+	left: 12px;
+	transform: translateY(-50%);
+	font-size: 20px;
+	pointer-events: none;
+}
+.search-wrap input,
+.search-wrap input[type='search'] {
+	padding-left: 42px !important;
+}
+.pal-in {
+	gap: 12px;
+}
+.pal-in input,
+.pal-in input:focus {
+	padding-left: 0 !important;
+	text-indent: 0;
+}
+
+/* Cài đặt tài khoản (ngăn bên phải) */
+.set-list {
+	display: grid;
+	gap: 8px;
+}
+.set-row {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	padding: 14px 16px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: var(--surface);
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: border-color .2s, background .2s;
+}
+.set-row:hover {
+	border-color: var(--brand, #0f6b55);
+	background: var(--surface-2, var(--surface));
+}
+.set-row .ms {
+	color: var(--icon, var(--mut));
+}
+.set-row .set-t {
+	display: grid;
+	gap: 2px;
+	flex: 1;
+	min-width: 0;
+}
+.set-row small {
+	color: var(--mut);
+}
+.set-row .set-go {
+	flex: 0 0 auto;
+}

@@ -99,19 +99,20 @@ giữ phiên và kiểm tra lại phiên khi quay lại tab. Chạy độc lập
 		return b;
 	}
 	function mountButtons() {
-		var foot = document.querySelector('.side-foot'), anchor = $('themeBtn');
-		if (!foot || !anchor || $('densityBtn')) {
-			return;
-		}
-		var bd = ghost('densityBtn', 'density_medium', 'Mật độ', 'Đổi mật độ hiển thị (thoải mái / gọn)');
-		var bs = ghost('fsBtn', 'format_size', 'Cỡ chữ', 'Đổi cỡ chữ');
-		foot.insertBefore(bd, anchor);
-		foot.insertBefore(bs, anchor);
-		bd.onclick = function () {
-			cycle(DENSITY, 'vdk-density', 'comfy');
-		};
-		bs.onclick = function () {
-			cycle(SIZES, 'vdk-fs', 'md');
+		/* Cỡ chữ và mật độ nằm trong "Cài đặt tài khoản" (admin.js đọc qua window.vdkPrefs), không còn nút riêng ở thanh bên */
+		window.vdkPrefs = {
+			fs: function () {
+				return SIZES[pick(SIZES, load('vdk-fs', 'md'))][1];
+			},
+			density: function () {
+				return DENSITY[pick(DENSITY, load('vdk-density', 'comfy'))][1];
+			},
+			cycleFs: function () {
+				cycle(SIZES, 'vdk-fs', 'md');
+			},
+			cycleDensity: function () {
+				cycle(DENSITY, 'vdk-density', 'comfy');
+			}
 		};
 		apply();
 	}
