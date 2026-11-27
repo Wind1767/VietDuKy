@@ -1,4 +1,38 @@
 /* Áp cài đặt website do quản trị chỉnh (màu, chữ, banner, bảo trì...). Dùng bản lưu sẵn để không bị nháy khi tải trang. */
+/* Gộp request: cùng một địa chỉ đọc (GET) gọi nhiều lần trong vài giây (menu, chat, trang…) chỉ đi mạng một lần.
+   Đăng nhập / đăng xuất / sửa tài khoản (không phải GET tới /api/auth/) làm mất bản nhớ của /api/auth/me. */
+(function () {
+  if (!window.fetch || window.__vdkFetch) {
+    return;
+  }
+  window.__vdkFetch = 1;
+  var orig = window.fetch, memo = {}, TTL = { '/api/site': 30000, '/api/tours': 30000, '/api/blocks': 30000, '/api/destinations': 30000, '/api/auth/me': 2500 };
+  window.fetch = function (u, o) {
+    var path = typeof u === 'string' ? u : '', get = !o || !o.method || String(o.method).toUpperCase() === 'GET';
+    if (!get && path.indexOf('/api/auth/') === 0) {
+      delete memo['/api/auth/me'];
+    }
+    if (!get || !TTL[path] || (o && o.cache === 'no-store')) {
+      return orig.apply(this, arguments);
+    }
+    var e = memo[path];
+    if (!e || Date.now() - e.t > TTL[path]) {
+      var p = orig.apply(this, arguments);
+      e = memo[path] = { t: Date.now(), p: p };
+      p.then(function (r) {
+        if (!r.ok) {
+          delete memo[path];
+        }
+      }, function () {
+        delete memo[path];
+      });
+    }
+    return e.p.then(function (r) {
+      return r.clone();
+    });
+  };
+})();
+
 (function () {
   'use strict';
   var KEY = 'vdk-site', S = null;

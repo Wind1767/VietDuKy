@@ -271,13 +271,13 @@ async function route(request, env, url, ctx) {
     tpl: async (key, vars, extra) => noticeEmail({ ...(await tplFields(env, key, vars)).fields, ...extra }) };
 
   if (pathname === '/api/site' && method === 'GET') {
-    return publicSite(env, helpers);
+    return cacheable(publicSite(env, helpers));
   }
   if (pathname === '/api/destinations' && method === 'GET') {
-    return publicDestinations(env, helpers);
+    return cacheable(publicDestinations(env, helpers));
   }
   if (pathname === '/api/blocks' && method === 'GET') {
-    return publicBlocks(env, helpers);
+    return cacheable(publicBlocks(env, helpers));
   }
   {
     const pm = pathname.match(/^\/api\/pages\/([a-z0-9-]+)$/);
@@ -334,7 +334,7 @@ async function route(request, env, url, ctx) {
     return publicBugReport(request, env, ip, helpers);
   }
   if (pathname === '/api/tours' && method === 'GET') {
-    return publicTours(env, helpers);
+    return cacheable(publicTours(env, helpers));
   }
   if (pathname === '/api/coupon/check' && method === 'POST') {
     return publicCouponCheck(request, env, helpers, ip);
@@ -526,6 +526,17 @@ async function route(request, env, url, ctx) {
 }
 
 /* ---------- Tiện ích ---------- */
+/* Dữ liệu công khai ít đổi: trình duyệt giữ 20 giây và dùng bản cũ thêm 1 phút trong lúc tải lại ngầm (admin sửa xong tối đa ~20 giây là thấy) */
+async function cacheable(pending) {
+  const r = await pending;
+  if (r.ok) {
+    const h = new Headers(r.headers);
+    h.set('Cache-Control', 'public, max-age=20, stale-while-revalidate=60');
+    return new Response(r.body, { status: r.status, headers: h });
+  }
+  return r;
+}
+
 function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
     status,
