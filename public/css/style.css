@@ -220,7 +220,7 @@ textarea:focus-visible {
 .hero .bg {
 	position: absolute;
 	inset: -6%;
-	background: url(../images/hero.jpg) center/cover;
+	background: url(../images/hero.webp) center/cover;
 	animation: kb 22s ease-in-out infinite alternate;
 	will-change: transform;
 }
@@ -744,7 +744,7 @@ textarea:focus-visible {
 
 /* cta/footer */
 .cta {
-	background: linear-gradient(120deg,rgba(218,37,29,.92),rgba(163,21,15,.92)),url(../images/about.jpg) center/cover;
+	background: linear-gradient(120deg,rgba(218,37,29,.92),rgba(163,21,15,.92)),url(../images/about.webp) center/cover;
 	color: #fff;
 	text-align: center;
 	border-radius: var(--r);
@@ -827,7 +827,7 @@ footer small {
 /* sub pages */
 .ph {
 	padding: 170px 0 90px;
-	background: linear-gradient(rgba(12,59,54,.8),rgba(12,59,54,.9)),url(../images/hero.jpg) center/cover;
+	background: linear-gradient(rgba(12,59,54,.8),rgba(12,59,54,.9)),url(../images/hero.webp) center/cover;
 	color: #fff;
 	text-align: center;
 }

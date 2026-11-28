@@ -1046,7 +1046,7 @@
 						c.className = 'card rv z in';
 						c.href = '/contact?destination=' + encodeURIComponent(d.name);
 						c.innerHTML = '<img alt="' + escH(d.name) + '" loading="lazy" decoding="async" src="' +
-							escH(imgUrl(d.image || 'images/hero.jpg')) +
+							escH(imgUrl(d.image || 'images/hero.webp')) +
 							'"/><span class="go"><span class="ms">north_east</span></span><div><span class="tag"></span><h3></h3><small></small></div>';
 						destGrid.appendChild(c);
 						attachFav(c, d.name, 'card');

@@ -3,12 +3,12 @@ export const DEST_SCHEMA = [
 	'CREATE TABLE IF NOT EXISTS destinations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, title TEXT NOT NULL DEFAULT \'\', province TEXT NOT NULL DEFAULT \'\', blurb TEXT NOT NULL DEFAULT \'\', image TEXT NOT NULL DEFAULT \'\', active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, updated_at INTEGER NOT NULL)'
 ];
 const SEED = [
-	['Vịnh Hạ Long', 'Vịnh Hạ Long', 'Quảng Ninh', 'Du thuyền qua hàng nghìn đảo đá vôi, chèo kayak trong hang động.', 'images/d-halong.jpg'],
-	['Sa Pa', 'Sa Pa', 'Lào Cai', 'Ruộng bậc thang vàng mùa lúa chín và chợ phiên vùng cao.', 'images/d-sapa.jpg'],
-	['Hội An', 'Hội An', 'Quảng Nam', 'Phố cổ đèn lồng, thả hoa đăng trên sông Hoài.', 'images/d-hoian.jpg'],
-	['Huế', 'Cố đô Huế', 'Thừa Thiên Huế', 'Đại Nội, lăng tẩm và ẩm thực cung đình.', 'images/d-hue.jpg'],
-	['Đà Lạt', 'Đà Lạt', 'Lâm Đồng', 'Săn mây, đồi thông và những quán cà phê sương sớm.', 'images/d-dalat.jpg'],
-	['Phú Quốc', 'Phú Quốc', 'Kiên Giang', 'Biển trong, cát trắng và hoàng hôn rực rỡ.', 'images/d-phuquoc.jpg']
+	['Vịnh Hạ Long', 'Vịnh Hạ Long', 'Quảng Ninh', 'Du thuyền qua hàng nghìn đảo đá vôi, chèo kayak trong hang động.', 'images/d-halong.webp'],
+	['Sa Pa', 'Sa Pa', 'Lào Cai', 'Ruộng bậc thang vàng mùa lúa chín và chợ phiên vùng cao.', 'images/d-sapa.webp'],
+	['Hội An', 'Hội An', 'Quảng Nam', 'Phố cổ đèn lồng, thả hoa đăng trên sông Hoài.', 'images/d-hoian.webp'],
+	['Huế', 'Cố đô Huế', 'Thừa Thiên Huế', 'Đại Nội, lăng tẩm và ẩm thực cung đình.', 'images/d-hue.webp'],
+	['Đà Lạt', 'Đà Lạt', 'Lâm Đồng', 'Săn mây, đồi thông và những quán cà phê sương sớm.', 'images/d-dalat.webp'],
+	['Phú Quốc', 'Phú Quốc', 'Kiên Giang', 'Biển trong, cát trắng và hoàng hôn rực rỡ.', 'images/d-phuquoc.webp']
 ];
 export async function seedDestinations(env) {
 	const first = await env.DB.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES ('seed92', '1') RETURNING key").first();

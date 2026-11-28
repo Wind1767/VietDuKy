@@ -11,7 +11,9 @@
     "format": "node tools/format.mjs",
     "format:check": "node tools/format.mjs --check",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "build:css": "node tools/bundle-css.mjs",
+    "predeploy": "npm run build:css"
   },
   "devDependencies": {
     "playwright": "^1.49.0",
