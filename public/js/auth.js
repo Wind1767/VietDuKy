@@ -21,7 +21,9 @@
 	if (/^\/(login|register|forgot)(\.html)?\/?$/.test(location.pathname) && window.fetch) {
 		var leave = function () {
 			fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
-				if (r.ok) {
+				return r.ok ? r.json() : null;
+			}).then(function (d) {
+				if (d && d.user) {
 					location.replace('/account');
 				}
 			}).catch(function () {});

@@ -790,8 +790,13 @@
 			attachFav(t.querySelector('.im'), t.dataset.fav, 'tour');
 		});
 		if (favTargets.length || document.querySelector('.tours')) {
-			fetch('/api/auth/favorites', { credentials: 'same-origin' }).then(function (r) {
+			/* Chỉ hỏi danh sách yêu thích khi đã đăng nhập (khách chưa đăng nhập sẽ nhận 401 và báo lỗi trong console) */
+			fetch('/api/auth/me', { credentials: 'same-origin' }).then(function (r) {
 				return r.ok ? r.json() : null;
+			}).then(function (m) {
+				return m && m.user ? fetch('/api/auth/favorites', { credentials: 'same-origin' }) : null;
+			}).then(function (r) {
+				return r && r.ok ? r.json() : null;
 			}).then(function (d) {
 				if (!d) {
 					return;
