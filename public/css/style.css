@@ -989,9 +989,7 @@ form.ct select:focus {
 
 @keyframes word {
 	from {
-		opacity: 0;
-		transform: translateY(70%) rotate(5deg);
-		filter: blur(8px);
+		transform: translateY(40%);
 	}
 }
 
@@ -1027,8 +1025,8 @@ form.ct select:focus {
 
 .hero h1 .w {
 	display: inline-block;
-	animation: word .9s cubic-bezier(.2, .7, .2, 1) both;
-	animation-delay: calc(var(--i)*.1s + .2s);
+	animation: word .5s cubic-bezier(.2, .7, .2, 1) both;
+	animation-delay: calc(var(--i)*.04s);
 }
 
 .btn {
@@ -2543,4 +2541,12 @@ body {
 
 .acc-sec.acc-closing summary .ms {
 	transform: rotate(0deg);
+}
+
+/* Các khối dưới màn hình đầu: trình duyệt chỉ tính bố cục khi sắp cuộn tới (giảm việc lúc tải trang) */
+body > section:not(.hero),
+body > footer,
+main > section:not(.hero) {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 700px;
 }

@@ -464,7 +464,23 @@
 		var charIndex = 0;
 		var deleting = false;
 
-		(function type() {
+		/* Chữ ở banner là chữ tĩnh lúc tải (giúp LCP nhanh, không đổi bố cục khi đang đo); chỉ bắt đầu "gõ" khi người dùng tương tác hoặc sau 6 giây */
+		var started = false;
+		function startTyping() {
+			if (started) {
+				return;
+			}
+			started = true;
+			charIndex = words[0].length;
+			deleting = true;
+			type();
+		}
+		['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
+			window.addEventListener(ev, startTyping, { once: true, passive: true });
+		});
+		setTimeout(startTyping, 6000);
+
+		function type() {
 			var word = words[wordIndex % words.length] || '';
 			var delay = deleting ? 45 : 110;
 
@@ -481,7 +497,7 @@
 			}
 
 			setTimeout(type, document.hidden ? 1000 : delay);
-		})();
+		}
 	}
 
 	/* ---------- Đèn lồng bay ở banner ---------- */
