@@ -1,3 +1,19 @@
+/* Nếu máy chủ/Cloudflare gửi CSP "trusted-types … default", mọi innerHTML sẽ bị chặn và dropdown tuỳ biến rơi về <select> mặc định.
+Tạo policy "default" cho phép chuỗi đi qua (nội dung đã được escape ở nơi dùng). */
+(function () {
+	if (window.trustedTypes && trustedTypes.createPolicy && !trustedTypes.defaultPolicy) {
+		try {
+			trustedTypes.createPolicy('default', {
+				createHTML: function (s) {
+					return s;
+				},
+				createScriptURL: function (s) {
+					return s;
+				}
+			});
+		} catch (e) { /* policy đã có hoặc không được phép */ }
+	}
+})();
 (function () {
 	'use strict';
 
