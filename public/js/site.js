@@ -490,6 +490,9 @@
 (function () {
 	'use strict';
 	function grow(t) {
+		if (t && !t.value && !t.style.height) {
+			return; // ô trống chưa cần dãn: tránh đo bố cục lúc tải trang
+		}
 		if (!t || t.tagName !== 'TEXTAREA' || t.hasAttribute('data-no-grow') || t.offsetParent === null) {
 			return;
 		}
