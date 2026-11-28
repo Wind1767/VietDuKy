@@ -1,3 +1,25 @@
+/* Font tải không chặn hiển thị: link có data-async khởi đầu media=print, tải xong mới chuyển sang all (không cần script nội tuyến) */
+(function () {
+	function on(l) {
+		l.media = 'all';
+	}
+	[].forEach.call(document.querySelectorAll('link[data-async]'), function (l) {
+		if (l.sheet) {
+			on(l);
+		} else {
+			l.addEventListener('load', function () {
+				on(l);
+			});
+			l.addEventListener('error', function () {
+				on(l);
+			});
+		}
+		setTimeout(function () {
+			on(l);
+		}, 3000);
+	});
+})();
+
 /* Áp cài đặt website do quản trị chỉnh (màu, chữ, banner, bảo trì...). Dùng bản lưu sẵn để không bị nháy khi tải trang. */
 /* Gộp request: cùng một địa chỉ đọc (GET) gọi nhiều lần trong vài giây (menu, chat, trang…) chỉ đi mạng một lần.
    Đăng nhập / đăng xuất / sửa tài khoản (không phải GET tới /api/auth/) làm mất bản nhớ của /api/auth/me. */

@@ -707,7 +707,9 @@ textarea:focus-visible {
 	font: italic 1.25rem Fraunces, serif;
 }
 
-.ts h4 {
+.ts h4,
+.ts h3 {
+	font-size: 1em;
 	margin-top: 10px;
 	color: var(--jade2);
 }
@@ -715,23 +717,28 @@ textarea:focus-visible {
 .dots {
 	display: flex;
 	justify-content: center;
-	gap: 10px;
-	margin-top: 20px;
+	gap: 0;
+	margin-top: 14px;
 }
 
+/* Vùng bấm 24x24 (đủ cho ngón tay), chấm nhìn thấy vẫn 12px nhờ đệm bên trong */
 .dots button {
-	width: 12px;
-	height: 12px;
+	box-sizing: border-box;
+	width: 24px;
+	height: 24px;
+	padding: 6px;
 	border-radius: 50%;
 	border: 0;
 	background: #b8c9c3;
+	background-clip: content-box;
 	cursor: pointer;
 	transition: .3s;
 }
 
 .dots .on {
 	background: var(--red);
-	width: 32px;
+	background-clip: content-box;
+	width: 44px;
 	border-radius: 99px;
 }
 
@@ -767,7 +774,9 @@ footer .g {
 	gap: 30px;
 }
 
-footer h4 {
+footer h4,
+footer h3 {
+	font-size: 1.05em;
 	color: #fff;
 	margin-bottom: 10px;
 }

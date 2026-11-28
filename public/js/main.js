@@ -109,9 +109,9 @@
 		'<ul class="menu" id="menu">' + menuItems() + acctItem + themeItem + ctaItem + '</ul>';
 
 	var footHTML = '<footer><div class="wrap"><div class="g">' +
-		'<div><h4 data-site="site_name">Việt Du Ký</h4><p data-site="footer_about">Đồng hành cùng bạn khám phá đất nước hình chữ S, từ Bắc vào Nam.</p><div class="soc" data-site-social></div></div>' +
-		'<div><h4>Khám phá</h4><ul id="footNav">' + footerItems() + '</ul></div>' +
-		'<div><h4>Liên hệ</h4><ul>' +
+		'<div><h3 data-site="site_name">Việt Du Ký</h3><p data-site="footer_about">Đồng hành cùng bạn khám phá đất nước hình chữ S, từ Bắc vào Nam.</p><div class="soc" data-site-social></div></div>' +
+		'<div><h3>Khám phá</h3><ul id="footNav">' + footerItems() + '</ul></div>' +
+		'<div><h3>Liên hệ</h3><ul>' +
 		'<li><span class="ms">call</span><span data-site="hotline">1900 1234</span></li>' +
 		'<li><span class="ms">mail</span><span data-site="contact_email">buivanphong7191@gmail.com</span></li>' +
 		'<li><span class="ms">location_on</span><span data-site="address">Phan Thiết, Lâm Đồng</span></li>' +

@@ -2099,7 +2099,7 @@ footer small {
 	color: #ff8a80;
 }
 
-:root[data-theme="dark"] :is(.tour .pr a, .ts h4, .why .ic .ms, .faq summary .ms) {
+:root[data-theme="dark"] :is(.tour .pr a, .ts h4, .ts h3, .why .ic .ms, .faq summary .ms) {
 	color: var(--brand);
 }
 

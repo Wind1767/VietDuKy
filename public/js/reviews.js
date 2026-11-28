@@ -83,7 +83,7 @@
 			box.innerHTML = d.items.map(function (r) {
 				var text = r.body.length > 220 ? r.body.slice(0, 217).replace(/\s+\S*$/, '') + '…' : r.body;
 				return '<div class="t"><div class="rv-av">' + av(r) + '</div>' + stars(r.rating) +
-					'<p>“' + esc(text) + '”</p><h4>' + esc(r.name) + (r.destination ? ' · ' + esc(r.destination) : '') + '</h4></div>';
+					'<p>“' + esc(text) + '”</p><h3>' + esc(r.name) + (r.destination ? ' · ' + esc(r.destination) : '') + '</h3></div>';
 			}).join('');
 			var slides = box.querySelectorAll('.t'), current = 0, timer;
 			function fit() {
